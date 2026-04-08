@@ -34,10 +34,9 @@ const Select: FC<SelectProps> = ({
           id={label.toLowerCase().replace(/\s/g, '-')}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
           disabled={disabled}
           className={`block w-full rounded-md border-gray-300 shadow-sm 
-                    focus:border-primary-500 focus:ring-primary-500 sm:text-sm
+                    focus:border-green-500 focus:ring-green-500 sm:text-sm
                     ${disabled ? 'bg-gray-50 opacity-50' : ''}
                     ${error ? 'border-red-500' : ''}`}
         >

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { clientAuth as auth, clientDb as db } from '@/lib/firebase';
+import { clientAuth, clientDb } from '@/lib/firebase';
 import { useToast } from '@/contexts/ui/ToastContext';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -26,15 +26,14 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(clientAuth, email, password);
       const user = userCredential.user;
       
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const userDoc = await getDoc(doc(clientDb, 'users', user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
         const role = userData.role;
         
-        // Set cookie for middleware
         document.cookie = `userRole=${role}; path=/; max-age=3600`;
         
         switch (role) {
@@ -61,11 +60,12 @@ export default function LoginPage() {
       } else {
         addToast('User data not found', 'error');
       }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      if (error.code === 'auth/invalid-credential') {
+    } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const err = error as any;
+      if (err.code === 'auth/invalid-credential') {
         addToast('Invalid email or password', 'error');
-      } else if (error.code === 'auth/user-not-found') {
+      } else if (err.code === 'auth/user-not-found') {
         addToast('User not found', 'error');
       } else {
         addToast('Login failed. Please try again.', 'error');
@@ -79,7 +79,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary-600">Smart Bazar</h1>
+          <h1 className="text-3xl font-bold text-green-600">Smart Bazar</h1>
           <p className="text-gray-600 mt-2">Your favorite grocery delivery app</p>
         </div>
 
@@ -115,27 +115,8 @@ export default function LoginPage() {
             
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                Don&apos;t have an account?{' '}
-                <button
-                  className="text-primary-600 hover:underline"
-                  onClick={() => router.push('/register')}
-                >
-                  Register here
-                </button>
+                Don&apos;t have an account? Register here
               </p>
-            </div>
-            
-            <div className="mt-6 pt-6 border-t">
-              <p className="text-xs text-gray-500 text-center">
-                Demo Accounts (use any password):
-              </p>
-              <div className="mt-2 text-xs text-gray-600 space-y-1">
-                <p>Admin: admin@smartbazar.com</p>
-                <p>Manager: manager@smartbazar.com</p>
-                <p>Store: store@smartbazar.com</p>
-                <p>Delivery: delivery@smartbazar.com</p>
-                <p>Customer: customer@smartbazar.com</p>
-              </div>
             </div>
           </div>
         </Card>

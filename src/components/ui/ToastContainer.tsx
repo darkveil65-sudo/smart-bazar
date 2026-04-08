@@ -16,8 +16,10 @@ const ToastContainer: FC<ToastContainerProps> = ({
     type?: 'success' | 'error' | 'warning' | 'info';
   }>>([]);
 
+let nextToastId = 0;
+
   const addToast = (children: ReactNode, type?: 'success' | 'error' | 'warning' | 'info') => {
-    const id = Math.random().toString(36).substring(2, 9);
+    const id = String(nextToastId++);
     setToasts(prev => [...prev, { id, children, type }]);
     
     // Auto remove after 5 seconds
