@@ -1,14 +1,14 @@
 {
-  "name": "smart-bazar",
-  "version": "0.1.0",
+  "name": "@smart-bazar/manager",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3004",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "next start -p 3004"
   },
   "dependencies": {
+    "@smart-bazar/shared": "*",
     "next": "16.2.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -17,17 +17,11 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
-  },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+    "@tailwindcss/postcss": "^4"
+  }
 }

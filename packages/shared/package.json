@@ -1,0 +1,12 @@
+{
+  "name": "@smart-bazar/shared",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "dependencies": {
+    "firebase": "^12.11.0",
+    "zustand": "^5.0.12",
+    "next": "16.2.2",
+    "react": "19.2.4"
+  }
+}
