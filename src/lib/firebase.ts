@@ -29,12 +29,14 @@ import {
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'demo',
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'demo.firebaseapp.com',
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo',
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'demo.appspot.com',
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '123456',
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:123456:web:demo',
+  apiKey: "AIzaSyARoEPvlQBjiGTeOQfzWsepQRz_AApEV7M",
+  authDomain: "smart-bazar-d08ed.firebaseapp.com",
+  databaseURL: "https://smart-bazar-d08ed-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "smart-bazar-d08ed",
+  storageBucket: "smart-bazar-d08ed.firebasestorage.app",
+  messagingSenderId: "525393563137",
+  appId: "1:525393563137:web:7d7cafda7b98f60557fa00",
+  measurementId: "G-HW5SGE0CJ7"
 };
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
