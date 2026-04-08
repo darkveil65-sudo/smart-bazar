@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, ReactNode, useState } from 'react';
+import { FC, ReactNode, useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { RoleBadge } from '@/components/ui/Badge';
