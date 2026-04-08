@@ -23,6 +23,20 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, title, navItems }
   const { userData, logout } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    if (!userData) {
+      router.push('/');
+    } else if (pathname.includes('/dashboard/admin') && !['admin', 'co-admin'].includes(userData.role)) {
+      router.push('/home');
+    } else if (pathname.includes('/dashboard/manager') && userData.role !== 'manager') {
+      router.push('/home');
+    } else if (pathname.includes('/dashboard/store') && userData.role !== 'store') {
+      router.push('/home');
+    } else if (pathname.includes('/dashboard/delivery') && userData.role !== 'delivery') {
+      router.push('/home');
+    }
+  }, [userData, pathname, router]);
+
   const handleLogout = async () => {
     await logout();
     router.push('/');

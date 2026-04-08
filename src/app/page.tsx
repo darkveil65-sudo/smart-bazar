@@ -1,20 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { clientAuth, clientDb } from '@/lib/firebase';
 import { useToast } from '@/contexts/ui/ToastContext';
+import { useAuthStore } from '@/stores/authStore';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 
 export default function LoginPage() {
   const router = useRouter();
   const { addToast } = useToast();
+  const { userData } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (userData) {
+      if (['admin', 'co-admin'].includes(userData.role)) router.push('/dashboard/admin');
+      else if (userData.role === 'manager') router.push('/dashboard/manager');
+      else if (userData.role === 'store') router.push('/dashboard/store');
+      else if (userData.role === 'delivery') router.push('/dashboard/delivery');
+      else router.push('/home');
+    }
+  }, [userData, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
