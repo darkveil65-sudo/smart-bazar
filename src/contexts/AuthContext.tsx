@@ -10,11 +10,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const initialized = useAuthStore((s) => s.initialized);
 
   useEffect(() => {
-    if (!initialized) {
-      const unsubscribe = init();
-      return () => unsubscribe();
-    }
-  }, [init, initialized]);
+    const unsubscribe = init();
+    return () => unsubscribe();
+  }, [init]);
 
   if (loading) {
     return <FullPageSpinner />;

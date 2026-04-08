@@ -19,8 +19,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
   initialized: false,
 
   init: () => {
-    set({ initialized: true });
+    // Safety fallback: if Firebase onAuthStateChanged hangs completely, release the loader after 8s
+    const safetyTimeout = setTimeout(() => {
+      if (useAuthStore.getState().loading) {
+        useAuthStore.setState({ loading: false });
+        console.error("Firebase auth initialization timed out.");
+      }
+    }, 8000);
+
     const unsubscribe = onAuthStateChanged(clientAuth, async (user) => {
+      clearTimeout(safetyTimeout);
       if (user) {
         try {
           const userDoc = await getDoc(doc(clientDb, 'users', user.uid));
