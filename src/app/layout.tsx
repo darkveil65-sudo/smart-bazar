@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from '@/contexts/ui/ToastContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import ToastContainer from '@/components/ui/ToastContainer';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -15,8 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Bazar - Grocery Delivery",
-  description: "Your favorite grocery delivery app",
+  title: "Smart Bazar - Grocery Delivery in 30 Minutes",
+  description: "Order groceries online and get them delivered to your doorstep in 30 minutes. Fresh vegetables, fruits, household items and more.",
+  keywords: "grocery delivery, online grocery, fresh vegetables, fruits, smart bazar",
 };
 
 export default function RootLayout({
@@ -27,11 +29,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col antialiased">
         <ToastProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
           <ToastContainer />
         </ToastProvider>
       </body>

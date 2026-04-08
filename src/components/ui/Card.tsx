@@ -5,6 +5,8 @@ interface CardProps {
   children: ReactNode;
   header?: ReactNode;
   footer?: ReactNode;
+  hover?: boolean;
+  onClick?: () => void;
 }
 
 const Card: FC<CardProps> = ({
@@ -12,12 +14,20 @@ const Card: FC<CardProps> = ({
   children,
   header,
   footer,
+  hover = false,
+  onClick,
 }) => {
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg shadow-sm ${className}`}>
-      {header && <div className="pb-4 pt-5 px-6 sm:px-7">{header}</div>}
-      <div className="px-5 pt-6 pb-4 sm:px-7">{children}</div>
-      {footer && <div className="px-5 pt-4 sm:px-7">{footer}</div>}
+    <div
+      className={`bg-card border border-border rounded-2xl shadow-sm
+        ${hover ? 'hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer' : ''}
+        ${onClick ? 'cursor-pointer' : ''}
+        ${className}`}
+      onClick={onClick}
+    >
+      {header && <div className="px-6 pt-5 pb-3">{header}</div>}
+      <div className="px-6 py-4">{children}</div>
+      {footer && <div className="px-6 pt-2 pb-4 border-t border-border">{footer}</div>}
     </div>
   );
 };

@@ -1,6 +1,32 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, limit } from 'firebase/firestore';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  limit,
+  serverTimestamp,
+  writeBatch,
+  increment,
+  Timestamp,
+} from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'demo',
@@ -15,8 +41,17 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0
 
 export const clientAuth = getAuth(app);
 export const clientDb = getFirestore(app);
+export const clientStorage = getStorage(app);
 
-export { collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, limit };
-export { signInWithEmailAndPassword, signOut, onAuthStateChanged };
+export {
+  collection, doc, getDoc, getDocs, setDoc, addDoc,
+  updateDoc, deleteDoc, query, where, orderBy,
+  onSnapshot, limit, serverTimestamp, writeBatch,
+  increment, Timestamp,
+};
+export {
+  signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  signOut, onAuthStateChanged,
+};
 
 export default app;

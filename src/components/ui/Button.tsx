@@ -1,11 +1,10 @@
 import { FC, ReactNode, ButtonHTMLAttributes } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'xs' | 'sm' | 'md' | 'lg';
   block?: boolean;
-  disabled?: boolean;
-  onClick?: () => void;
+  loading?: boolean;
   children: ReactNode;
   className?: string;
 }
@@ -14,37 +13,41 @@ const Button: FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
   block = false,
-  disabled = false,
-  onClick,
+  loading = false,
   children,
   className = '',
+  disabled,
   ...props
 }) => {
-  const baseClasses = 'transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
-  
-  const variantClasses = {
-    primary: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
-    secondary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    outline: 'border border-gray-300 hover:bg-gray-50 focus:ring-gray-500',
-    ghost: 'hover:bg-gray-100 focus:ring-gray-500',
+  const base = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus-ring disabled:opacity-50 disabled:pointer-events-none active:scale-[0.97]';
+
+  const variants = {
+    primary: 'bg-primary text-white hover:bg-primary-dark shadow-sm hover:shadow-md',
+    secondary: 'bg-secondary text-white hover:bg-blue-700 shadow-sm hover:shadow-md',
+    outline: 'border-2 border-border bg-transparent hover:bg-muted text-foreground',
+    ghost: 'bg-transparent hover:bg-muted text-foreground',
+    danger: 'bg-destructive text-white hover:bg-red-600 shadow-sm',
   };
-  
-  const sizeClasses = {
-    xs: 'h-8 px-2 text-xs',
-    sm: 'h-9 px-3 text-sm',
-    md: 'h-10 px-4 text-sm',
-    lg: 'h-11 px-5 text-base',
+
+  const sizes = {
+    xs: 'h-7 px-2.5 text-xs gap-1',
+    sm: 'h-8 px-3 text-sm gap-1.5',
+    md: 'h-10 px-4 text-sm gap-2',
+    lg: 'h-12 px-6 text-base gap-2',
   };
-  
-  const blockClass = block ? 'w-full' : '';
-  
+
   return (
     <button
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${blockClass} ${className}`}
-      onClick={onClick}
-      disabled={disabled}
+      className={`${base} ${variants[variant]} ${sizes[size]} ${block ? 'w-full' : ''} ${className}`}
+      disabled={disabled || loading}
       {...props}
     >
+      {loading && (
+        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+      )}
       {children}
     </button>
   );

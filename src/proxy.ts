@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const userRole = request.cookies.get('userRole')?.value;
   const pathname = request.nextUrl.pathname;
 
-  // Define protected routes based on role
+  // Protected dashboard routes
   const protectedRoutes: Record<string, string[]> = {
     '/dashboard/admin': ['admin', 'co-admin'],
     '/dashboard/manager': ['manager'],
@@ -13,15 +13,11 @@ export function middleware(request: NextRequest) {
     '/dashboard/delivery': ['delivery'],
   };
 
-  // Check if the pathname matches any protected route
   for (const [route, roles] of Object.entries(protectedRoutes)) {
     if (pathname.startsWith(route)) {
-      // If no user role, redirect to login
       if (!userRole) {
         return NextResponse.redirect(new URL('/', request.url));
       }
-      
-      // If user role is not in allowed roles, redirect to appropriate dashboard
       if (!roles.includes(userRole)) {
         const redirectMap: Record<string, string> = {
           admin: '/dashboard/admin',
@@ -36,15 +32,12 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Customer-only routes
-  const customerRoutes = ['/home', '/cart', '/checkout', '/order-confirmation', '/order-tracking'];
-  const isCustomerRoute = customerRoutes.some(route => pathname.startsWith(route));
-  
-  if (isCustomerRoute && userRole && !['customer', 'admin', 'co-admin'].includes(userRole)) {
-    // Redirect non-customers away from customer routes
+  // Customer routes — allow guests too (no redirect for unauthenticated)
+  const customerOnlyRoutes = ['/checkout', '/orders'];
+  const isCustomerOnly = customerOnlyRoutes.some((r) => pathname.startsWith(r));
+
+  if (isCustomerOnly && userRole && !['customer', 'admin', 'co-admin'].includes(userRole)) {
     const redirectMap: Record<string, string> = {
-      admin: '/dashboard/admin',
-      'co-admin': '/dashboard/admin',
       manager: '/dashboard/manager',
       store: '/dashboard/store',
       delivery: '/dashboard/delivery',
@@ -58,10 +51,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
-    '/home/:path*',
-    '/cart/:path*',
     '/checkout/:path*',
-    '/order-confirmation/:path*',
-    '/order-tracking/:path*',
+    '/orders/:path*',
   ],
 };

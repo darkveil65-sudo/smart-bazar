@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useCallback, useState, ReactNode } from 'react';
 
 interface Toast {
   id: string;
@@ -16,23 +16,22 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
+let toastCounter = 0;
+
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = (children: ReactNode, type?: 'success' | 'error' | 'warning' | 'info') => {
-    const id = Math.random().toString(36).substring(2, 9);
-    const newToast: Toast = { id, children, type };
-    setToasts(prev => [...prev, newToast]);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-      setToasts(prev => prev.filter(toast => toast.id !== id));
-    }, 5000);
-  };
+  const removeToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
+  const addToast = useCallback((content: ReactNode, type?: 'success' | 'error' | 'warning' | 'info') => {
+    const id = String(++toastCounter);
+    setToasts((prev) => [...prev, { id, children: content, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 5000);
+  }, []);
 
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
