@@ -1,0 +1,162 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Helper function to get user role from custom claims
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+    
+    // Helper function to check if user has specific role
+    function hasRole(role) {
+      return getUserRole() == role;
+    }
+    
+    // Helper function to check if user is admin or co-admin
+    function isAdminOrCoAdmin() {
+      return hasRole('admin') || hasRole('co-admin');
+    }
+    
+    // Helper function to check if user is manager
+    function isManager() {
+      return hasRole('manager');
+    }
+    
+    // Helper function to check if user is store owner
+    function isStore() {
+      return hasRole('store');
+    }
+    
+    // Helper function to check if user is delivery person
+    function isDelivery() {
+      return hasRole('delivery');
+    }
+    
+    // Helper function to check if user is customer
+    function isCustomer() {
+      return hasRole('customer');
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Anyone can read their own data
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      
+      // Admins can read all users
+      allow read: if isAdminOrCoAdmin();
+      
+      // Only admins can create/update/delete users (except self-update of certain fields)
+      allow create: if isAdminOrCoAdmin();
+      allow update: if isAdminOrCoAdmin() || 
+                   (isSignedIn() && request.auth.uid == userId && 
+                    request.resource.data.keys().hasOnly(['name'])); // Users can only update their name
+      allow delete: if isAdminOrCoAdmin();
+    }
+    
+    // Categories collection (predefined, read-only for most)
+    match /categories/{categoryId} {
+      allow read: if true; // Publicly readable
+      allow create, update, delete: if isAdminOrCoAdmin(); // Only admins can modify
+    }
+    
+    // Products collection
+    match /products/{productId} {
+      allow read: if true; // Products are publicly browsable
+      
+      // Store owners can only create products in their assigned category
+      allow create: if isSignedIn() && 
+                   isStore() &&
+                   request.resource.data.category in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.assignedCategories &&
+                   request.resource.data.storeId == request.auth.uid;
+                   
+      // Store owners can update/delete only their own products
+      allow update, delete: if isSignedIn() &&
+                           isStore() &&
+                           resource.data.storeId == request.auth.uid;
+                           
+      // Admins can manage all products
+      allow create, update, delete: if isAdminOrCoAdmin();
+    }
+    
+    // Orders collection
+    match /orders/{orderId} {
+      // Customers can read their own orders
+      allow read: if isSignedIn() &&
+                 (request.auth.uid == resource.data.customerId ||
+                  request.auth.uid == resource.data.assignedManagerId ||
+                  request.auth.uid == resource.data.assignedStoreId ||
+                  request.auth.uid == resource.data.assignedDeliveryBoyId);
+                  
+      // Managers can read orders assigned to them or pending assignment
+      // Store owners can read orders assigned to them
+      // Delivery persons can read orders assigned to them
+      allow create: if isSignedIn() && isCustomer(); // Only customers can create orders
+      
+      // Status transitions based on role
+      allow update: if isSignedIn() &&
+                   (
+                    // Customer can cancel their own pending order
+                    (isCustomer() && 
+                     request.auth.uid == resource.data.customerId &&
+                     resource.data.status == 'pending' &&
+                     request.resource.data.status == 'cancelled') ||
+                    
+                    // Manager can assign order to store or move from pending to manager
+                    (isManager() &&
+                     (request.auth.uid == resource.data.assignedManagerId ||
+                      (resource.data.status == 'pending' && 
+                       request.resource.data.status == 'manager' &&
+                       request.resource.data.assignedManagerId == request.auth.uid))) ||
+                    
+                    // Store owner can accept or pack order
+                    (isStore() &&
+                     request.auth.uid == resource.data.assignedStoreId &&
+                     (
+                      (resource.data.status == 'manager' && 
+                       request.resource.data.status == 'store') ||
+                      (resource.data.status == 'store' && 
+                       request.resource.data.status == 'packed')
+                     )) ||
+                     
+                    // Delivery person can pick up or deliver order
+                    (isDelivery() &&
+                     request.auth.uid == resource.data.assignedDeliveryBoyId &&
+                     (
+                      (resource.data.status == 'packed' && 
+                       request.resource.data.status == 'delivery') ||
+                      (resource.data.status == 'delivery' && 
+                       request.resource.data.status == 'completed')
+                     )) ||
+                     
+                    // Admins can make any changes
+                    isAdminOrCoAdmin()
+                   );
+                   
+      // Delete only for admins
+      allow delete: if isAdminOrCoAdmin();
+    }
+    
+    // Applications collection (for store/delivery boy applications)
+    match /applications/{applicationId} {
+      // Users can read their own applications
+      allow read: if isSignedIn() && request.auth.uid == resource.data.userId;
+      
+      // Admins can read all applications
+      allow read: if isAdminOrCoAdmin();
+      
+      // Users can create their own applications
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId;
+      
+      // Admins can update application status (approve/reject)
+      allow update: if isAdminOrCoAdmin();
+      
+      // Delete only for admins
+      allow delete: if isAdminOrCoAdmin();
+    }
+  }
+}
