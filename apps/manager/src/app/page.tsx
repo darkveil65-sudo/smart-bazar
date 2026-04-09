@@ -150,11 +150,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="mt-4 text-center">
-          <Button variant="ghost" size="sm" onClick={() => router.push('/home')}>
-            Continue as Guest →
-          </Button>
-        </div>
+
       </div>
     </div>
   );

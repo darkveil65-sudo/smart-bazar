@@ -3,9 +3,9 @@ import {
   updateDoc, query, where, orderBy, onSnapshot,
 } from '@smart-bazar/shared/lib/firebase';
 import { Order } from '@smart-bazar/shared/types/firestore';
-
 export const orderService = {
   async createOrder(data: Omit<Order, 'id'>): Promise<string> {
+
     const ref = await addDoc(collection(clientDb, 'orders'), {
       ...data,
       status: 'pending',
@@ -15,11 +15,13 @@ export const orderService = {
   },
 
   async getOrder(id: string): Promise<Order | null> {
+
     const snap = await getDoc(doc(clientDb, 'orders', id));
     return snap.exists() ? { id: snap.id, ...snap.data() } as Order : null;
   },
 
   async getOrdersByCustomer(customerId: string): Promise<Order[]> {
+
     const q = query(
       collection(clientDb, 'orders'),
       where('customerId', '==', customerId),
@@ -30,24 +32,28 @@ export const orderService = {
   },
 
   async getOrdersByStatus(status: string): Promise<Order[]> {
+
     const q = query(collection(clientDb, 'orders'), where('status', '==', status));
     const snap = await getDocs(q);
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Order);
   },
 
   async getOrdersByStore(storeId: string): Promise<Order[]> {
+
     const q = query(collection(clientDb, 'orders'), where('assignedStoreId', '==', storeId));
     const snap = await getDocs(q);
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Order);
   },
 
   async getOrdersByDelivery(deliveryId: string): Promise<Order[]> {
+
     const q = query(collection(clientDb, 'orders'), where('assignedDeliveryBoyId', '==', deliveryId));
     const snap = await getDocs(q);
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Order);
   },
 
   async updateOrderStatus(id: string, status: string, extraData?: Record<string, unknown>): Promise<void> {
+
     await updateDoc(doc(clientDb, 'orders', id), {
       status,
       ...extraData,
@@ -56,42 +62,33 @@ export const orderService = {
   },
 
   async assignManager(orderId: string, managerId: string): Promise<void> {
-    await updateDoc(doc(clientDb, 'orders', orderId), {
-      status: 'manager',
-      assignedManagerId: managerId,
-      updatedAt: new Date().toISOString(),
-    });
+    await this.updateOrderStatus(orderId, 'manager', { assignedManagerId: managerId });
   },
 
   async assignStore(orderId: string, storeId: string): Promise<void> {
-    await updateDoc(doc(clientDb, 'orders', orderId), {
-      status: 'store',
-      assignedStoreId: storeId,
-      updatedAt: new Date().toISOString(),
-    });
+    await this.updateOrderStatus(orderId, 'store', { assignedStoreId: storeId });
   },
 
   async assignDelivery(orderId: string, deliveryBoyId: string): Promise<void> {
-    await updateDoc(doc(clientDb, 'orders', orderId), {
-      status: 'delivery',
-      assignedDeliveryBoyId: deliveryBoyId,
-      updatedAt: new Date().toISOString(),
-    });
+    await this.updateOrderStatus(orderId, 'delivery', { assignedDeliveryBoyId: deliveryBoyId });
   },
 
   subscribeToOrder(orderId: string, callback: (order: Order | null) => void) {
+
     return onSnapshot(doc(clientDb, 'orders', orderId), (snap) => {
       callback(snap.exists() ? { id: snap.id, ...snap.data() } as Order : null);
     });
   },
 
   subscribeToOrders(callback: (orders: Order[]) => void) {
+
     return onSnapshot(collection(clientDb, 'orders'), (snap) => {
       callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Order));
     });
   },
 
   subscribeToOrdersByStatus(status: string, callback: (orders: Order[]) => void) {
+
     const q = query(collection(clientDb, 'orders'), where('status', '==', status));
     return onSnapshot(q, (snap) => {
       callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Order));

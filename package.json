@@ -3,7 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "npm run dev:customer",
+    "dev:customer": "npm run dev -w apps/customer",
+    "dev:admin": "npm run dev -w apps/admin",
+    "dev:co-admin": "npm run dev -w apps/co-admin",
+    "dev:delivery": "npm run dev -w apps/delivery",
+    "dev:manager": "npm run dev -w apps/manager",
+    "dev:store": "npm run dev -w apps/store",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

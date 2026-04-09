@@ -18,6 +18,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   loading: true,
   initialized: false,
 
+
   init: () => {
     // Safety fallback: if Firebase onAuthStateChanged hangs completely, release the loader after 8s
     const safetyTimeout = setTimeout(() => {

@@ -5,44 +5,38 @@ import {
 import { Application } from '@smart-bazar/shared/types/firestore';
 
 export const applicationService = {
+  async getAllApplications(): Promise<Application[]> {
+
+    const snap = await getDocs(collection(clientDb, 'applications'));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Application);
+  },
+
+  async getApplicationsByUser(userId: string): Promise<Application[]> {
+
+    const q = query(collection(clientDb, 'applications'), where('userId', '==', userId));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Application);
+  },
+
   async createApplication(data: Omit<Application, 'id'>): Promise<string> {
+
     const ref = await addDoc(collection(clientDb, 'applications'), {
       ...data,
-      status: 'pending',
       createdAt: new Date().toISOString(),
     });
     return ref.id;
   },
 
-  async getApplicationsByType(type: 'store' | 'delivery'): Promise<Application[]> {
-    const q = query(collection(clientDb, 'applications'), where('type', '==', type));
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Application);
-  },
+  async updateApplicationStatus(id: string, status: string): Promise<void> {
 
-  async getPendingApplications(): Promise<Application[]> {
-    const q = query(collection(clientDb, 'applications'), where('status', '==', 'pending'));
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Application);
-  },
-
-  async approveApplication(id: string, notes?: string): Promise<void> {
     await updateDoc(doc(clientDb, 'applications', id), {
-      status: 'approved',
-      adminNotes: notes || '',
+      status,
       updatedAt: new Date().toISOString(),
     });
   },
 
-  async rejectApplication(id: string, notes?: string): Promise<void> {
-    await updateDoc(doc(clientDb, 'applications', id), {
-      status: 'rejected',
-      adminNotes: notes || '',
-      updatedAt: new Date().toISOString(),
-    });
-  },
+  subscribeToApplications(callback: (applications: Application[]) => void) {
 
-  subscribeToApplications(callback: (apps: Application[]) => void) {
     return onSnapshot(collection(clientDb, 'applications'), (snap) => {
       callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Application));
     });
