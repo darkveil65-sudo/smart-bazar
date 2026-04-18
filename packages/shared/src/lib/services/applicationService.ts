@@ -35,6 +35,20 @@ export const applicationService = {
     });
   },
 
+  async approveApplication(id: string): Promise<void> {
+    await updateDoc(doc(clientDb, 'applications', id), {
+      status: 'approved',
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
+  async rejectApplication(id: string): Promise<void> {
+    await updateDoc(doc(clientDb, 'applications', id), {
+      status: 'rejected',
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
   subscribeToApplications(callback: (applications: Application[]) => void) {
 
     return onSnapshot(collection(clientDb, 'applications'), (snap) => {

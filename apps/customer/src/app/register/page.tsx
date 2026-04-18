@@ -45,7 +45,7 @@ export default function RegisterPage() {
       });
 
       document.cookie = 'userRole=customer; path=/; max-age=86400';
-      addToast('Account created successfully!', 'success');
+      addToast('Account created successfully! Welcome to Smart Bazar!', 'success');
       router.push('/home');
     } catch (error: unknown) {
       const err = error as { code?: string };
@@ -73,11 +73,16 @@ export default function RegisterPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-primary rounded-2xl mb-4 shadow-lg">
             <span className="text-3xl">🛒</span>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Create Account</h1>
-          <p className="text-muted-foreground mt-1">Join Smart Bazar today</p>
+          <h1 className="text-3xl font-bold text-foreground">Smart Bazar</h1>
+          <p className="text-muted-foreground mt-1">Grocery delivery in 30 minutes</p>
+          <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+            🛒 New Customer Registration
+          </div>
         </div>
 
         <div className="bg-card rounded-2xl shadow-lg border border-border p-8">
+          <h2 className="text-xl font-semibold mb-1 text-center">Create Account</h2>
+          <p className="text-xs text-muted-foreground text-center mb-6">Join Smart Bazar today</p>
           <form onSubmit={handleRegister} className="space-y-1">
             <Input
               label="Full Name"

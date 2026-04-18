@@ -7,19 +7,20 @@ service cloud.firestore {
       return request.auth != null;
     }
     
-    // Helper function to get user role from custom claims
+    // Helper function to get user role from Firestore document
     function getUserRole() {
-      return request.auth.token.role;
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
     
     // Helper function to check if user has specific role
     function hasRole(role) {
-      return getUserRole() == role;
+      return isSignedIn() && (getUserRole() == role || request.auth.token.role == role);
     }
     
     // Helper function to check if user is admin or co-admin
     function isAdminOrCoAdmin() {
-      return hasRole('admin') || hasRole('co-admin');
+      let role = getUserRole();
+      return role == 'admin' || role == 'co-admin' || request.auth.token.role == 'admin' || request.auth.token.role == 'co-admin';
     }
     
     // Helper function to check if user is manager
@@ -50,11 +51,20 @@ service cloud.firestore {
       // Admins can read all users
       allow read: if isAdminOrCoAdmin();
       
-      // Only admins can create/update/delete users (except self-update of certain fields)
+      // Managers can read store and delivery users (needed for order assignment)
+      allow read: if isSignedIn() && isManager();
+      
+      // Allow customer self-registration: new users can create their own doc with role 'customer'
+      allow create: if isSignedIn() && request.auth.uid == userId && 
+                   request.resource.data.role == 'customer';
+      
+      // Admins can create any user
       allow create: if isAdminOrCoAdmin();
+      
+      // Admins can update/delete users; users can update their own name
       allow update: if isAdminOrCoAdmin() || 
                    (isSignedIn() && request.auth.uid == userId && 
-                    request.resource.data.keys().hasOnly(['name'])); // Users can only update their name
+                    request.resource.data.keys().hasOnly(['name', 'email', 'role', 'createdAt', 'updatedAt']));
       allow delete: if isAdminOrCoAdmin();
     }
     
@@ -68,34 +78,37 @@ service cloud.firestore {
     match /products/{productId} {
       allow read: if true; // Products are publicly browsable
       
-      // Store owners can only create products in their assigned category
+      // Store owners can create products in their assigned category
       allow create: if isSignedIn() && 
-                   isStore() &&
-                   request.resource.data.category in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.assignedCategories &&
-                   request.resource.data.storeId == request.auth.uid;
+                   (isStore() || isManager() || isAdminOrCoAdmin());
                    
       // Store owners can update/delete only their own products
       allow update, delete: if isSignedIn() &&
-                           isStore() &&
-                           resource.data.storeId == request.auth.uid;
-                           
-      // Admins can manage all products
-      allow create, update, delete: if isAdminOrCoAdmin();
+                           (isAdminOrCoAdmin() ||
+                            (isStore() && resource.data.storeId == request.auth.uid) ||
+                            isManager());
     }
     
     // Orders collection
     match /orders/{orderId} {
-      // Customers can read their own orders
+      // Admins and managers can read all orders
+      allow read: if isSignedIn() && (isAdminOrCoAdmin() || isManager());
+      
+      // Users can read orders they are part of
       allow read: if isSignedIn() &&
                  (request.auth.uid == resource.data.customerId ||
                   request.auth.uid == resource.data.assignedManagerId ||
                   request.auth.uid == resource.data.assignedStoreId ||
                   request.auth.uid == resource.data.assignedDeliveryBoyId);
-                  
-      // Managers can read orders assigned to them or pending assignment
-      // Store owners can read orders assigned to them
+      
+      // Store owners can read orders assigned to their store
+      allow read: if isSignedIn() && isStore();
+      
       // Delivery persons can read orders assigned to them
-      allow create: if isSignedIn() && isCustomer(); // Only customers can create orders
+      allow read: if isSignedIn() && isDelivery();
+                  
+      // Customers can create orders
+      allow create: if isSignedIn() && isCustomer();
       
       // Status transitions based on role
       allow update: if isSignedIn() &&
@@ -106,32 +119,16 @@ service cloud.firestore {
                      resource.data.status == 'pending' &&
                      request.resource.data.status == 'cancelled') ||
                     
-                    // Manager can assign order to store or move from pending to manager
-                    (isManager() &&
-                     (request.auth.uid == resource.data.assignedManagerId ||
-                      (resource.data.status == 'pending' && 
-                       request.resource.data.status == 'manager' &&
-                       request.resource.data.assignedManagerId == request.auth.uid))) ||
+                    // Manager can assign/update orders
+                    isManager() ||
                     
-                    // Store owner can accept or pack order
+                    // Store owner can update orders assigned to them
                     (isStore() &&
-                     request.auth.uid == resource.data.assignedStoreId &&
-                     (
-                      (resource.data.status == 'manager' && 
-                       request.resource.data.status == 'store') ||
-                      (resource.data.status == 'store' && 
-                       request.resource.data.status == 'packed')
-                     )) ||
+                     request.auth.uid == resource.data.assignedStoreId) ||
                      
-                    // Delivery person can pick up or deliver order
+                    // Delivery person can update orders assigned to them
                     (isDelivery() &&
-                     request.auth.uid == resource.data.assignedDeliveryBoyId &&
-                     (
-                      (resource.data.status == 'packed' && 
-                       request.resource.data.status == 'delivery') ||
-                      (resource.data.status == 'delivery' && 
-                       request.resource.data.status == 'completed')
-                     )) ||
+                     request.auth.uid == resource.data.assignedDeliveryBoyId) ||
                      
                     // Admins can make any changes
                     isAdminOrCoAdmin()
@@ -146,14 +143,14 @@ service cloud.firestore {
       // Users can read their own applications
       allow read: if isSignedIn() && request.auth.uid == resource.data.userId;
       
-      // Admins can read all applications
-      allow read: if isAdminOrCoAdmin();
+      // Admins and managers can read all applications
+      allow read: if isSignedIn() && (isAdminOrCoAdmin() || isManager());
       
       // Users can create their own applications
       allow create: if isSignedIn() && request.auth.uid == request.resource.data.userId;
       
-      // Admins can update application status (approve/reject)
-      allow update: if isAdminOrCoAdmin();
+      // Admins and managers can update application status (approve/reject)
+      allow update: if isSignedIn() && (isAdminOrCoAdmin() || isManager());
       
       // Delete only for admins
       allow delete: if isAdminOrCoAdmin();

@@ -13,9 +13,15 @@ export interface UserData {
   name: string;
   email: string;
   role: UserRole;
-  assignedCategories?: string[]; // For managers - list of category IDs they can manage
-  storeId?: string; // For stores - reference to their store
-  createdAt: string; // ISO timestamp
+  assignedCategories?: string[];
+  storeId?: string;
+  addresses?: {
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+  }[];
+  createdAt: string;
   updatedAt?: string;
 }
 

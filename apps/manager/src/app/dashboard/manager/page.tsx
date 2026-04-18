@@ -4,279 +4,154 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@smart-bazar/shared/components/layout/DashboardLayout';
 import { useAuthStore } from '@smart-bazar/shared/stores/authStore';
 import { orderService } from '@smart-bazar/shared/lib/services/orderService';
-import { productService } from '@smart-bazar/shared/lib/services/productService';
-import { applicationService } from '@smart-bazar/shared/lib/services/applicationService';
 import { userService } from '@smart-bazar/shared/lib/services/userService';
-import { Order, Product, Application, UserData } from '@smart-bazar/shared/types/firestore';
-import { CATEGORIES, CATEGORY_MAP } from '@smart-bazar/shared/lib/constants';
+import { Order, UserData } from '@smart-bazar/shared/types/firestore';
 import { OrderStatusBadge } from '@smart-bazar/shared/components/ui/Badge';
-import Card from '@smart-bazar/shared/components/ui/Card';
-import Button from '@smart-bazar/shared/components/ui/Button';
-import Modal from '@smart-bazar/shared/components/ui/Modal';
-import Input from '@smart-bazar/shared/components/ui/Input';
-import Select from '@smart-bazar/shared/components/ui/Select';
-import EmptyState from '@smart-bazar/shared/components/ui/EmptyState';
 import { useToast } from '@smart-bazar/shared/contexts/ui/ToastContext';
 
 const managerNav = [
-  { label: 'Dashboard', href: '/dashboard/manager', icon: '📊' },
+  { label: 'Overview', href: '/dashboard/manager', icon: '📋' },
+  { label: 'Store Partners', href: '/dashboard/manager/stores', icon: '🏪' },
+  { label: 'Delivery Team', href: '/dashboard/manager/delivery', icon: '🛵' },
+  { label: 'Performance', href: '/dashboard/manager/reports', icon: '📊' },
 ];
 
 export default function ManagerDashboard() {
   const { addToast } = useToast();
   const { userData } = useAuthStore();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [stores, setStores] = useState<UserData[]>([]);
-  const [deliveryBoys, setDeliveryBoys] = useState<UserData[]>([]);
-  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'applications'>('orders');
-  const [productModal, setProductModal] = useState(false);
-  const [assignModal, setAssignModal] = useState<{ orderId: string; type: 'store' | 'delivery' } | null>(null);
-  const [newProduct, setNewProduct] = useState({ name: '', price: '', category: '', description: '' });
-
-  const assignedCategories = userData?.assignedCategories || [];
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [activeTab, setActiveTab] = useState<'orders' | 'staff'>('orders');
 
   useEffect(() => {
     const unsubs = [
       orderService.subscribeToOrders(setOrders),
-      productService.subscribeToProducts(setProducts),
-      applicationService.subscribeToApplications(setApplications),
+      userService.subscribeToUsers(setUsers),
     ];
-    userService.getUsersByRole('store').then(setStores);
-    userService.getUsersByRole('delivery').then(setDeliveryBoys);
-    return () => unsubs.forEach((u) => u());
+    return () => unsubs.forEach(u => u());
   }, []);
 
-  const myOrders = orders.filter((o) =>
-    o.status === 'pending' || o.assignedManagerId === userData?.id
-  );
-
-  const myProducts = products.filter((p) =>
-    assignedCategories.length === 0 || assignedCategories.includes(p.category)
-  );
-
-  const pendingApps = applications.filter((a) => a.status === 'pending');
-
-  const handleAssignToSelf = async (orderId: string) => {
-    if (!userData) return;
-    try {
-      await orderService.assignManager(orderId, userData.id);
-      addToast('Order assigned to you', 'success');
-    } catch { addToast('Failed', 'error'); }
+  const stats = {
+    pendingOrders: orders.filter(o => o.status === 'pending').length,
+    activeStores: users.filter(u => u.role === 'store').length,
+    deliveryOnline: users.filter(u => u.role === 'delivery').length,
+    todaySales: orders.filter(o => o.status === 'completed' && new Date(o.createdAt).toDateString() === new Date().toDateString()).reduce((s,o) => s+o.totalAmount, 0),
   };
-
-  const handleAssignStore = async (orderId: string, storeId: string) => {
-    try {
-      await orderService.assignStore(orderId, storeId);
-      addToast('Assigned to store', 'success');
-      setAssignModal(null);
-    } catch { addToast('Failed', 'error'); }
-  };
-
-  const handleAssignDelivery = async (orderId: string, deliveryId: string) => {
-    try {
-      await orderService.assignDelivery(orderId, deliveryId);
-      addToast('Assigned to delivery', 'success');
-      setAssignModal(null);
-    } catch { addToast('Failed', 'error'); }
-  };
-
-  const handleAddProduct = async () => {
-    if (!newProduct.name || !newProduct.price || !newProduct.category) {
-      addToast('Fill all required fields', 'error');
-      return;
-    }
-    try {
-      await productService.addProduct({
-        name: newProduct.name,
-        price: Number(newProduct.price),
-        category: newProduct.category,
-        storeId: userData?.id || '',
-        description: newProduct.description,
-        stock: 100,
-        isAvailable: true,
-        createdAt: new Date().toISOString(),
-      });
-      addToast('Product added', 'success');
-      setProductModal(false);
-      setNewProduct({ name: '', price: '', category: '', description: '' });
-    } catch { addToast('Failed', 'error'); }
-  };
-
-  const handleApproveApp = async (app: Application) => {
-    try {
-      await applicationService.approveApplication(app.id);
-      if (app.userId) {
-        await userService.updateUser(app.userId, {
-          role: app.type as UserData['role'],
-          ...(app.storeCategory ? { assignedCategories: [app.storeCategory] } : {}),
-        });
-      }
-      addToast('Approved', 'success');
-    } catch { addToast('Failed', 'error'); }
-  };
-
-  const tabs = [
-    { key: 'orders', label: 'Orders', icon: '📦' },
-    { key: 'products', label: 'Products', icon: '🏷️' },
-    { key: 'applications', label: 'Applications', icon: '📋' },
-  ] as const;
 
   return (
-    <DashboardLayout title="Manager Dashboard" navItems={managerNav}>
-      {/* Categories info */}
-      {assignedCategories.length > 0 && (
-        <div className="flex gap-2 mb-4 flex-wrap">
-          <span className="text-xs text-muted-foreground py-1">Your categories:</span>
-          {assignedCategories.map((catId) => {
-            const cat = CATEGORY_MAP[catId];
-            return cat ? (
-              <span key={catId} className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                {cat.icon} {cat.name}
-              </span>
-            ) : null;
-          })}
+    <DashboardLayout title="Operations Hub" navItems={managerNav} accentColor="#10b981">
+      <div className="animate-fadeIn">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Manager Dashboard</h1>
+          <p className="text-sm text-slate-500">Overseeing store and delivery operations</p>
         </div>
-      )}
 
-      <div className="flex gap-2 mb-6 overflow-x-auto hide-scrollbar">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all
-              ${activeTab === tab.key ? 'bg-primary text-white shadow-sm' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 stagger">
+          {[
+            { label: 'Pending Orders', value: stats.pendingOrders, icon: '🛒', color: '#10b981', sub: 'Needs Assignment' },
+            { label: 'Active Stores', value: stats.activeStores, icon: '🏪', color: '#3b82f6', sub: 'Operational' },
+            { label: 'Delivery Boys', value: stats.deliveryOnline, icon: '🛵', color: '#f59e0b', sub: 'Online Now' },
+            { label: 'Today Revenue', value: `₹${stats.todaySales}`, icon: '💰', color: '#8b5cf6', sub: 'Live Stats' },
+          ].map((s, i) => (
+            <div key={s.label} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm animate-fadeInUp" style={{ animationDelay: `${i*100}ms` }}>
+              <div className="flex justify-between items-start mb-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: `${s.color}10` }}>
+                  {s.icon}
+                </div>
+                <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full uppercase tracking-widest">LIVE</span>
+              </div>
+              <p className="text-[11px] font-bold text-slate-500 uppercase">{s.label}</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{s.value}</h3>
+              <p className="text-[10px] text-slate-400 mt-2 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> {s.sub}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Tab Selection */}
+        <div className="flex gap-2 p-1 bg-slate-100 rounded-xl mb-6 w-fit border border-slate-200">
+          <button 
+            onClick={() => setActiveTab('orders')}
+            className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'orders' ? 'bg-white text-[#10b981] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
-            {tab.icon} {tab.label}
+            Live Orders
           </button>
-        ))}
-      </div>
-
-      {/* Orders */}
-      {activeTab === 'orders' && (
-        <div className="animate-fadeIn space-y-3">
-          {myOrders.length === 0 ? (
-            <EmptyState icon="📦" title="No orders" description="Orders will appear here" />
-          ) : (
-            myOrders.map((order) => (
-              <Card key={order.id}>
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="text-sm font-medium">#{order.id.slice(0, 8)}</p>
-                    <p className="text-xs text-muted-foreground">{order.items.length} items • ₹{order.totalAmount}</p>
-                  </div>
-                  <OrderStatusBadge status={order.status} />
-                </div>
-                <div className="flex gap-2 mt-3">
-                  {order.status === 'pending' && (
-                    <Button size="xs" onClick={() => handleAssignToSelf(order.id)}>Accept Order</Button>
-                  )}
-                  {order.status === 'manager' && (
-                    <Button size="xs" onClick={() => setAssignModal({ orderId: order.id, type: 'store' })}>Assign Store</Button>
-                  )}
-                  {order.status === 'packed' && (
-                    <Button size="xs" variant="secondary" onClick={() => setAssignModal({ orderId: order.id, type: 'delivery' })}>Assign Delivery</Button>
-                  )}
-                </div>
-              </Card>
-            ))
-          )}
+          <button 
+            onClick={() => setActiveTab('staff')}
+            className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'staff' ? 'bg-white text-[#10b981] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Staff Directory
+          </button>
         </div>
-      )}
 
-      {/* Products */}
-      {activeTab === 'products' && (
-        <div className="animate-fadeIn">
-          <div className="flex justify-between mb-4">
-            <h3 className="font-semibold">Products ({myProducts.length})</h3>
-            <Button size="sm" onClick={() => setProductModal(true)}>+ Add Product</Button>
-          </div>
-          {myProducts.length === 0 ? (
-            <EmptyState icon="🏷️" title="No products" action={{ label: 'Add Product', onClick: () => setProductModal(true) }} />
+        {/* Operational View */}
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden animate-scaleIn">
+          {activeTab === 'orders' ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50">
+                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Order Detail</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {orders.map((o) => (
+                    <tr key={o.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <p className="text-xs font-bold text-slate-900">#{o.id.slice(0, 8).toUpperCase()}</p>
+                        <p className="text-[10px] text-slate-500">{o.items.length} items • {new Date(o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <OrderStatusBadge status={o.status} />
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-900 text-sm">₹{o.totalAmount}</td>
+                      <td className="px-6 py-4">
+                        <button className="text-[10px] font-bold text-[#10b981] px-3 py-1.5 bg-[#10b981]10 rounded-lg hover:bg-[#10b981]20 transition-all uppercase">
+                          Manage
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {orders.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-20 text-center">
+                        <p className="text-4xl mb-4">💤</p>
+                        <p className="text-sm font-bold text-slate-400">No active orders right now</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {myProducts.map((p) => (
-                <Card key={p.id}>
-                  <div className="flex justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{p.name}</p>
-                      <p className="text-xs text-muted-foreground">{CATEGORY_MAP[p.category]?.name || p.category}</p>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {users.filter(u => u.role !== 'customer').map((u) => (
+                <div key={u.id} className="p-4 rounded-2xl border border-slate-100 hover:border-[#10b981]30 hover:bg-slate-50/50 transition-all">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-500">
+                      {u.name[0]?.toUpperCase()}
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-primary">₹{p.price}</p>
-                      <Button size="xs" variant="danger" className="mt-1" onClick={() => productService.deleteProduct(p.id)}>Delete</Button>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900">{u.name}</p>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase">{u.role}</p>
                     </div>
                   </div>
-                </Card>
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-bold">ONLINE</span>
+                    <button className="text-[#10b981] font-bold hover:underline">View Performance</button>
+                  </div>
+                </div>
               ))}
             </div>
           )}
         </div>
-      )}
-
-      {/* Applications */}
-      {activeTab === 'applications' && (
-        <div className="animate-fadeIn space-y-3">
-          {pendingApps.length === 0 ? (
-            <EmptyState icon="📋" title="No pending applications" />
-          ) : (
-            pendingApps.map((app) => (
-              <Card key={app.id}>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm font-medium capitalize">{app.type} Application</p>
-                    {app.businessName && <p className="text-xs text-muted-foreground">{app.businessName}</p>}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="xs" onClick={() => handleApproveApp(app)}>Approve</Button>
-                    <Button size="xs" variant="danger" onClick={() => applicationService.rejectApplication(app.id)}>Reject</Button>
-                  </div>
-                </div>
-              </Card>
-            ))
-          )}
-        </div>
-      )}
-
-      {/* Add product modal */}
-      <Modal isOpen={productModal} onClose={() => setProductModal(false)} title="Add Product">
-        <Input label="Product Name" value={newProduct.name} onChange={(v) => setNewProduct((p) => ({ ...p, name: v }))} required />
-        <Input label="Price (₹)" type="number" value={newProduct.price} onChange={(v) => setNewProduct((p) => ({ ...p, price: v }))} required />
-        <Select
-          label="Category"
-          value={newProduct.category}
-          onChange={(v) => setNewProduct((p) => ({ ...p, category: v }))}
-          options={(assignedCategories.length > 0 ? CATEGORIES.filter((c) => assignedCategories.includes(c.id)) : CATEGORIES).map((c) => ({ value: c.id, label: `${c.icon} ${c.name}` }))}
-          required
-        />
-        <Input label="Description" value={newProduct.description} onChange={(v) => setNewProduct((p) => ({ ...p, description: v }))} />
-        <Button variant="primary" block onClick={handleAddProduct} className="mt-4">Add Product</Button>
-      </Modal>
-
-      {/* Assign modal */}
-      {assignModal && (
-        <Modal isOpen={true} onClose={() => setAssignModal(null)} title={`Assign ${assignModal.type === 'store' ? 'Store' : 'Delivery Boy'}`}>
-          <div className="space-y-2">
-            {(assignModal.type === 'store' ? stores : deliveryBoys).map((u) => (
-              <button
-                key={u.id}
-                onClick={() => assignModal.type === 'store' ? handleAssignStore(assignModal.orderId, u.id) : handleAssignDelivery(assignModal.orderId, u.id)}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-all"
-              >
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">{u.name[0]}</div>
-                <div className="text-left">
-                  <p className="text-sm font-medium">{u.name}</p>
-                  <p className="text-xs text-muted-foreground">{u.email}</p>
-                </div>
-              </button>
-            ))}
-            {(assignModal.type === 'store' ? stores : deliveryBoys).length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">No {assignModal.type === 'store' ? 'stores' : 'delivery boys'} available</p>
-            )}
-          </div>
-        </Modal>
-      )}
+      </div>
     </DashboardLayout>
   );
 }

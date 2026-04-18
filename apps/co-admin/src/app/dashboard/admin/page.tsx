@@ -7,30 +7,25 @@ import { userService } from '@smart-bazar/shared/lib/services/userService';
 import { orderService } from '@smart-bazar/shared/lib/services/orderService';
 import { applicationService } from '@smart-bazar/shared/lib/services/applicationService';
 import { UserData, Order, Application } from '@smart-bazar/shared/types/firestore';
-import { CATEGORIES } from '@smart-bazar/shared/lib/constants';
 import { OrderStatusBadge, RoleBadge } from '@smart-bazar/shared/components/ui/Badge';
 import Card from '@smart-bazar/shared/components/ui/Card';
 import Button from '@smart-bazar/shared/components/ui/Button';
-import Modal from '@smart-bazar/shared/components/ui/Modal';
-import Select from '@smart-bazar/shared/components/ui/Select';
-import Input from '@smart-bazar/shared/components/ui/Input';
 import EmptyState from '@smart-bazar/shared/components/ui/EmptyState';
 import { useToast } from '@smart-bazar/shared/contexts/ui/ToastContext';
 
-const adminNav = [
+const coAdminNav = [
   { label: 'Dashboard', href: '/dashboard/admin', icon: '📊' },
+  { label: 'Orders', href: '/dashboard/admin/orders', icon: '📦' },
+  { label: 'Users', href: '/dashboard/admin/users', icon: '👥' },
 ];
 
-export default function AdminDashboard() {
+export default function CoAdminDashboard() {
   const { addToast } = useToast();
   const { userData } = useAuthStore();
   const [users, setUsers] = useState<UserData[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'orders' | 'applications'>('overview');
-  const [userModal, setUserModal] = useState(false);
-  const [categoryModal, setCategoryModal] = useState<{ userId: string; current: string[] } | null>(null);
-  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'customer' });
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'users' | 'applications'>('overview');
 
   useEffect(() => {
     const unsubs = [
@@ -44,7 +39,6 @@ export default function AdminDashboard() {
   const stats = {
     totalUsers: users.length,
     totalOrders: orders.length,
-    totalRevenue: orders.filter((o) => o.status === 'completed').reduce((s, o) => s + o.totalAmount, 0),
     pendingOrders: orders.filter((o) => o.status === 'pending').length,
     pendingApps: applications.filter((a) => a.status === 'pending').length,
   };
@@ -59,34 +53,31 @@ export default function AdminDashboard() {
         });
       }
       addToast('Application approved', 'success');
-    } catch { addToast('Failed to approve', 'error'); }
+     } catch (error) {
+       console.error('Failed to approve:', error);
+       addToast('Failed to approve', 'error');
+     }
   };
 
   const handleRejectApp = async (id: string) => {
     try {
       await applicationService.rejectApplication(id);
       addToast('Application rejected', 'info');
-    } catch { addToast('Failed to reject', 'error'); }
+     } catch (error) {
+       console.error('Failed to reject:', error);
+       addToast('Failed to reject', 'error');
+     }
   };
 
-  const handleAssignCategories = async (userId: string, categories: string[]) => {
-    try {
-      await userService.assignCategories(userId, categories);
-      addToast('Categories assigned', 'success');
-      setCategoryModal(null);
-    } catch { addToast('Failed to assign', 'error'); }
-  };
-
-  const tabs = [
+  const tabs: { key: 'overview' | 'orders' | 'users' | 'applications'; label: string; icon: string; badge?: number }[] = [
     { key: 'overview', label: 'Overview', icon: '📊' },
-    { key: 'users', label: 'Users', icon: '👥' },
     { key: 'orders', label: 'Orders', icon: '📦' },
-    { key: 'applications', label: 'Applications', icon: '📋' },
-  ] as const;
+    { key: 'users', label: 'Users', icon: '👥' },
+    { key: 'applications', label: 'Applications', icon: '📋', badge: stats.pendingApps },
+  ];
 
   return (
-    <DashboardLayout title="Admin Dashboard" navItems={adminNav}>
-      {/* Tabs */}
+    <DashboardLayout title="Co-Admin Dashboard" navItems={coAdminNav}>
       <div className="flex gap-2 mb-6 overflow-x-auto hide-scrollbar">
         {tabs.map((tab) => (
           <button
@@ -96,21 +87,19 @@ export default function AdminDashboard() {
               ${activeTab === tab.key ? 'bg-primary text-white shadow-sm' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
           >
             {tab.icon} {tab.label}
-            {tab.key === 'applications' && stats.pendingApps > 0 && (
-              <span className="ml-1 w-5 h-5 bg-destructive text-white text-xs rounded-full flex items-center justify-center">{stats.pendingApps}</span>
+            {tab.badge && tab.badge > 0 && (
+              <span className="ml-1 w-5 h-5 bg-destructive text-white text-xs rounded-full flex items-center justify-center">{tab.badge}</span>
             )}
           </button>
         ))}
       </div>
 
-      {/* Overview */}
       {activeTab === 'overview' && (
         <div className="animate-fadeIn">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
             {[
               { label: 'Total Users', value: stats.totalUsers, icon: '👥', color: '#3b82f6' },
               { label: 'Total Orders', value: stats.totalOrders, icon: '📦', color: '#8b5cf6' },
-              { label: 'Revenue', value: `₹${stats.totalRevenue.toLocaleString()}`, icon: '💰', color: '#22c55e' },
               { label: 'Pending Orders', value: stats.pendingOrders, icon: '⏳', color: '#f59e0b' },
             ].map((s) => (
               <Card key={s.label}>
@@ -124,7 +113,6 @@ export default function AdminDashboard() {
               </Card>
             ))}
           </div>
-          {/* Recent orders */}
           <Card>
             <h3 className="font-semibold mb-3">Recent Orders</h3>
             {orders.length === 0 ? (
@@ -149,48 +137,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Users */}
-      {activeTab === 'users' && (
-        <div className="animate-fadeIn">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold">All Users ({users.length})</h3>
-          </div>
-          {users.length === 0 ? (
-            <EmptyState icon="👥" title="No users yet" />
-          ) : (
-            <div className="bg-card rounded-2xl border border-border overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead><tr className="border-b border-border bg-muted/50">
-                    <th className="text-left px-4 py-3 font-medium">Name</th>
-                    <th className="text-left px-4 py-3 font-medium">Email</th>
-                    <th className="text-left px-4 py-3 font-medium">Role</th>
-                    <th className="text-left px-4 py-3 font-medium">Actions</th>
-                  </tr></thead>
-                  <tbody>
-                    {users.map((u) => (
-                      <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/30">
-                        <td className="px-4 py-3">{u.name}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
-                        <td className="px-4 py-3"><RoleBadge role={u.role} /></td>
-                        <td className="px-4 py-3">
-                          {(u.role === 'manager' || u.role === 'co-admin') && (
-                            <Button size="xs" variant="outline" onClick={() => setCategoryModal({ userId: u.id, current: u.assignedCategories || [] })}>
-                              Categories
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Orders */}
       {activeTab === 'orders' && (
         <div className="animate-fadeIn">
           <h3 className="font-semibold mb-4">All Orders ({orders.length})</h3>
@@ -215,12 +161,41 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Applications */}
+      {activeTab === 'users' && (
+        <div className="animate-fadeIn">
+          <h3 className="font-semibold mb-4">All Users ({users.length})</h3>
+          {users.length === 0 ? (
+            <EmptyState icon="👥" title="No users yet" />
+          ) : (
+            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead><tr className="border-b border-border bg-muted/50">
+                    <th className="text-left px-4 py-3 font-medium">Name</th>
+                    <th className="text-left px-4 py-3 font-medium">Email</th>
+                    <th className="text-left px-4 py-3 font-medium">Role</th>
+                  </tr></thead>
+                  <tbody>
+                    {users.map((u) => (
+                      <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/30">
+                        <td className="px-4 py-3">{u.name}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
+                        <td className="px-4 py-3"><RoleBadge role={u.role} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {activeTab === 'applications' && (
         <div className="animate-fadeIn">
           <h3 className="font-semibold mb-4">Applications ({applications.length})</h3>
           {applications.length === 0 ? (
-            <EmptyState icon="📋" title="No applications" description="Store and delivery applications will appear here" />
+            <EmptyState icon="📋" title="No applications" />
           ) : (
             <div className="space-y-3">
               {applications.map((app) => (
@@ -250,37 +225,6 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
-      )}
-
-      {/* Category Assignment Modal */}
-      {categoryModal && (
-        <Modal isOpen={true} onClose={() => setCategoryModal(null)} title="Assign Categories">
-          <div className="space-y-3">
-            {CATEGORIES.map((cat) => {
-              const selected = categoryModal.current.includes(cat.id);
-              return (
-                <label key={cat.id} className="flex items-center gap-3 p-3 rounded-xl border border-border hover:bg-muted/50 cursor-pointer transition-all">
-                  <input
-                    type="checkbox"
-                    checked={selected}
-                    onChange={() => {
-                      const newCats = selected
-                        ? categoryModal.current.filter((c) => c !== cat.id)
-                        : [...categoryModal.current, cat.id];
-                      setCategoryModal({ ...categoryModal, current: newCats });
-                    }}
-                    className="rounded"
-                  />
-                  <span className="text-lg">{cat.icon}</span>
-                  <span className="text-sm font-medium">{cat.name}</span>
-                </label>
-              );
-            })}
-            <Button variant="primary" block onClick={() => handleAssignCategories(categoryModal.userId, categoryModal.current)}>
-              Save Categories
-            </Button>
-          </div>
-        </Modal>
       )}
     </DashboardLayout>
   );

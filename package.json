@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npm run dev:customer",
+    "dev:all": "node dev_all.js",
     "dev:customer": "npm run dev -w apps/customer",
     "dev:admin": "npm run dev -w apps/admin",
     "dev:co-admin": "npm run dev -w apps/co-admin",
@@ -15,10 +16,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "firebase": "^12.11.0",
     "next": "16.2.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "firebase": "^12.11.0",
     "react-firebase-hooks": "^5.1.1",
     "zustand": "^5.0.12"
   },
@@ -29,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
+    "firebase-admin": "^13.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
