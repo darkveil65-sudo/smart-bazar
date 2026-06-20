@@ -38,7 +38,17 @@ export default function OrdersPage() {
 
   // New states for review feedback tracking
   const [reviewedOrderIds, setReviewedOrderIds] = useState<Set<string>>(new Set());
-  const [dismissedOrderIds, setDismissedOrderIds] = useState<Set<string>>(new Set());
+  const [dismissedOrderIds, setDismissedOrderIds] = useState<Set<string>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('dismissed_feedback_orders');
+        return stored ? new Set(JSON.parse(stored)) : new Set();
+      } catch (e) {
+        return new Set();
+      }
+    }
+    return new Set();
+  });
   
   // Feedback modal states
   const [reviewOrder, setReviewOrder] = useState<Order | null>(null);
@@ -139,9 +149,17 @@ export default function OrdersPage() {
   useEffect(() => {
     if (loading || orders.length === 0) return;
     
-    const unreviewedCompletedOrder = orders.find(
-      (o) => o.status === 'completed' && !reviewedOrderIds.has(o.id) && !dismissedOrderIds.has(o.id)
-    );
+    const now = Date.now();
+    const twoHoursLimit = 2 * 60 * 60 * 1000; // 2 hours in ms
+    
+    const unreviewedCompletedOrder = orders.find((o) => {
+      if (o.status !== 'completed' || reviewedOrderIds.has(o.id) || dismissedOrderIds.has(o.id)) {
+        return false;
+      }
+      // Only auto-prompt if completed within the last 2 hours (or fallback to createdAt)
+      const completionTime = o.deliveredAt ? new Date(o.deliveredAt).getTime() : new Date(o.createdAt).getTime();
+      return (now - completionTime) < twoHoursLimit;
+    });
     
     if (unreviewedCompletedOrder) {
       const timer = setTimeout(() => {
@@ -662,7 +680,13 @@ export default function OrdersPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        setDismissedOrderIds((prev) => new Set([...prev, reviewOrder.id]));
+                        setDismissedOrderIds((prev) => {
+                          const next = new Set([...prev, reviewOrder.id]);
+                          if (typeof window !== 'undefined') {
+                            localStorage.setItem('dismissed_feedback_orders', JSON.stringify(Array.from(next)));
+                          }
+                          return next;
+                        });
                         setReviewOrder(null);
                       }}
                       className="flex-1 py-3 border border-border rounded-xl font-bold text-sm hover:bg-muted text-muted-foreground transition-all duration-200 press-effect cursor-pointer focus:outline-none"

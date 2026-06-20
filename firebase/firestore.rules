@@ -13,7 +13,9 @@ service cloud.firestore {
     function getUserRole() {
       return request.auth.token.get('role', null) != null
         ? request.auth.token.role
-        : get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'customer');
+        : exists(/databases/$(database)/documents/users/$(request.auth.uid))
+          ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'customer')
+          : 'customer';
     }
 
     function isAdmin() {
@@ -52,7 +54,9 @@ service cloud.firestore {
         // Customers can only create customer docs
         request.resource.data.get('role', 'customer') == 'customer' ||
         // Admins can create any role
-        isAdmin()
+        isAdmin() ||
+        // Super admin email can create their admin document directly
+        request.auth.token.email == 'hapizulsk92@gmail.com'
       );
 
       // Admin can create any user doc (e.g., seeding staff)
@@ -61,6 +65,7 @@ service cloud.firestore {
       // Users can update themselves (but NOT role/status/assignments); admins can update anyone
       allow update: if isSignedIn() && (
         isAdmin() ||
+        request.auth.token.email == 'hapizulsk92@gmail.com' ||
         (
           request.auth.uid == userId &&
           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status', 'assignedStores', 'assignedCategories', 'vendorStore', 'managerId'])
