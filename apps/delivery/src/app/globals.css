@@ -173,3 +173,28 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes fadeOutShrink {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    max-height: 500px;
+    margin-bottom: 1rem;
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+    overflow: hidden;
+  }
+}
+
+.animate-fadeOutShrink {
+  animation: fadeOutShrink 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

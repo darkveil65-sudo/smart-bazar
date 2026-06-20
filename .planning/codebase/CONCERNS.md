@@ -16,11 +16,9 @@ _Last mapped: 2026-04-18_
 - Orders collection has broad read rules for `isStore()` and `isDelivery()` (no scoping to assigned orders)
 - Lines 179-182: Duplicate `categories` match block at bottom of rules file will cause a rule conflict
 
-### 3. `orderService.ts` Uses Inconsistent Field Names
+### 3. `orderService.ts` Uses Inconsistent Field Names (RESOLVED)
 - **File**: `packages/shared/src/lib/services/orderService.ts`
-- Functions `getOrdersByStore` and `subscribeToOrdersByStore` query `assignedStoreId` (lines 42, 136)
-- But `Order` type in `firestore.ts` uses `assignedVendorId` (line 107)
-- This means store-vendor order filtering queries may return **no results** in production data
+- Standardized: Functions `getOrdersByStore` and `subscribeToOrdersByStore` query `assignedVendorId` matching the `Order` type in `firestore.ts`.
 
 ## 🟠 High Priority
 

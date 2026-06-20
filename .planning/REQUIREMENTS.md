@@ -8,7 +8,7 @@ This document bounds the scope of what we are building. The goal is a deployable
 
 **Stability & Core Fixes (Phase 1)**
 - [ ] Firestore rules fixed: secure product creation/updates by vendor ID
-- [ ] Order service fields fixed: `assignedStoreId` corrected to `assignedVendorId`
+- [x] Order service fields fixed: `assignedStoreId` corrected to `assignedVendorId`
 - [ ] Error boundary layout deployed across all apps to trap Firebase crashes
 - [ ] Auth guards audited: unauthorized roles bounce immediately to correct app
 - [ ] Skeleton loaders on all dashboards and customer views

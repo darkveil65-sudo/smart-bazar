@@ -4,6 +4,8 @@ import "./globals.css";
 import { ToastProvider } from '@smart-bazar/shared/contexts/ui/ToastContext';
 import { AuthProvider } from '@smart-bazar/shared/contexts/AuthContext';
 import ToastContainer from '@smart-bazar/shared/components/ui/ToastContainer';
+import { AppConfigProvider } from '@smart-bazar/shared/contexts/AppConfigContext';
+import { ErrorBoundary } from '@smart-bazar/shared/components/ErrorBoundary';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,12 +34,16 @@ export default function RootLayout({
       className={`${inter.variable} ${geistMono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased">
-        <ToastProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-          <ToastContainer />
-        </ToastProvider>
+        <ErrorBoundary>
+          <AppConfigProvider>
+            <ToastProvider>
+              <AuthProvider allowedRoles={['store']} defaultAuthPath="/dashboard/store">
+                {children}
+              </AuthProvider>
+              <ToastContainer />
+            </ToastProvider>
+          </AppConfigProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

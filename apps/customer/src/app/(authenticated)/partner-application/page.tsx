@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { clientDb, doc, setDoc, collection, addDoc } from '@smart-bazar/shared/lib/firebase';
+import { useState, Suspense, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { clientDb, collection, addDoc } from '@smart-bazar/shared/lib/firebase';
 import { useAuthStore } from '@smart-bazar/shared/stores/authStore';
 import { useToast } from '@smart-bazar/shared/contexts/ui/ToastContext';
 import { CATEGORIES } from '@smart-bazar/shared/lib/constants';
@@ -10,17 +10,33 @@ import { CATEGORIES } from '@smart-bazar/shared/lib/constants';
 type AppType = 'store' | 'delivery' | 'manager' | 'staff';
 
 export default function PartnerApplicationPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+      <PartnerApplicationContent />
+    </Suspense>
+  );
+}
+
+function PartnerApplicationContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { userData, user } = useAuthStore();
   const { addToast } = useToast();
 
   const [type, setType] = useState<AppType>('store');
   const [loading, setLoading] = useState(false);
   
+  useEffect(() => {
+    const urlType = searchParams.get('type') as AppType;
+    if (urlType === 'store' || urlType === 'delivery' || urlType === 'manager' || urlType === 'staff') {
+      setType(urlType);
+    }
+  }, [searchParams]);
+  
   // Form fields
   const [businessName, setBusinessName] = useState('');
   const [businessAddress, setBusinessAddress] = useState('');
-  const [storeCategory, setStoreCategory] = useState(CATEGORIES[0].id);
+  const [storeCategory, setStoreCategory] = useState<string>(CATEGORIES[0].id);
   const [vehicleType, setVehicleType] = useState('Bike');
 
   const handleSubmit = async (e: React.FormEvent) => {

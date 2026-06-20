@@ -6,11 +6,17 @@ interface Toast {
   id: string;
   children: ReactNode;
   type?: 'success' | 'error' | 'warning' | 'info';
+  title?: string;
+  duration?: number;
 }
 
 interface ToastContextType {
   toasts: Toast[];
-  addToast: (children: ReactNode, type?: 'success' | 'error' | 'warning' | 'info') => void;
+  addToast: (
+    children: ReactNode,
+    type?: 'success' | 'error' | 'warning' | 'info',
+    options?: { title?: string; duration?: number }
+  ) => void;
   removeToast: (id: string) => void;
 }
 
@@ -25,12 +31,22 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const addToast = useCallback((content: ReactNode, type?: 'success' | 'error' | 'warning' | 'info') => {
+  const addToast = useCallback((
+    content: ReactNode,
+    type?: 'success' | 'error' | 'warning' | 'info',
+    options?: { title?: string; duration?: number }
+  ) => {
     const id = String(++toastCounter);
-    setToasts((prev) => [...prev, { id, children: content, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 5000);
+    setToasts((prev) => [
+      ...prev,
+      {
+        id,
+        children: content,
+        type,
+        title: options?.title,
+        duration: options?.duration,
+      },
+    ]);
   }, []);
 
   return (

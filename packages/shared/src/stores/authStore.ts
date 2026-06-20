@@ -13,15 +13,45 @@ interface AuthStore {
   setUserData: (userData: UserData | null) => void;
 }
 
+// Attempt to read cache synchronously during store creation
+let initialUserData = null;
+let initialLoading = true;
+let initialInitialized = false;
+
+if (typeof window !== 'undefined') {
+  try {
+    const cachedUser = localStorage.getItem('sb_userData');
+    if (cachedUser) {
+      initialUserData = JSON.parse(cachedUser);
+      initialLoading = false;
+      initialInitialized = true;
+    }
+  } catch (e) {
+    console.warn('Could not read cached auth data', e);
+  }
+}
+
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
-  userData: null,
-  loading: true,
-  initialized: false,
+  userData: initialUserData,
+  loading: initialLoading,
+  initialized: initialInitialized,
 
   setUserData: (userData) => set({ userData }),
 
   init: () => {
+    // Attempt to load cached session synchronously to avoid layout shift and Fast Refresh drops
+    if (typeof window !== 'undefined') {
+      try {
+        const cachedUser = localStorage.getItem('sb_userData');
+        if (cachedUser) {
+          useAuthStore.setState({ userData: JSON.parse(cachedUser), loading: false, initialized: true });
+        }
+      } catch (e) {
+        console.warn('Could not read cached auth data', e);
+      }
+    }
+
     // Safety fallback: if Firebase onAuthStateChanged hangs completely, release the loader after 4s
     const safetyTimeout = setTimeout(() => {
       if (useAuthStore.getState().loading) {
@@ -31,7 +61,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
     }, 4000);
 
     const unsubscribe = onAuthStateChanged(clientAuth, async (user) => {
-      clearTimeout(safetyTimeout);
       console.log("Auth state changed:", user ? `User logged in (${user.email})` : "No user");
       if (user) {
         try {
@@ -39,17 +68,26 @@ export const useAuthStore = create<AuthStore>((set) => ({
           if (userDoc.exists()) {
             const userData = { id: userDoc.id, ...userDoc.data() } as UserData;
             document.cookie = `userRole=${userData.role}; path=/; max-age=86400`;
+            if (typeof window !== 'undefined') localStorage.setItem('sb_userData', JSON.stringify(userData));
             set({ user, userData, loading: false, initialized: true });
           } else {
-            set({ user, userData: null, loading: false, initialized: true });
+            // Keep cached data if it exists during transient errors, otherwise null
+            const hasCache = typeof window !== 'undefined' && localStorage.getItem('sb_userData');
+            if (!hasCache) set({ user, userData: null, loading: false, initialized: true });
+            else set({ user, loading: false, initialized: true });
           }
          } catch (error) {
            console.error('Auth initialization error:', error);
-           set({ user, userData: null, loading: false, initialized: true });
+           // Do not wipe userData aggressively on simple network errors
+           set({ user, loading: false, initialized: true });
+         } finally {
+           clearTimeout(safetyTimeout);
          }
       } else {
         document.cookie = 'userRole=; path=/; max-age=0';
+        if (typeof window !== 'undefined') localStorage.removeItem('sb_userData');
         set({ user: null, userData: null, loading: false, initialized: true });
+        clearTimeout(safetyTimeout);
       }
     });
     return unsubscribe;
@@ -58,6 +96,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   logout: async () => {
     await signOut(clientAuth);
     document.cookie = 'userRole=; path=/; max-age=0';
+    if (typeof window !== 'undefined') localStorage.removeItem('sb_userData');
     set({ user: null, userData: null });
   },
 }));

@@ -1,46 +1,48 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  signInWithEmailAndPassword, 
-  sendPasswordResetEmail 
+import { useRouter } from 'next/navigation';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { clientAuth, clientDb } from '@smart-bazar/shared/lib/firebase';
 import { useToast } from '@smart-bazar/shared/contexts/ui/ToastContext';
 import { useAuthStore } from '@smart-bazar/shared/stores/authStore';
 import { UserData } from '@smart-bazar/shared/types/firestore';
-import { getAppUrl } from '@smart-bazar/shared/lib/urls';
 
-const ALLOWED_ROLES: string[] = ["delivery"];
-
-export default function LoginPage() {
+export default function DeliveryAuthPage() {
+  const router = useRouter();
   const { addToast } = useToast();
   const { userData } = useAuthStore();
-  const [tab, setTab] = useState<'login' | 'forgot'>('login');
+
+  const [tab, setTab] = useState<'login' | 'signup' | 'forgot'>('login');
+
+  // Login fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // Signup fields
+  const [signupName, setSignupName] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPhone, setSignupPhone] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [signupConfirm, setSignupConfirm] = useState('');
+
   const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   useEffect(() => {
     if (userData) {
-      const roleMap: Record<string, string> = {
-        admin: getAppUrl('admin') + '/dashboard/admin',
-        'co-admin': getAppUrl('co-admin') + '/dashboard/admin',
-        manager: getAppUrl('manager') + '/dashboard/manager',
-        store: getAppUrl('store') + '/dashboard/store',
-        delivery: getAppUrl('delivery') + '/dashboard/delivery',
-        customer: getAppUrl('customer') + '/home',
-      };
-      const role = userData.role as string;
-      if (role === 'delivery') {
-        window.location.href = window.location.origin + '/dashboard/delivery';
-      } else {
-        window.location.href = roleMap[role] || getAppUrl('customer') + '/home';
+      if (userData.role === 'delivery' && userData.status === 'active') {
+        router.replace('/dashboard/delivery');
       }
     }
-  }, [userData]);
+  }, [userData, router]);
 
+  // ─── LOGIN ────────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) { addToast('Please fill all fields', 'error'); return; }
@@ -50,12 +52,18 @@ export default function LoginPage() {
       const userDoc = await getDoc(doc(clientDb, 'users', firebaseUser.uid));
       if (userDoc.exists()) {
         const data = userDoc.data() as UserData;
-        const role = data.role;
 
-        if (!ALLOWED_ROLES.includes(role)) {
-          // Sign them out immediately and show an error
+        // Must be delivery role
+        if (data.role !== 'delivery') {
           await clientAuth.signOut();
           addToast('Access Denied. This panel is for Delivery accounts only.', 'error');
+          return;
+        }
+
+        // Must be approved (active) by manager
+        if (data.status !== 'active') {
+          await clientAuth.signOut();
+          addToast('Your account is pending approval by the Manager. Please wait.', 'warning');
           return;
         }
 
@@ -63,9 +71,12 @@ export default function LoginPage() {
           user: firebaseUser,
           userData: { ...data, id: userDoc.id } as UserData,
           loading: false,
+          initialized: true,
         });
-        document.cookie = "userRole=" + role + "; path=/; max-age=86400";
-        addToast('Login successful!', 'success');
+        localStorage.setItem('sb_userData', JSON.stringify({ ...data, id: userDoc.id }));
+        document.cookie = 'userRole=delivery; path=/; max-age=86400';
+        addToast('Welcome back! 🚚', 'success');
+        router.replace('/dashboard/delivery');
       } else {
         addToast('User profile not found. Contact admin.', 'error');
         await clientAuth.signOut();
@@ -82,6 +93,63 @@ export default function LoginPage() {
     }
   };
 
+  // ─── SIGNUP ───────────────────────────────────────────────
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!signupName || !signupEmail || !signupPhone || !signupPassword || !signupConfirm) {
+      addToast('Please fill all fields', 'error'); return;
+    }
+    if (signupPassword !== signupConfirm) {
+      addToast('Passwords do not match', 'error'); return;
+    }
+    if (signupPassword.length < 6) {
+      addToast('Password must be at least 6 characters', 'error'); return;
+    }
+    setLoading(true);
+    try {
+      // 1. Create Firebase Auth user
+      const { user: firebaseUser } = await createUserWithEmailAndPassword(clientAuth, signupEmail, signupPassword);
+
+      // 2. Save user to Firestore — customer role, inactive until approved
+      await setDoc(doc(clientDb, 'users', firebaseUser.uid), {
+        name: signupName.trim(),
+        email: signupEmail,
+        phone: signupPhone.trim(),
+        role: 'customer',       // role will be upgraded to 'delivery' on approval
+        status: 'inactive',     // blocked until manager approves
+        createdAt: new Date().toISOString(),
+      });
+
+      // 3. Create a delivery application for manager to review
+      await addDoc(collection(clientDb, 'applications'), {
+        userId: firebaseUser.uid,
+        userName: signupName.trim(),
+        userEmail: signupEmail,
+        userPhone: signupPhone.trim(),
+        type: 'delivery',
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      // 4. Sign them out — must wait for manager approval
+      await clientAuth.signOut();
+
+      addToast('Account created! 🎉 Your application is under review by the Manager.', 'success');
+      setTab('login');
+      setSignupName(''); setSignupEmail(''); setSignupPhone('');
+      setSignupPassword(''); setSignupConfirm('');
+    } catch (err: unknown) {
+      const e = err as { code?: string };
+      if (e.code === 'auth/email-already-in-use') addToast('Email already registered', 'error');
+      else if (e.code === 'auth/weak-password') addToast('Password too weak', 'error');
+      else addToast('Registration failed. Try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─── FORGOT PASSWORD ──────────────────────────────────────
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) { addToast('Please enter your email', 'error'); return; }
@@ -90,13 +158,14 @@ export default function LoginPage() {
       await sendPasswordResetEmail(clientAuth, email);
       addToast('Password reset email sent!', 'success');
       setTab('login');
-    } catch (err) {
+    } catch {
       addToast('Reset failed. Check if the email is correct.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  // ─── ICONS ────────────────────────────────────────────────
   const emailIcon = (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
       <path d="M2.67 2.67H13.33C14.07 2.67 14.67 3.27 14.67 4V12C14.67 12.73 14.07 13.33 13.33 13.33H2.67C1.93 13.33 1.33 12.73 1.33 12V4C1.33 3.27 1.93 2.67 2.67 2.67Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
@@ -109,50 +178,153 @@ export default function LoginPage() {
       <path d="M5.33 7.33V4.67a2.67 2.67 0 015.33 0v2.67" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
     </svg>
   );
+  const userIcon = (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.2"/>
+      <path d="M2.5 13c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+    </svg>
+  );
+  const phoneIcon = (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M2 2h4l1.5 3.5-1.75 1.25C6.5 8.5 7.5 9.5 9.25 10.25L10.5 8.5 14 10v4c0 0-2 1-6-3S1 3 2 2z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  const inputCls = "w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all";
+  const btnCls = "w-full py-3 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-emerald-500 to-lime-500 hover:opacity-90 disabled:opacity-50 transition-all shadow-lg";
 
   return (
-    <div className={"min-h-screen flex items-center justify-center p-4 bg-gradient-to-br " + "from-slate-900 via-emerald-900/20 to-slate-900"}>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-lime-500/5 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-sm relative z-10">
+        {/* Brand */}
         <div className="text-center mb-8">
-          <div className={"inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br " + "from-emerald-500 to-lime-500" + " rounded-3xl mb-4 shadow-2xl"}>
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500 to-lime-500 rounded-3xl mb-4 shadow-2xl">
             <span className="text-4xl">🚚</span>
           </div>
           <h1 className="text-2xl font-bold text-white">Smart Bazar Delivery</h1>
           <p className="text-slate-400 text-sm mt-1">Delivery Partner Panel</p>
         </div>
 
-        <div className={"bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border " + "border-emerald-500/30" + " overflow-hidden"}>
+        <div className="bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-emerald-500/30 overflow-hidden">
+          {/* Tabs */}
+          {tab !== 'forgot' && (
+            <div className="flex border-b border-slate-700">
+              {(['login', 'signup'] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className={`flex-1 py-4 text-sm font-bold capitalize transition-all relative ${
+                    tab === t ? 'text-emerald-400' : 'text-slate-500'
+                  }`}
+                >
+                  {t === 'login' ? '👋 Sign In' : '✨ Register'}
+                  {tab === t && (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-emerald-400 rounded-full" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="p-8">
+            {/* ── LOGIN FORM ── */}
             {tab === 'login' && (
               <form onSubmit={handleLogin} className="space-y-5">
                 <div>
                   <h2 className="text-xl font-bold text-white">Delivery Login</h2>
-                  <p className="text-sm text-slate-400 mt-0.5">Sign in with your delivery account</p>
+                  <p className="text-sm text-slate-400 mt-0.5">Sign in with your approved delivery account</p>
                 </div>
                 <div className="space-y-4">
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{emailIcon}</div>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all" />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className={inputCls} />
                   </div>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{lockIcon}</div>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all" />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className={inputCls} />
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <button type="button" onClick={() => setTab('forgot')} className={"text-xs " + "text-emerald-400" + " hover:underline"}>Forgot password?</button>
+                  <button type="button" onClick={() => setTab('forgot')} className="text-xs text-emerald-400 hover:underline">Forgot password?</button>
                 </div>
-                <button type="submit" disabled={loading} className={"w-full py-3 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r " + "from-emerald-500 to-lime-500" + " hover:opacity-90 disabled:opacity-50 transition-all shadow-lg"}>
+                <button type="submit" disabled={loading} className={btnCls}>
                   {loading ? 'Signing in...' : 'Sign In'}
                 </button>
               </form>
             )}
 
+            {/* ── SIGNUP FORM ── */}
+            {tab === 'signup' && (
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div>
+                  <h2 className="text-xl font-bold text-white">Join as Rider</h2>
+                  <p className="text-sm text-slate-400 mt-0.5">Manager will approve your account</p>
+                </div>
+                <div className="space-y-3">
+                  {/* Name */}
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{userIcon}</div>
+                    <input type="text" value={signupName} onChange={(e) => setSignupName(e.target.value)} placeholder="Full Name" required className={inputCls} />
+                  </div>
+                  {/* Email */}
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{emailIcon}</div>
+                    <input type="email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} placeholder="Email" required className={inputCls} />
+                  </div>
+                  {/* Phone */}
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{phoneIcon}</div>
+                    <input type="tel" value={signupPhone} onChange={(e) => setSignupPhone(e.target.value)} placeholder="Phone Number" required className={inputCls} />
+                  </div>
+                  {/* Password */}
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{lockIcon}</div>
+                    <input
+                      type={showPass ? 'text' : 'password'}
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      placeholder="Password (min 6 chars)"
+                      required
+                      className={inputCls + ' pr-10'}
+                    />
+                    <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.5"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5"/></svg>
+                    </button>
+                  </div>
+                  {/* Confirm Password */}
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{lockIcon}</div>
+                    <input
+                      type={showPass ? 'text' : 'password'}
+                      value={signupConfirm}
+                      onChange={(e) => setSignupConfirm(e.target.value)}
+                      placeholder="Confirm Password"
+                      required
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+
+                {/* Info banner */}
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-4 py-3 flex gap-2 items-start">
+                  <span className="text-lg mt-0.5">🛵</span>
+                  <p className="text-[11px] text-emerald-300 leading-relaxed">
+                    After registration, your application will be reviewed by a Manager. You can log in only after approval.
+                  </p>
+                </div>
+
+                <button type="submit" disabled={loading} className={btnCls}>
+                  {loading ? 'Creating Account...' : 'Apply as Delivery Rider'}
+                </button>
+              </form>
+            )}
+
+            {/* ── FORGOT PASSWORD FORM ── */}
             {tab === 'forgot' && (
               <form onSubmit={handleForgotPassword} className="space-y-5">
                 <div>
@@ -165,25 +337,14 @@ export default function LoginPage() {
                 </div>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{emailIcon}</div>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all" />
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required className={inputCls} />
                 </div>
-                <button type="submit" disabled={loading} className={"w-full py-3 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r " + "from-emerald-500 to-lime-500" + " hover:opacity-90 disabled:opacity-50 transition-all shadow-lg"}>
+                <button type="submit" disabled={loading} className={btnCls}>
                   {loading ? 'Sending...' : 'Send Reset Email'}
                 </button>
               </form>
             )}
           </div>
-        </div>
-
-        <div className="mt-6 p-6 rounded-3xl bg-slate-800/40 border border-emerald-500/20 text-center backdrop-blur-sm animate-fadeIn" style={{ animationDelay: '300ms' }}>
-          <p className="text-sm font-semibold text-white mb-3">Join as Delivery Partner</p>
-          <button 
-            onClick={() => window.location.href = getAppUrl('customer') + '/?tab=signup'}
-            className="px-6 py-2 bg-gradient-to-r from-emerald-500/20 to-lime-500/20 hover:from-emerald-500/30 hover:to-lime-500/30 text-emerald-300 rounded-full text-xs font-bold transition-all border border-emerald-500/30"
-          >
-            Become a Rider
-          </button>
-          <p className="text-[10px] text-slate-500 mt-3 uppercase tracking-widest font-bold">Earn • Deliver • Be Free</p>
         </div>
 
         <p className="text-center text-[10px] text-slate-700 mt-6 uppercase tracking-wider font-semibold">

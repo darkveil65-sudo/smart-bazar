@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@smart-bazar/shared/*": ["./packages/shared/src/*"]
     }
   },
   "include": [

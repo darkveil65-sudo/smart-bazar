@@ -1,23 +1,32 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Product } from '@smart-bazar/shared/types/firestore';
-import { FREE_DELIVERY_MIN, DELIVERY_CHARGE } from '@smart-bazar/shared/lib/constants';
+// Fallback defaults (overridden by live AppConfig at runtime)
+const DEFAULT_FREE_DELIVERY_MIN = 199;
+const DEFAULT_DELIVERY_CHARGE   = 20;
 
-interface CartItem {
+export interface CartItem {
   product: Product;
   quantity: number;
+  variantId?: string;    // which variant was selected
+  variantName?: string;  // display label e.g. "125g"
+  variantPrice?: number; // override price from variant
 }
 
 interface CartStore {
   items: CartItem[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, variant?: { id: string; name: string; price: number }) => void;
+  removeItem: (productId: string, variantId?: string) => void;
+  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   clearCart: () => void;
   getItemCount: () => number;
   getSubtotal: () => number;
-  getDeliveryCharge: () => number;
-  getTotal: () => number;
+  /**
+   * Pass live config values from useAppConfig() for real-time pricing.
+   * Falls back to hardcoded defaults if not passed.
+   */
+  getDeliveryCharge: (freeMin?: number, charge?: number) => number;
+  getTotal: (freeMin?: number, charge?: number) => number;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -25,36 +34,54 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product) => {
+      addItem: (product, variant) => {
         set((state) => {
-          const existing = state.items.find((i) => i.product.id === product.id);
+          // Match on product id + variant id (so same product, different variant = separate entry)
+          const existing = state.items.find(
+            (i) => i.product.id === product.id && i.variantId === variant?.id
+          );
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.product.id === product.id
+                i.product.id === product.id && i.variantId === variant?.id
                   ? { ...i, quantity: i.quantity + 1 }
                   : i
               ),
             };
           }
-          return { items: [...state.items, { product, quantity: 1 }] };
+          return {
+            items: [
+              ...state.items,
+              {
+                product,
+                quantity: 1,
+                variantId: variant?.id,
+                variantName: variant?.name,
+                variantPrice: variant?.price,
+              },
+            ],
+          };
         });
       },
 
-      removeItem: (productId) => {
+      removeItem: (productId, variantId) => {
         set((state) => ({
-          items: state.items.filter((i) => i.product.id !== productId),
+          items: state.items.filter(
+            (i) => !(i.product.id === productId && i.variantId === variantId)
+          ),
         }));
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (productId, quantity, variantId) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(productId, variantId);
           return;
         }
         set((state) => ({
           items: state.items.map((i) =>
-            i.product.id === productId ? { ...i, quantity } : i
+            i.product.id === productId && i.variantId === variantId
+              ? { ...i, quantity }
+              : i
           ),
         }));
       },
@@ -64,14 +91,18 @@ export const useCartStore = create<CartStore>()(
       getItemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
 
       getSubtotal: () =>
-        get().items.reduce((sum, i) => sum + i.product.price * i.quantity, 0),
+        get().items.reduce(
+          (sum, i) => sum + (i.variantPrice ?? i.product.price) * i.quantity,
+          0
+        ),
 
-      getDeliveryCharge: () => {
+      getDeliveryCharge: (freeMin = DEFAULT_FREE_DELIVERY_MIN, charge = DEFAULT_DELIVERY_CHARGE) => {
         const subtotal = get().getSubtotal();
-        return subtotal >= FREE_DELIVERY_MIN ? 0 : DELIVERY_CHARGE;
+        return subtotal >= freeMin ? 0 : charge;
       },
 
-      getTotal: () => get().getSubtotal() + get().getDeliveryCharge(),
+      getTotal: (freeMin = DEFAULT_FREE_DELIVERY_MIN, charge = DEFAULT_DELIVERY_CHARGE) =>
+        get().getSubtotal() + get().getDeliveryCharge(freeMin, charge),
     }),
     {
       name: 'smart-bazar-cart',

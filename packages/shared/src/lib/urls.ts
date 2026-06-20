@@ -4,7 +4,6 @@ export const getAppUrl = (app: string) => {
     const ports: Record<string, number> = {
       customer: 3001,
       admin: 3002,
-      'co-admin': 3003,
       manager: 3004,
       store: 3005,
       delivery: 3006,

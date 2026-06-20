@@ -3,9 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
-  --primary: #059669;
-  --primary-light: #10b981;
-  --primary-dark: #047857;
+  --primary: #d97706;
+  --primary-light: #f59e0b;
+  --primary-dark: #b45309;
   --primary-foreground: #ffffff;
   --secondary: #3b82f6;
   --secondary-foreground: #ffffff;
@@ -39,7 +39,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
-  --color-card: var(--card);
+  --color-card: var(--color-card);
   --color-card-foreground: var(--card-foreground);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
@@ -147,13 +147,13 @@ body {
 
 /* Gradient backgrounds */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #059669, #10b981);
+  background: linear-gradient(135deg, #d97706, #f59e0b);
 }
 .bg-gradient-hero {
-  background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%);
 }
 .bg-gradient-card {
-  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  background: linear-gradient(135deg, #fef3c7, #fffbeb);
 }
 
 /* Focus ring utility */
@@ -173,3 +173,20 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes flash-red-warning {
+  0%, 100% {
+    background-color: rgba(254, 226, 226, 0.4);
+    border-color: rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 4px rgba(239, 68, 68, 0.1);
+  }
+  50% {
+    background-color: rgba(254, 226, 226, 0.85);
+    border-color: rgba(220, 38, 38, 0.85);
+    box-shadow: 0 0 12px rgba(220, 38, 38, 0.35);
+  }
+}
+
+.animate-flash-red-warning {
+  animation: flash-red-warning 1.8s infinite ease-in-out;
+}

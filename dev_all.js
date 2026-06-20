@@ -3,7 +3,6 @@ const { spawn } = require('child_process');
 const apps = [
   { name: 'customer', port: 3001 },
   { name: 'admin', port: 3002 },
-  { name: 'co-admin', port: 3003 },
   { name: 'manager', port: 3004 },
   { name: 'store', port: 3005 },
   { name: 'delivery', port: 3006 },

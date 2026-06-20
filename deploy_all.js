@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-const apps = ['customer', 'admin', 'co-admin', 'manager', 'store', 'delivery'];
+const apps = ['customer', 'admin', 'manager', 'store', 'delivery'];
 
 apps.forEach(app => {
     const appPath = path.join('apps', app);

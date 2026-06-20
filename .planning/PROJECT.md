@@ -47,7 +47,7 @@ Get orders from customers to delivery agents, reliably, fast, without data corru
 
 **P0 — Critical Fixes (App is broken without these)**
 - [ ] REQ-001: Fix Firestore security rules — replace `storeId` with `vendorId` in product write rules
-- [ ] REQ-002: Fix orderService field mismatch — align `assignedStoreId` → `assignedVendorId` across queries and type
+- [x] REQ-002: Fix orderService field mismatch — align `assignedStoreId` → `assignedVendorId` across queries and type
 - [ ] REQ-003: Add error boundaries to all apps — Firebase errors must not silently crash pages
 - [ ] REQ-004: Fix auth role guard on all staff apps — wrong-role users must be redirected instantly
 - [ ] REQ-005: Add consistent loading states across all pages (skeleton/spinner)
