@@ -163,7 +163,7 @@ export default function CheckoutPage() {
   const [priceDifferences, setPriceDifferences] = useState<PriceDifference[]>([]);
   const [pendingItems, setPendingItems] = useState<any[]>([]);
 
-  /* ── Coupon state ── */
+  /* -- Coupon state -- */
   const [couponCode, setCouponCode]     = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [couponError, setCouponError]   = useState('');
@@ -207,7 +207,7 @@ export default function CheckoutPage() {
   const discount       = couponDiscount;
   const total          = subtotal + deliveryCharge - discount;
 
-  /* ── Apply coupon ── */
+  /* -- Apply coupon -- */
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
     setCouponLoading(true);
@@ -237,7 +237,7 @@ export default function CheckoutPage() {
   const activeAddress: DeliveryAddress | null =
     useNew ? newAddr : (selectedIdx !== null ? savedAddresses[selectedIdx] : null);
 
-  /* ─── Empty cart ─── */
+  /* --- Empty cart --- */
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 animate-fadeIn">
@@ -254,7 +254,7 @@ export default function CheckoutPage() {
     );
   }
 
-  /* ─── Place Order ─── */
+  /* --- Place Order --- */
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
       addToast('Your cart is empty', 'error');
@@ -520,7 +520,7 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* ══ SECTION 1 — DELIVERY ADDRESS ══ */}
+      {/* == SECTION 1 — DELIVERY ADDRESS == */}
       <section className="mb-6 bg-card/45 backdrop-blur-md border border-border/60 rounded-2xl p-5 shadow-sm">
         <h2 className="text-base font-display font-black text-foreground mb-4 flex items-center gap-2">
           <span className="w-7 h-7 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shadow-sm">1</span>
@@ -750,7 +750,7 @@ export default function CheckoutPage() {
         )}
       </section>
 
-      {/* ══ SECTION 2.5 — COUPON CODE ══ */}
+      {/* == SECTION 2.5 — COUPON CODE == */}
       <section className="mb-6 bg-card/45 backdrop-blur-md border border-border/60 rounded-2xl p-5 shadow-sm">
         <h2 className="text-base font-display font-black text-foreground mb-4 flex items-center gap-2">
           <span className="w-7 h-7 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shadow-sm">🎟️</span>
@@ -806,7 +806,7 @@ export default function CheckoutPage() {
         )}
       </section>
 
-      {/* ══ SECTION 3 — PAYMENT ══ */}
+      {/* == SECTION 3 — PAYMENT == */}
       <section className="mb-6 bg-card/45 backdrop-blur-md border border-border/60 rounded-2xl p-5 shadow-sm">
         <h2 className="text-base font-display font-black text-foreground mb-4 flex items-center gap-2">
           <span className="w-7 h-7 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shadow-sm">2</span>
@@ -1040,7 +1040,7 @@ export default function CheckoutPage() {
         </div>
       </section>
 
-      {/* ══ SECTION 4 — ORDER SUMMARY ══ */}
+      {/* == SECTION 4 — ORDER SUMMARY == */}
       <section className="mb-6 bg-card/45 backdrop-blur-md border border-border/60 rounded-2xl p-5 shadow-sm">
         <h2 className="text-base font-display font-black text-foreground mb-4 flex items-center gap-2">
           <span className="w-7 h-7 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shadow-sm">3</span>
@@ -1090,7 +1090,7 @@ export default function CheckoutPage() {
         </div>
       </section>
 
-      {/* ══ PLACE ORDER CTA ══ */}
+      {/* == PLACE ORDER CTA == */}
       <button
         onClick={handlePlaceOrder}
         disabled={loading}
@@ -1111,7 +1111,7 @@ export default function CheckoutPage() {
 
       <p className="text-center text-xs text-muted-foreground mt-3">🔒 Your data is safe and encrypted</p>
 
-      {/* ══ PRICE DIFFERENCE DIALOG ══ */}
+      {/* == PRICE DIFFERENCE DIALOG == */}
       {priceDifferences.length > 0 && (
         <div 
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"

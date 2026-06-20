@@ -5,7 +5,7 @@ import {
 import { Application } from '@smart-bazar/shared/types/firestore';
 
 export const applicationService = {
-  // ─── READ ─────────────────────────────────────────────────
+  // --- READ -------------------------------------------------
   async getAllApplications(): Promise<Application[]> {
     const snap = await getDocs(collection(clientDb, 'applications'));
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Application);
@@ -23,7 +23,7 @@ export const applicationService = {
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Application);
   },
 
-  // ─── CREATE ───────────────────────────────────────────────
+  // --- CREATE -----------------------------------------------
   async createApplication(data: Omit<Application, 'id'>): Promise<string> {
     const ref = await addDoc(collection(clientDb, 'applications'), {
       ...data,
@@ -33,7 +33,7 @@ export const applicationService = {
     return ref.id;
   },
 
-  // ─── APPROVE (also upgrades user role) ────────────────────
+  // --- APPROVE (also upgrades user role) --------------------
   async approveApplication(
     applicationId: string,
     application: Application,
@@ -81,7 +81,7 @@ export const applicationService = {
     });
   },
 
-  // ─── REAL-TIME ────────────────────────────────────────────
+  // --- REAL-TIME --------------------------------------------
   subscribeToApplications(callback: (applications: Application[]) => void) {
     return onSnapshot(collection(clientDb, 'applications'), (snap) => {
       callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Application));

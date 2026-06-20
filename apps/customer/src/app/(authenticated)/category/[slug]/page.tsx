@@ -58,7 +58,7 @@ export default function CategoryPage() {
   };
   const accentColor = category?.color ?? '#059669';
 
-  // ── Data subscriptions ───────────────────────────────────────────────────────
+  // -- Data subscriptions -------------------------------------------------------
   useEffect(() => {
     if (!slug) return;
     // slug = storeId: load categories (formerly sub-categories) for this store
@@ -85,7 +85,7 @@ export default function CategoryPage() {
     return () => { unsubCat(); unsubProd(); unsubStoreSub(); };
   }, [slug]);
 
-  // ── Real-time stores (for chip strip navigation) ─────────────────────────────
+  // -- Real-time stores (for chip strip navigation) -----------------------------
   useEffect(() => {
     const unsub = storeService.subscribeToStores((data) => {
       setDbStores(data);
@@ -94,7 +94,7 @@ export default function CategoryPage() {
     return () => unsub();
   }, []);
 
-  // ── Load Real SubCategories when a Category is selected ──
+  // -- Load Real SubCategories when a Category is selected --
   useEffect(() => {
     setActiveRealSubCat(null);
     if (activeCategory) {
@@ -112,7 +112,7 @@ export default function CategoryPage() {
     el?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
   }, [slug]);
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
+  // -- Helpers ------------------------------------------------------------------
   const getQty = (pid: string) => items.find((i) => i.product.id === pid)?.quantity ?? 0;
 
   const filteredProducts = (() => {
@@ -149,11 +149,11 @@ export default function CategoryPage() {
 
   const isFiltered = !!activeSubCat || !!searchQuery || sortBy !== 'default' || filterAvailability || !!activeRealSubCat;
 
-  // ── Coming Soon guard ────────────────────────────────────────────────────────
+  // -- Coming Soon guard --------------------------------------------------------
   const thisCategory = dbCategories.find((c) => c.id === slug);
   const isComingSoon = !catLoading && thisCategory?.isComingSoon === true;
 
-  // ── RENDER ───────────────────────────────────────────────────────────────────
+  // -- RENDER -------------------------------------------------------------------
 
   // Coming Soon blocking screen
   if (isComingSoon) {
@@ -192,7 +192,7 @@ export default function CategoryPage() {
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', paddingBottom: 90 }}>
 
-      {/* ════════════════════════ STICKY HEADER ════════════════════════ */}
+      {/* ======================== STICKY HEADER ======================== */}
       <div style={{
         position: 'sticky', top: 60, zIndex: 30,
         background: '#fff', borderBottom: '1px solid #f0f0f0',
@@ -299,7 +299,7 @@ export default function CategoryPage() {
         </div>
       </div>
 
-      {/* ════════════════════════ SEARCH BAR ════════════════════════ */}
+      {/* ======================== SEARCH BAR ======================== */}
       <div style={{ background: '#fff', padding: '10px 14px', borderBottom: '1px solid #f0f0f0', display: 'flex', gap: 8, alignItems: 'center' }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, background: '#f5f5f5', borderRadius: 12, padding: '10px 14px' }}>
           <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#94a3b8" strokeWidth="2">
@@ -331,7 +331,7 @@ export default function CategoryPage() {
         </button>
       </div>
 
-      {/* ════════════════════════ QUICK SORT & FILTER BAR ════════════════════════ */}
+      {/* ======================== QUICK SORT & FILTER BAR ======================== */}
       <div style={{ background: '#fff', padding: '0 14px 10px', borderBottom: '1px solid #f0f0f0', marginBottom: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#f5f5f5', borderRadius: 10, padding: '6px 12px' }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>Sort:</span>
@@ -374,7 +374,7 @@ export default function CategoryPage() {
         )}
       </div>
 
-      {/* ════════════════════════ FILTER DRAWER (SIDEBAR) ════════════════════════ */}
+      {/* ======================== FILTER DRAWER (SIDEBAR) ======================== */}
       {showFilterDrawer && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', justifyContent: 'flex-end', animation: 'fadeIn 0.2s ease-out' }}>
           {/* Backdrop */}
@@ -535,7 +535,7 @@ export default function CategoryPage() {
         </div>
       )}
 
-      {/* ════════ FILTERED / SEARCH RESULT VIEW ════════ */}
+      {/* ======== FILTERED / SEARCH RESULT VIEW ======== */}
       {isFiltered ? (
         <div>
           {/* Filter chip row */}
@@ -607,7 +607,7 @@ export default function CategoryPage() {
         </div>
 
       ) : loading ? (
-        // ════════ LOADING SKELETONS ════════
+        // ======== LOADING SKELETONS ========
         <div>
           <div style={{ background: '#fff', padding: 14, marginBottom: 8 }}>
             <div style={{ height: 110, borderRadius: 18, background: 'linear-gradient(90deg,#f1f5f9 25%,#e8eef5 50%,#f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
@@ -629,10 +629,10 @@ export default function CategoryPage() {
         </div>
 
       ) : (
-        // ════════ MAIN CONTENT VIEW ════════
+        // ======== MAIN CONTENT VIEW ========
         <div>
 
-          {/* ── HERO BANNER ── */}
+          {/* -- HERO BANNER -- */}
           <div style={{ padding: '0 14px 8px', background: '#fff', marginBottom: 8 }}>
             <div style={{
               background: banner.bg, borderRadius: 20, padding: '20px 18px',
@@ -664,7 +664,7 @@ export default function CategoryPage() {
             </div>
           </div>
 
-          {/* ── FEATURED SUB-CATEGORY BANNERS (horizontal scroll) ── */}
+          {/* -- FEATURED SUB-CATEGORY BANNERS (horizontal scroll) -- */}
           {subCategories.length > 0 && (
             <div style={{ background: '#fff', padding: '14px 0 14px', marginBottom: 8 }}>
               <div style={{ paddingLeft: 14, paddingRight: 14, marginBottom: 12 }}>
@@ -722,7 +722,7 @@ export default function CategoryPage() {
             </div>
           )}
 
-          {/* ── PRODUCT SECTIONS BY SUB-CATEGORY ── */}
+          {/* -- PRODUCT SECTIONS BY SUB-CATEGORY -- */}
           {productsBySubCat.map((group, gIdx) => (
             <div key={group.subcat.id} style={{ background: '#fff', padding: '14px 0 6px', marginBottom: 8 }}>
               {/* Section header */}
@@ -799,7 +799,7 @@ export default function CategoryPage() {
             </div>
           ))}
 
-          {/* ── UNCATEGORISED PRODUCTS ── */}
+          {/* -- UNCATEGORISED PRODUCTS -- */}
           {uncategorisedProducts.length > 0 && (
             <div style={{ background: '#fff', padding: '14px 0 6px', marginBottom: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 14px', marginBottom: 12 }}>
@@ -828,7 +828,7 @@ export default function CategoryPage() {
             </div>
           )}
 
-          {/* ── SHOP BY CATEGORY (4-column grid) ── */}
+          {/* -- SHOP BY CATEGORY (4-column grid) -- */}
           {subCategories.length > 0 && (
             <div style={{ background: '#fff', padding: '16px 14px', marginBottom: 8 }}>
               <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', margin: '0 0 14px' }}>
@@ -876,7 +876,7 @@ export default function CategoryPage() {
             </div>
           )}
 
-          {/* ── EMPTY STATE ── */}
+          {/* -- EMPTY STATE -- */}
           {products.length === 0 && !loading && (
             <EmptyState
               icon={category?.icon ?? '📦'}
@@ -895,9 +895,9 @@ export default function CategoryPage() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ===============================================================
 // HORIZONTAL SCROLL PRODUCT CARD (Blinkit-style, ~130px wide)
-// ═══════════════════════════════════════════════════════════════
+// ===============================================================
 function HorizontalProductCard({
   product, qty, accentColor, catIcon, deliverySlot, onAdd, onInc, onDec, onClick,
 }: {
@@ -1026,9 +1026,9 @@ function HorizontalProductCard({
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ===============================================================
 // GRID PRODUCT CARD (for filtered/search view)
-// ═══════════════════════════════════════════════════════════════
+// ===============================================================
 function ProductCard({
   product, qty, accentColor, catIcon, deliverySlot, onAdd, onInc, onDec, onClick,
 }: {

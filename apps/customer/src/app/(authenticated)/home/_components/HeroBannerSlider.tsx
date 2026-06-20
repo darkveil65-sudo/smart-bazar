@@ -2,7 +2,7 @@
 
 import { HeroBanner, Store } from '@smart-bazar/shared/types/firestore';
 
-/* ── Per-category hero gradient palettes ─────────────────────────────────── */
+/* -- Per-category hero gradient palettes ----------------------------------- */
 const HERO_GRADIENTS = [
   'linear-gradient(135deg, #004d20 0%, #00c853 60%, #1de9b6 100%)',
   'linear-gradient(135deg, #0d47a1 0%, #1976d2 55%, #42a5f5 100%)',

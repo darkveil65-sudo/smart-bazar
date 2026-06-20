@@ -15,16 +15,16 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Offer ticker
     'offer.1': '🚀 Free delivery on orders above ₹199',
-    'offer.2': '💚 Fresh groceries delivered in minutes',
+    'offer.2': '🛋️ Premium furniture & decor delivered to your doorstep',
     'offer.3': '🎁 Flat ₹50 OFF on your first order',
     'offer.4': '⚡ Express delivery available',
-    'offer.5': '🌿 100% fresh produce guaranteed',
+    'offer.5': '🌿 100% quality assurance guaranteed',
 
     // Auth — General
-    'auth.appTagline': 'Groceries delivered in 30 minutes ⚡',
-    'auth.badge.fresh': '🥬 Fresh',
+    'auth.appTagline': 'Premium furniture & home decor store 🏡',
+    'auth.badge.fresh': '🛋️ Luxury',
     'auth.badge.fast': '⚡ Fast',
-    'auth.badge.trusted': '💚 Trusted',
+    'auth.badge.trusted': '⭐ Premium',
     'auth.newHere': 'New here? Create Account',
     'auth.tab.signin': '👋 Sign In',
     'auth.tab.signup': '✨ Create Account',
@@ -156,16 +156,16 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Offer ticker
     'offer.1': '🚀 ₹199 er upor order e free delivery',
-    'offer.2': '💚 Fresh grocery minute er modhye delivery',
+    'offer.2': '🛋️ Premium furniture o decor barite delivery',
     'offer.3': '🎁 Prothom order e flat ₹50 ছাড়',
     'offer.4': '⚡ Express delivery available ache',
-    'offer.5': '🌿 100% fresh product guaranteed',
+    'offer.5': '🌿 100% quality product guaranteed',
 
     // Auth — General
-    'auth.appTagline': '30 minutey grocery delivery ⚡',
-    'auth.badge.fresh': '🥬 Fresh',
+    'auth.appTagline': 'Premium furniture & home decor store 🏡',
+    'auth.badge.fresh': '🛋️ Luxury',
     'auth.badge.fast': '⚡ Dhruto',
-    'auth.badge.trusted': '💚 Bishwashogyo',
+    'auth.badge.trusted': '⭐ Premium',
     'auth.newHere': 'Notun? Account banao',
     'auth.tab.signin': '👋 Login',
     'auth.tab.signup': '✨ Account Banao',
@@ -297,16 +297,16 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Offer ticker
     'offer.1': '🚀 ₹১৯৯ এর উপর অর্ডারে বিনামূল্যে ডেলিভারি',
-    'offer.2': '💚 তাজা মুদিখানা মিনিটে ডেলিভারি',
+    'offer.2': '🛋️ আপনার দোরগোড়ায় প্রিমিয়াম আসবাবপত্র ও সাজসজ্জা',
     'offer.3': '🎁 প্রথম অর্ডারে ফ্ল্যাট ₹৫০ ছাড়',
     'offer.4': '⚡ এক্সপ্রেস ডেলিভারি উপলব্ধ',
-    'offer.5': '🌿 ১০০% তাজা পণ্যের গ্যারান্টি',
+    'offer.5': '🌿 ১০০% গুণমানের নিশ্চয়তার গ্যারান্টি',
 
     // Auth — General
-    'auth.appTagline': '৩০ মিনিটে মুদিখানা ডেলিভারি ⚡',
-    'auth.badge.fresh': '🥬 তাজা',
+    'auth.appTagline': 'প্রিমিয়াম আসবাবপত্র এবং গৃহসজ্জা সামগ্রী 🏡',
+    'auth.badge.fresh': '🛋️ বিলাসবহুল',
     'auth.badge.fast': '⚡ দ্রুত',
-    'auth.badge.trusted': '💚 বিশ্বস্ত',
+    'auth.badge.trusted': '⭐ প্রিমিয়াম',
     'auth.newHere': 'নতুন? অ্যাকাউন্ট তৈরি করুন',
     'auth.tab.signin': '👋 লগইন',
     'auth.tab.signup': '✨ অ্যাকাউন্ট তৈরি করুন',

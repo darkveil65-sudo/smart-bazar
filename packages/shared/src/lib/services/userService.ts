@@ -5,7 +5,7 @@ import {
 import { UserData, UserRole } from '@smart-bazar/shared/types/firestore';
 
 export const userService = {
-  // ─── READ ─────────────────────────────────────────────────
+  // --- READ -------------------------------------------------
   async getUser(uid: string): Promise<UserData | null> {
     const snap = await getDoc(doc(clientDb, 'users', uid));
     return snap.exists() ? { id: snap.id, ...snap.data() } as UserData : null;
@@ -42,7 +42,7 @@ export const userService = {
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as UserData);
   },
 
-  // ─── CREATE / UPDATE ──────────────────────────────────────
+  // --- CREATE / UPDATE --------------------------------------
   async createUser(uid: string, data: Omit<UserData, 'id'>): Promise<void> {
     await setDoc(doc(clientDb, 'users', uid), {
       ...data,
@@ -89,7 +89,7 @@ export const userService = {
     await deleteDoc(doc(clientDb, 'users', uid));
   },
 
-  // ─── REAL-TIME ────────────────────────────────────────────
+  // --- REAL-TIME --------------------------------------------
   subscribeToUsers(callback: (users: UserData[]) => void) {
     return onSnapshot(collection(clientDb, 'users'), (snap) => {
       callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as UserData));

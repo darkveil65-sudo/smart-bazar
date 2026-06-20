@@ -2,10 +2,10 @@
 
 import { useEffect, useRef } from 'react';
 
-/* ═══════════════════════════════════════════════════════════
+/* ===========================================================
    ANIMATED BACKGROUND — Canvas floating orbs + particles
    GPU-accelerated, pauses when tab is hidden.
-   ═══════════════════════════════════════════════════════════ */
+   =========================================================== */
 
 interface Orb {
   x: number; y: number;
@@ -57,7 +57,7 @@ export default function AnimatedBackground() {
     resize();
     window.addEventListener('resize', resize);
 
-    // ── Init orbs ──────────────────────────────────────────
+    // -- Init orbs ------------------------------------------
     const W = () => canvas.width  / DPR;
     const H = () => canvas.height / DPR;
 
@@ -74,7 +74,7 @@ export default function AnimatedBackground() {
     };
     initOrbs();
 
-    // ── Spawn particle ─────────────────────────────────────
+    // -- Spawn particle -------------------------------------
     let particleTimer = 0;
     const spawnParticle = () => {
       const life = 80 + Math.random() * 80;
@@ -90,7 +90,7 @@ export default function AnimatedBackground() {
       });
     };
 
-    // ── Draw loop ──────────────────────────────────────────
+    // -- Draw loop ------------------------------------------
     const draw = () => {
       const w = W(), h = H();
       ctx.clearRect(0, 0, w, h);

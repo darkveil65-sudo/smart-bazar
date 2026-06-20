@@ -16,7 +16,7 @@ import ProductCard from './_components/ProductCard';
 import EmptyState from '@smart-bazar/shared/components/ui/EmptyState';
 
 
-/* ── Color palette cycles across categories ──────────────────────────────── */
+/* -- Color palette cycles across categories -------------------------------- */
 const CAT_PALETTES = [
   { color: '#00c853', bg: '#e8fff1' },
   { color: '#f43f5e', bg: '#fff1f2' },
@@ -28,7 +28,7 @@ const CAT_PALETTES = [
   { color: '#e11d48', bg: '#fff1f2' },
 ];
 
-/* ── Per-category hero gradient palettes ─────────────────────────────────── */
+/* -- Per-category hero gradient palettes ----------------------------------- */
 // const HERO_GRADIENTS = [
 //   'linear-gradient(135deg, #004d20 0%, #00c853 60%, #1de9b6 100%)',
 //   'linear-gradient(135deg, #0d47a1 0%, #1976d2 55%, #42a5f5 100%)',
@@ -43,7 +43,7 @@ const Skeleton = ({ h = 160, r = 16, w = '100%' }: { h?: number; r?: number; w?:
   <div style={{ height: h, width: w, borderRadius: r }} className="animate-shimmer" />
 );
 
-/* ═══════════════════════════════════════════════════════════════════════════ */
+/* =========================================================================== */
 export default function HomePage() {
   const router = useRouter();
   const { userData } = useAuthStore();
@@ -323,11 +323,11 @@ export default function HomePage() {
 
 
 
-  /* ────────────────────────────────────────────────────────────────────────── */
+  /* -------------------------------------------------------------------------- */
   return (
     <div style={{ background: 'transparent', minHeight: '100vh' }}>
 
-      {/* ═══ SEARCH BAR ═══════════════════════════════════════════════════ */}
+      {/* === SEARCH BAR =================================================== */}
       <div style={{
         background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(16px)',
         padding: '10px 16px', position: 'sticky', top: 0, zIndex: 20,
@@ -466,7 +466,7 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* ═══ CATEGORY CHIPS (top scroll row) ═════════════════════════════ */}
+      {/* === CATEGORY CHIPS (top scroll row) ============================= */}
       {!searchQuery && (
         <div style={{
           background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(12px)',
@@ -527,7 +527,7 @@ export default function HomePage() {
 
       <div style={{ paddingBottom: 80 }}>
 
-        {/* ═══ SEARCH RESULTS ══════════════════════════════════════════════ */}
+        {/* === SEARCH RESULTS ============================================== */}
         {searchQuery && (
           <div style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)', padding: '16px', marginBottom: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
@@ -559,7 +559,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* ═══ CATEGORY FILTERED VIEW ══════════════════════════════════════ */}
+        {/* === CATEGORY FILTERED VIEW ====================================== */}
         {activeCategory && activeCategory !== 'all' && !searchQuery && (
           <div style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)', padding: '16px', marginBottom: 8 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -616,10 +616,10 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* ═══ HOME CONTENT ════════════════════════════════════════════════ */}
+        {/* === HOME CONTENT ================================================ */}
         {!searchQuery && !activeStore && !activeCategory && (
           <>
-            {/* ── Hero Banner ─────────────────────────────────────────────── */}
+            {/* -- Hero Banner ----------------------------------------------- */}
             <div style={{ padding: '14px 16px 0' }}>
               <div
                 onTouchStart={handleTouchStart}
@@ -744,7 +744,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ── Offer Cards ─────────────────────────────────────────────── */}
+            {/* -- Offer Cards ----------------------------------------------- */}
             <div style={{ padding: '10px 16px 14px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div style={{ background: 'linear-gradient(135deg,#e8fff1,#f0fdf4)', border: '1px solid rgba(0,200,83,0.2)', borderRadius: 18, padding: '14px', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,200,83,0.10)' }}>
@@ -764,7 +764,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ── Shop by Store (Categories) ──────────── */}
+            {/* -- Shop by Store (Categories) ------------ */}
             {dbCategories.filter(c => !c.isComingSoon).length > 0 && (
               <div style={{ background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(12px)', padding: '14px 16px 16px', marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -814,7 +814,7 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* ── Products by Store  ──────────────────────────────────── */}
+            {/* -- Products by Store  ------------------------------------ */}
             {loading ? (
               <div style={{ background: 'rgba(255,255,255,0.88)', padding: 16, marginBottom: 8 }}>
                 <Skeleton h={20} r={8} w="160px" />

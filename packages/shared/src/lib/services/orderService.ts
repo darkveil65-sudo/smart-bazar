@@ -7,7 +7,7 @@ import { notificationService } from './notificationService';
 import { userService } from './userService';
 
 export const orderService = {
-  // ─── CREATE ───────────────────────────────────────────────
+  // --- CREATE -----------------------------------------------
   async createOrder(data: Omit<Order, 'id'>): Promise<string> {
     const ref = await addDoc(collection(clientDb, 'orders'), {
       ...data,
@@ -51,7 +51,7 @@ export const orderService = {
     return ref.id;
   },
 
-  // ─── READ ─────────────────────────────────────────────────
+  // --- READ -------------------------------------------------
   async getOrder(id: string): Promise<Order | null> {
     const snap = await getDoc(doc(clientDb, 'orders', id));
     return snap.exists() ? { id: snap.id, ...snap.data() } as Order : null;
@@ -103,7 +103,7 @@ export const orderService = {
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
 
-  // ─── UPDATE ───────────────────────────────────────────────
+  // --- UPDATE -----------------------------------------------
   async updateOrderStatus(
     id: string,
     status: OrderStatus,
@@ -351,7 +351,7 @@ export const orderService = {
     });
   },
 
-  // ─── REAL-TIME SUBSCRIPTIONS ──────────────────────────────
+  // --- REAL-TIME SUBSCRIPTIONS ------------------------------
   subscribeToOrder(orderId: string, callback: (order: Order | null) => void) {
     return onSnapshot(doc(clientDb, 'orders', orderId), (snap) => {
       callback(snap.exists() ? { id: snap.id, ...snap.data() } as Order : null);

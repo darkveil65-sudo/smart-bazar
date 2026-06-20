@@ -190,7 +190,7 @@ export interface Notification {
   createdAt: string;
 }
 
-// ─── App-level Remote Config (stored in Firestore: config/app) ────────────────
+// --- App-level Remote Config (stored in Firestore: config/app) ----------------
 export interface DeliverySlotRule {
   id: string;       // e.g. "slot_1"
   orderFrom: number;  // hour (0-23), e.g. 6
@@ -243,7 +243,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   serviceFee:         0,
 };
 
-// ─── Coupon / Promo Code ───────────────────────────────────────────────────────
+// --- Coupon / Promo Code -------------------------------------------------------
 export type CouponType = 'flat' | 'percent' | 'free_delivery';
 
 export interface Coupon {

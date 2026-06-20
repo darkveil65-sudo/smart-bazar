@@ -772,7 +772,7 @@ export default function ProductDetailsPage() {
           <p style={{ color: '#64748b', fontSize: 15, fontWeight: 500, marginBottom: 16 }}>{unitStr}</p>
         )}
 
-        {/* ── Variant Selector Chips ── */}
+        {/* -- Variant Selector Chips -- */}
         {product.variants && product.variants.length > 0 && (
           <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Color variants selector */}
@@ -934,7 +934,7 @@ export default function ProductDetailsPage() {
           {/* Add / Qty Logic */}
           <div style={{ position: 'relative' }}>
              {effectiveStock <= 0 ? (
-                // ── PRE-ORDER BUTTON ──
+                // -- PRE-ORDER BUTTON --
                 qty > 0 ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'linear-gradient(135deg,#f59e0b,#d97706)', borderRadius: 14, padding: '8px 12px', boxShadow: '0 8px 24px rgba(217,119,6,0.35)' }}>
                     <button onClick={onDec} style={{ width: 28, height: 28, background: 'rgba(255,255,255,0.2)', borderRadius: 8, border: 'none', color: '#fff', fontWeight: 800, fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
@@ -992,7 +992,7 @@ export default function ProductDetailsPage() {
         {/* Urgency & Delivery Info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 30 }}>
 
-            {/* ── PRE-ORDER INFO BANNER (out of stock) ── */}
+            {/* -- PRE-ORDER INFO BANNER (out of stock) -- */}
             {product.stock <= 0 && (
               <div style={{
                 padding: 18, borderRadius: 18,
@@ -1681,9 +1681,9 @@ export default function ProductDetailsPage() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ===============================================================
 // HORIZONTAL PRODUCT CARD (for "Explore more" carousels)
-// ═══════════════════════════════════════════════════════════════
+// ===============================================================
 function HorizontalProductCard({
   product, qty, accentColor, catIcon, deliverySlot, onAdd, onInc, onDec, onClick,
 }: {
@@ -1812,9 +1812,9 @@ function HorizontalProductCard({
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ===============================================================
 // GRID PRODUCT CARD (for filtered/search view)
-// ═══════════════════════════════════════════════════════════════
+// ===============================================================
 function ProductCard({
   product, qty, accentColor, catIcon, deliverySlot, onAdd, onInc, onDec, onClick,
 }: {

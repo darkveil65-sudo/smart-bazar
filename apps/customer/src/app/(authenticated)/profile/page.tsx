@@ -112,7 +112,7 @@ export default function ProfilePage() {
   return (
     <div className="animate-fadeIn pb-10">
 
-      {/* ── Hero Banner ── */}
+      {/* -- Hero Banner -- */}
       <div className="relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #064e3b 0%, #065f46 40%, #059669 100%)', paddingBottom: 56 }}>
         {/* Decorative circles */}
         <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
@@ -165,7 +165,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ── Stats strip (overlapping hero) ── */}
+      {/* -- Stats strip (overlapping hero) -- */}
       <div style={{ marginTop: -32, marginLeft: 16, marginRight: 16, position: 'relative', zIndex: 2 }}>
         <div style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
@@ -193,7 +193,7 @@ export default function ProfilePage() {
 
       <div style={{ padding: '20px 16px 0' }}>
 
-        {/* ── Edit Name Form ── */}
+        {/* -- Edit Name Form -- */}
         {editingName && (
           <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 20, padding: 16, marginBottom: 16 }} className="animate-slideUp">
             <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Edit Name</p>
@@ -214,7 +214,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* ── Account Info ── */}
+        {/* -- Account Info -- */}
         <div style={{ marginBottom: 20 }}>
           <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Account Info</p>
           <div style={{ background: 'var(--card)', borderRadius: 20, border: '1px solid var(--border)', overflow: 'hidden' }}>
@@ -240,7 +240,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ── Saved Addresses ── */}
+        {/* -- Saved Addresses -- */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Saved Addresses</p>
@@ -374,7 +374,7 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* ── Preferences ── */}
+        {/* -- Preferences -- */}
         <div style={{ marginBottom: 20 }}>
           <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Preferences</p>
           <div style={{ background: 'var(--card)', borderRadius: 20, border: '1px solid var(--border)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -422,7 +422,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ── Quick Links ── */}
+        {/* -- Quick Links -- */}
         <div style={{ marginBottom: 20 }}>
           <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Quick Links</p>
           <div style={{ background: 'var(--card)', borderRadius: 20, border: '1px solid var(--border)', overflow: 'hidden' }}>
@@ -447,7 +447,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ── Logout ── */}
+        {/* -- Logout -- */}
         {!confirmLogout ? (
           <button onClick={() => setConfirmLogout(true)} className="press-effect"
             style={{ width: '100%', padding: '14px 0', borderRadius: 18, border: '1.5px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.04)', color: '#ef4444', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>

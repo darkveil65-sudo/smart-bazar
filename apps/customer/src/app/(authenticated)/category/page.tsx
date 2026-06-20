@@ -6,7 +6,7 @@ import { storeService } from '@smart-bazar/shared/lib/services/storeService';
 import { Store } from '@smart-bazar/shared/types/firestore';
 import EmptyState from '@smart-bazar/shared/components/ui/EmptyState';
 
-/* ── Color palette for category cards (cycles through) ─────────────────── */
+/* -- Color palette for category cards (cycles through) ------------------- */
 const CARD_PALETTES = [
   { from: '#00c853', to: '#1de9b6', text: '#004d20' },
   { from: '#3b82f6', to: '#6366f1', text: '#1e3a8a' },
@@ -18,7 +18,7 @@ const CARD_PALETTES = [
   { from: '#f97316', to: '#fb923c', text: '#7c2d12' },
 ];
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/* --------------------------------------------------------------------------- */
 export default function StoreListPage() {
   const router = useRouter();
   const [stores, setStores]   = useState<Store[]>([]);
@@ -33,7 +33,7 @@ export default function StoreListPage() {
     return () => unsub();
   }, []);
 
-  /* ── Skeleton ─────────────────────────────────────────────────────────── */
+  /* -- Skeleton ----------------------------------------------------------- */
   if (loading) {
     return (
       <div style={{ padding: '20px 16px' }}>
@@ -58,7 +58,7 @@ export default function StoreListPage() {
 
   return (
     <div style={{ padding: '20px 16px 24px', animation: 'fadeIn 0.3s ease-out' }}>
-      {/* ── Header ──────────────────────────────────────────────────────── */}
+      {/* -- Header -------------------------------------------------------- */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <div style={{
@@ -80,7 +80,7 @@ export default function StoreListPage() {
         </p>
       </div>
 
-      {/* ── Featured banner ──────────────────────────────────────────────── */}
+      {/* -- Featured banner ------------------------------------------------ */}
       <div style={{
         background: 'linear-gradient(135deg,#00a045,#00c853,#1de9b6)',
         backgroundSize: '200% 200%', animation: 'gradientShift 6s ease infinite',
@@ -110,7 +110,7 @@ export default function StoreListPage() {
         </div>
       </div>
 
-      {/* ── Category grid ──────────────────────────────────────────────────── */}
+      {/* -- Category grid ---------------------------------------------------- */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
         {stores.map((s, i) => {
           const isComingSoon = s.isComingSoon === true;
@@ -228,7 +228,7 @@ export default function StoreListPage() {
         })}
       </div>
 
-      {/* ── Empty state ──────────────────────────────────────────────────── */}
+      {/* -- Empty state ---------------------------------------------------- */}
       {stores.length === 0 && (
         <EmptyState
           type="search"

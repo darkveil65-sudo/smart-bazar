@@ -17,14 +17,14 @@ import { NotificationBell } from '../NotificationBell';
 
 interface CustomerLayoutProps { children: ReactNode; }
 
-/* ─── Language config ──────────────────────────────────────────────────── */
+/* --- Language config ---------------------------------------------------- */
 const LANGS: { code: Lang; label: string }[] = [
   { code: 'en',       label: 'EN'  },
   { code: 'banglish', label: 'BN' },
   { code: 'bn',       label: 'বাং' },
 ];
 
-/* ─── Nav items (dynamic labels via t()) ────────────────────────────────── */
+/* --- Nav items (dynamic labels via t()) ---------------------------------- */
 const NAV_ICONS = [
   {
     key: 'nav.home',
@@ -86,12 +86,12 @@ const NAV_ICONS = [
   },
 ];
 
-/* ─── Offer keys ────────────────────────────────────────────────────────── */
+/* --- Offer keys ---------------------------------------------------------- */
 const OFFER_KEYS = ['offer.1', 'offer.2', 'offer.3', 'offer.4', 'offer.5'];
 
-/* ═══════════════════════════════════════════════════════════════════════════
+/* ===========================================================================
    CUSTOMER LAYOUT
-   ═══════════════════════════════════════════════════════════════════════════ */
+   =========================================================================== */
 const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
   const { lang, setLang, t } = useLanguage();
   const router   = useRouter();
@@ -252,7 +252,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
   return (
     <div style={{ minHeight: '100dvh', background: 'transparent', position: 'relative' }} className={lang === 'bn' ? 'font-hind-siliguri' : ''}>
 
-      {/* ═══ HEADER ═══════════════════════════════════════════════════ */}
+      {/* === HEADER =================================================== */}
       <header
         className="glass-header"
         style={{
@@ -268,7 +268,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
             : 'none',
         }}
       >
-        {/* ── Offer ticker bar ─────────────────────────────────────── */}
+        {/* -- Offer ticker bar --------------------------------------- */}
         <div style={{
           background: 'linear-gradient(90deg, #00a045, #00c853, #00a045)',
           backgroundSize: '200% 100%',
@@ -290,7 +290,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
           </div>
         </div>
 
-        {/* ── Main header row ──────────────────────────────────────── */}
+        {/* -- Main header row ---------------------------------------- */}
         <div style={{ maxWidth: 430, margin: '0 auto', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
 
           {/* Logo, Brand + Location Selector Badge */}
@@ -468,7 +468,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
           </div>
         </div>
 
-        {/* ── Search row ───────────────────────────────────────────── */}
+        {/* -- Search row --------------------------------------------- */}
         <div style={{ maxWidth: 430, margin: '0 auto', padding: '0 16px 10px' }}>
           <div className="premium-search-pill">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -512,7 +512,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
         </div>
       </header>
 
-      {/* ═══ GLOBAL SEARCH OVERLAY ══════════════════════════════════ */}
+      {/* === GLOBAL SEARCH OVERLAY ================================== */}
       {globalSearchQuery.trim() !== '' && (
         <div style={{
           position: 'fixed',
@@ -675,7 +675,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
         </div>
       )}
 
-      {/* ═══ MAIN CONTENT ════════════════════════════════════════════ */}
+      {/* === MAIN CONTENT ============================================ */}
       <main
         style={{
           maxWidth: 430, margin: '0 auto',
@@ -687,7 +687,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      {/* ═══ BOTTOM NAVIGATION ═══════════════════════════════════════ */}
+      {/* === BOTTOM NAVIGATION ======================================= */}
       <nav
         className="glass-nav"
         style={{
