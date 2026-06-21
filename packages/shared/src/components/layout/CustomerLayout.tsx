@@ -426,14 +426,13 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
                 </button>
               ))}
             </div>
-                  {/* Mobile: Cycle button */}
+            {/* Mobile: Cycle button */}
             <button
               onClick={handleCycleLang}
-              className="press-effect md:hidden"
+              className="press-effect md:hidden flex items-center justify-center"
               style={{
                 width: 38, height: 38, borderRadius: 12, border: 'none',
                 background: 'rgba(0,200,83,0.08)',
-                display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', transition: 'all 0.2s',
                 color: 'var(--foreground)',
                 fontSize: lang === 'bn' ? 12 : 11,
