@@ -14,7 +14,7 @@ interface ToastProps {
 const Toast: FC<ToastProps> = ({
   children,
   type = 'info',
-  duration = 5000,
+  duration = 2000,
   onClose,
   title,
 }) => {
@@ -23,16 +23,13 @@ const Toast: FC<ToastProps> = ({
   const [isExiting, setIsExiting] = useState(false);
   
   // Timer and progress state
-  const [progress, setProgress] = useState(100);
   const [timeLeft, setTimeLeft] = useState(duration);
+  const [progress, setProgress] = useState(100);
   const [isPaused, setIsPaused] = useState(false);
-  
-  const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
     // Trigger entrance animation on mount
     setIsMounted(true);
-    startTimeRef.current = Date.now();
   }, []);
 
   const triggerClose = useCallback(() => {
@@ -44,34 +41,35 @@ const Toast: FC<ToastProps> = ({
     }, 300);
   }, [onClose]);
 
+  // Handle countdown interval
   useEffect(() => {
     if (isPaused || isExiting) return;
 
-    startTimeRef.current = Date.now();
-    const startProgress = progress;
-
+    const interval = 30;
     const timer = setInterval(() => {
-      const elapsed = Date.now() - startTimeRef.current;
-      const computed = startProgress - (elapsed / timeLeft) * startProgress;
-
-      if (computed <= 0) {
-        setProgress(0);
-        clearInterval(timer);
-        triggerClose();
-      } else {
-        setProgress(computed);
-      }
-    }, 30);
+      setTimeLeft((prev) => {
+        const next = prev - interval;
+        if (next <= 0) {
+          clearInterval(timer);
+          triggerClose();
+          return 0;
+        }
+        return next;
+      });
+    }, interval);
 
     return () => {
       clearInterval(timer);
     };
-  }, [timeLeft, isPaused, isExiting, progress, triggerClose]);
+  }, [isPaused, isExiting, triggerClose]);
+
+  // Sync progress bar percentage
+  useEffect(() => {
+    setProgress((timeLeft / duration) * 100);
+  }, [timeLeft, duration]);
 
   const handleMouseEnter = () => {
     setIsPaused(true);
-    const elapsed = Date.now() - startTimeRef.current;
-    setTimeLeft((prev) => Math.max(0, prev - elapsed));
   };
 
   const handleMouseLeave = () => {
