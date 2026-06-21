@@ -538,13 +538,17 @@ export default function ProductDetailsPage() {
         </div>
       </div>
 
-      {/* Hero Image Gallery */}
-      <div style={{
-        height: '45vh', minHeight: 320, position: 'relative',
-        background: `radial-gradient(circle at 50% 50%, ${accentColor}15 0%, #f8fafc 100%)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden'
-      }}>
+      {/* Responsive layout wrapper */}
+      <div className="flex flex-col md:grid md:grid-cols-12 md:gap-8 w-full max-w-7xl mx-auto px-0 md:px-6 md:py-8 pt-20 md:pt-24">
+        
+        {/* Hero Image Gallery */}
+        <div 
+          className="product-gallery-container w-full md:col-span-6"
+          style={{
+            background: `radial-gradient(circle at 50% 50%, ${accentColor}15 0%, #f8fafc 100%)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
         {/* Decorative Blobs */}
         <div className="pulse-slow" style={{
           position: 'absolute', top: '10%', right: '-10%', width: 200, height: 200,
@@ -745,11 +749,7 @@ export default function ProductDetailsPage() {
       </div>
 
       {/* Content Section */}
-      <div className="slide-up" style={{
-        background: '#fff', borderRadius: '32px 32px 0 0', marginTop: -40,
-        padding: '30px 24px', position: 'relative', zIndex: 5,
-        boxShadow: '0 -10px 40px rgba(0,0,0,0.04)'
-      }}>
+      <div className="product-content-section slide-up w-full md:col-span-6">
         {/* Badges */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
           {discountPct && discountPct > 0 && (
@@ -1338,6 +1338,9 @@ export default function ProductDetailsPage() {
           </button>
         </div>
       )}
+      
+      </div> {/* Close Responsive layout wrapper */}
+
       {/* Full Screen Image Gallery Modal */}
       {isFullScreenOpen && (
         <div style={{

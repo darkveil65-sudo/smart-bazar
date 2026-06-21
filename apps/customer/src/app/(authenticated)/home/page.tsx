@@ -543,7 +543,7 @@ export default function HomePage() {
                 description="Try a different keyword"
               />
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                 {filteredProducts.map((product, i) => (
                   <ProductCard key={product.id} product={product} qty={getCartQty(product.id)}
                                onAdd={() => addItem(product)} onInc={() => updateQuantity(product.id, getCartQty(product.id) + 1)}
@@ -603,7 +603,7 @@ export default function HomePage() {
                 <p style={{ fontSize: 13, color: '#94a3b8' }}>Products will appear soon</p>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                 {filteredProducts.map((product, i) => (
                   <ProductCard key={product.id} product={product} qty={getCartQty(product.id)}
                                onAdd={() => addItem(product)} onInc={() => updateQuantity(product.id, getCartQty(product.id) + 1)}
@@ -620,7 +620,7 @@ export default function HomePage() {
         {!searchQuery && !activeStore && !activeCategory && (
           <>
             {/* -- Hero Banner ----------------------------------------------- */}
-            <div style={{ padding: '14px 16px 0' }}>
+            <div className="px-4 md:px-0 pt-3.5 md:pt-6">
               <div
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
@@ -629,11 +629,11 @@ export default function HomePage() {
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseLeave}
+                className="min-h-[160px] md:min-h-[300px]"
                 style={{
                   borderRadius: 22,
                   position: 'relative',
                   overflow: 'hidden',
-                  minHeight: 160,
                   boxShadow: '0 8px 32px rgba(0,0,0,0.16)',
                   cursor: isDragging ? 'grabbing' : 'grab',
                   userSelect: 'none',
@@ -649,14 +649,13 @@ export default function HomePage() {
                   {heroSlidesFallback.map((slide, index) => (
                     <div
                       key={index}
+                      className="min-h-[160px] md:min-h-[300px] py-5 md:py-8 px-5 md:px-10"
                       style={{
                         flex: '0 0 100%',
                         width: '100%',
                         background: slide.gradient,
-                        padding: '20px 20px 18px',
                         position: 'relative',
                         overflow: 'hidden',
-                        minHeight: 160,
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
@@ -676,12 +675,12 @@ export default function HomePage() {
                         <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: 4 }}>
                           👋 Hi {firstName}!
                         </p>
-                        <h2 style={{
-                          fontSize: 26, fontWeight: 900, color: '#fff', margin: '0 0 6px',
+                        <h2 className="text-2xl md:text-4xl" style={{
+                          fontWeight: 900, color: '#fff', margin: '0 0 6px',
                           lineHeight: 1.15, fontFamily: 'var(--font-display)',
                         }}>
                           {slide.headline}<br />
-                          <span style={{ opacity: 0.85, fontSize: 18 }}>{slide.sub}</span>
+                          <span className="text-[18px] md:text-[22px]" style={{ opacity: 0.85 }}>{slide.sub}</span>
                         </h2>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginTop: 12 }}>
                           <button onClick={() => slide.catId ? router.push(`/category/${slide.catId}`) : router.push('/category')} style={{
@@ -816,10 +815,10 @@ export default function HomePage() {
 
             {/* -- Products by Store  ------------------------------------ */}
             {loading ? (
-              <div style={{ background: 'rgba(255,255,255,0.88)', padding: 16, marginBottom: 8 }}>
+              <div className="bg-white/88 py-6 md:py-8 px-4 md:px-6 mb-4 md:mb-8 md:rounded-2xl md:shadow-sm md:border md:border-slate-100/60">
                 <Skeleton h={20} r={8} w="160px" />
-                <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  {[1, 2, 3, 4].map(i => <Skeleton key={i} h={200} r={16} />)}
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mt-4">
+                  {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} h={200} r={16} />)}
                 </div>
               </div>
             ) : productsByCategory.length === 0 ? (
@@ -830,13 +829,15 @@ export default function HomePage() {
               </div>
             ) : (
               productsByCategory.map((group, gIndex) => (
-                <div key={group.id} style={{
-                  background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)',
-                  padding: '16px 0 6px', marginBottom: 8,
-                  animation: `fadeInUp 0.4s ${gIndex * 80}ms ease-out both`,
-                }}>
+                <div 
+                  key={group.id} 
+                  className="bg-white/88 backdrop-blur-md py-6 md:py-8 mb-4 md:mb-8 md:rounded-2xl md:shadow-sm md:border md:border-slate-100/60"
+                  style={{
+                    animation: `fadeInUp 0.4s ${gIndex * 80}ms ease-out both`,
+                  }}
+                >
                   {/* Section header */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', marginBottom: 14 }}>
+                  <div className="flex justify-between items-center px-4 md:px-6 mb-4">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{
                         width: 40, height: 40, borderRadius: 12,
@@ -868,7 +869,7 @@ export default function HomePage() {
                   </div>
 
                   {/* Product grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, padding: '0 16px' }}>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 px-4 md:px-6">
                     {group.products.map((product, i) => (
                       <ProductCard
                         key={product.id}

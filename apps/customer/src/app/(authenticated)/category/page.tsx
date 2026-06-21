@@ -42,7 +42,7 @@ export default function StoreListPage() {
           <div style={{ height: 28, width: 160, borderRadius: 10, background: 'linear-gradient(90deg,#e8f5ec 25%,#d5edd9 50%,#e8f5ec 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite', marginBottom: 8 }} />
           <div style={{ height: 14, width: 240, borderRadius: 6, background: 'linear-gradient(90deg,#e8f5ec 25%,#d5edd9 50%,#e8f5ec 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite 200ms' }} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} style={{
               height: 160, borderRadius: 20,
@@ -111,7 +111,7 @@ export default function StoreListPage() {
       </div>
 
       {/* -- Category grid ---------------------------------------------------- */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {stores.map((s, i) => {
           const isComingSoon = s.isComingSoon === true;
           const palette      = CARD_PALETTES[i % CARD_PALETTES.length];

@@ -590,7 +590,7 @@ export default function CategoryPage() {
                 }}
               />
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                 {filteredProducts.map((p) => (
                   <ProductCard key={p.id} product={p} qty={getQty(p.id)} accentColor={accentColor}
                     catIcon={category?.icon ?? '📦'}
@@ -834,7 +834,7 @@ export default function CategoryPage() {
               <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', margin: '0 0 14px' }}>
                 Shop by Category
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
+              <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-10 gap-3">
                 {subCategories.map((sub) => (
                   <button
                     key={sub.id}

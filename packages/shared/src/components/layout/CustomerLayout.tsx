@@ -276,7 +276,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
           padding: '5px 16px',
           overflow: 'hidden',
         }}>
-          <div style={{ maxWidth: 430, margin: '0 auto', textAlign: 'center' }}>
+          <div className="w-full max-w-[430px] md:max-w-7xl mx-auto" style={{ textAlign: 'center' }}>
             <p
               key={tickerIdx}
               style={{
@@ -291,7 +291,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
         </div>
 
         {/* -- Main header row ---------------------------------------- */}
-        <div style={{ maxWidth: 430, margin: '0 auto', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div className="w-full max-w-[430px] md:max-w-7xl mx-auto px-4 md:px-8 py-2 md:py-3 flex items-center justify-between gap-3 md:gap-12">
 
           {/* Logo, Brand + Location Selector Badge */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -371,6 +371,30 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
                 </svg>
               </div>
             </div>
+          </div>
+
+          {/* Desktop Top Navigation Links */}
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
+            {NAV_ICONS.map((item) => {
+              const active = pathname === item.href || pathname.startsWith(item.href + '/');
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-2 text-sm font-bold transition-all duration-200 hover:text-emerald-500"
+                  style={{
+                    color: active ? 'var(--primary)' : 'var(--foreground)',
+                  }}
+                >
+                  <span className="flex-shrink-0" style={{ transform: active ? 'scale(1.08)' : 'scale(1)', transition: 'transform 0.2s' }}>
+                    {item.icon}
+                  </span>
+                  <span style={{ fontFamily: lang === 'bn' ? 'var(--font-hind-siliguri), sans-serif' : 'inherit' }}>
+                    {t(item.key)}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right actions */}
@@ -469,7 +493,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
         </div>
 
         {/* -- Search row --------------------------------------------- */}
-        <div style={{ maxWidth: 430, margin: '0 auto', padding: '0 16px 10px' }}>
+        <div className="w-full max-w-[430px] md:max-w-3xl mx-auto px-4 md:px-8 pb-2.5">
           <div className="premium-search-pill">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />
@@ -514,20 +538,22 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
 
       {/* === GLOBAL SEARCH OVERLAY ================================== */}
       {globalSearchQuery.trim() !== '' && (
-        <div style={{
-          position: 'fixed',
-          top: 'calc(126px + env(safe-area-inset-top, 0px))',
-          bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '100%',
-          maxWidth: 430,
-          background: 'var(--background)',
-          zIndex: 45,
-          overflowY: 'auto',
-          padding: '16px 16px 24px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-        }}>
+        <div 
+          className="w-full max-w-[430px] md:max-w-5xl"
+          style={{
+            position: 'fixed',
+            top: 'calc(126px + env(safe-area-inset-top, 0px))',
+            bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '100%',
+            background: 'var(--background)',
+            zIndex: 45,
+            overflowY: 'auto',
+            padding: '16px 16px 24px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+          }}
+        >
           {/* Header info */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <p style={{ fontSize: 13, color: 'var(--muted-foreground)', fontWeight: 600, margin: 0 }}>
@@ -586,7 +612,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
               <p style={{ fontSize: 13 }}>Try another search term or remove filters</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {filteredGlobalProducts.map((p) => {
                 const qty = getQty(p.id);
                 const unitStr = p.unit ? (/^\d/.test(p.unit) ? p.unit : `1 ${p.unit}`) : null;
@@ -677,9 +703,8 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
 
       {/* === MAIN CONTENT ============================================ */}
       <main
+        className="w-full max-w-[430px] md:max-w-7xl mx-auto md:px-8 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-12 pt-0 md:pt-6"
         style={{
-          maxWidth: 430, margin: '0 auto',
-          paddingBottom: `calc(5.5rem + var(--safe-bottom))`,
           position: 'relative', zIndex: 1,
           animation: 'fadeIn 0.35s ease-out',
         }}
@@ -689,7 +714,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
 
       {/* === BOTTOM NAVIGATION ======================================= */}
       <nav
-        className="glass-nav"
+        className="glass-nav md:hidden"
         style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
