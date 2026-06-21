@@ -9,11 +9,11 @@ import { userService } from '@smart-bazar/shared/lib/services/userService';
 import { ORDER_STATUS_FLOW, ORDER_STATUSES } from '@smart-bazar/shared/lib/constants';
 
 const VENDOR_TAGS = [
-  'Fresh Items',
-  'Well Packed',
-  'Great Quality',
-  'Correct Items',
-  'Hygiene Standard',
+  'Premium Woods',
+  'Sturdy Build',
+  'Flawless Finish',
+  'Great Comfort',
+  'Elegant Design',
   'Super Value'
 ];
 

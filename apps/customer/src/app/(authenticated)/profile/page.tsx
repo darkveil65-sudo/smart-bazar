@@ -428,7 +428,7 @@ export default function ProfilePage() {
           <div style={{ background: 'var(--card)', borderRadius: 20, border: '1px solid var(--border)', overflow: 'hidden' }}>
             {[
               { icon: '📦', label: t('profile.orders'), sub: 'View your order history', action: () => router.push('/orders'), color: '#0ea5e9' },
-              { icon: '🛒', label: 'Browse Products', sub: 'Shop fresh groceries', action: () => router.push('/home'), color: '#10b981' },
+              { icon: '🛒', label: 'Browse Products', sub: 'Shop premium furniture', action: () => router.push('/home'), color: '#10b981' },
               { icon: '🎁', label: 'Offers & Deals', sub: 'Special discounts for you', action: () => router.push('/home'), color: '#f59e0b' },
               { icon: '💬', label: t('profile.support'), sub: 'Help & FAQs', action: () => {}, color: '#8b5cf6' },
             ].map((link, i, arr) => (

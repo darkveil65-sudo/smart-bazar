@@ -12,11 +12,11 @@ import { ORDER_STATUSES, ORDER_STATUS_FLOW } from '@smart-bazar/shared/lib/const
 import EmptyState from '@smart-bazar/shared/components/ui/EmptyState';
 
 const VENDOR_TAGS = [
-  'Fresh Items',
-  'Well Packed',
-  'Great Quality',
-  'Correct Items',
-  'Hygiene Standard',
+  'Premium Woods',
+  'Sturdy Build',
+  'Flawless Finish',
+  'Great Comfort',
+  'Elegant Design',
   'Super Value'
 ];
 

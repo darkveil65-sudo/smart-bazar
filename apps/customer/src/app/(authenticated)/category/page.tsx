@@ -6,22 +6,15 @@ import { storeService } from '@smart-bazar/shared/lib/services/storeService';
 import { Store } from '@smart-bazar/shared/types/firestore';
 import EmptyState from '@smart-bazar/shared/components/ui/EmptyState';
 
-/* -- Color palette for category cards (cycles through) ------------------- */
-const CARD_PALETTES = [
-  { from: '#00c853', to: '#1de9b6', text: '#004d20' },
-  { from: '#3b82f6', to: '#6366f1', text: '#1e3a8a' },
-  { from: '#f43f5e', to: '#fb7185', text: '#9f1239' },
-  { from: '#ffab00', to: '#fbbf24', text: '#78350f' },
-  { from: '#7c3aed', to: '#a855f7', text: '#3b0764' },
-  { from: '#0ea5e9', to: '#38bdf8', text: '#0c4a6e' },
-  { from: '#14b8a6', to: '#2dd4bf', text: '#134e4a' },
-  { from: '#f97316', to: '#fb923c', text: '#7c2d12' },
+const SHOWROOM_IMAGES = [
+  'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80', // luxury living room
+  'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=600&q=80', // design showroom
+  'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80', // study desk / workspace
 ];
 
-/* --------------------------------------------------------------------------- */
 export default function StoreListPage() {
   const router = useRouter();
-  const [stores, setStores]   = useState<Store[]>([]);
+  const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [hovered, setHovered] = useState<string | null>(null);
 
@@ -33,23 +26,17 @@ export default function StoreListPage() {
     return () => unsub();
   }, []);
 
-  /* -- Skeleton ----------------------------------------------------------- */
   if (loading) {
     return (
-      <div style={{ padding: '20px 16px' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 animate-pulse">
         {/* Header skeleton */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ height: 28, width: 160, borderRadius: 10, background: 'linear-gradient(90deg,#e8f5ec 25%,#d5edd9 50%,#e8f5ec 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite', marginBottom: 8 }} />
-          <div style={{ height: 14, width: 240, borderRadius: 6, background: 'linear-gradient(90deg,#e8f5ec 25%,#d5edd9 50%,#e8f5ec 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite 200ms' }} />
+        <div className="mb-8">
+          <div className="h-8 w-48 bg-slate-200 dark:bg-zinc-800 rounded-xl mb-3" />
+          <div className="h-4 w-72 bg-slate-200 dark:bg-zinc-800 rounded-lg" />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} style={{
-              height: 160, borderRadius: 20,
-              background: 'linear-gradient(90deg,#e8f5ec 25%,#d5edd9 50%,#e8f5ec 75%)',
-              backgroundSize: '200% 100%',
-              animation: `shimmer 1.5s ${i * 80}ms infinite`,
-            }} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-80 rounded-3xl bg-slate-100 dark:bg-zinc-900 border border-slate-200/50 dark:border-zinc-800/50" />
           ))}
         </div>
       </div>
@@ -57,173 +44,148 @@ export default function StoreListPage() {
   }
 
   return (
-    <div style={{ padding: '20px 16px 24px', animation: 'fadeIn 0.3s ease-out' }}>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 text-slate-800 dark:text-zinc-100 font-sans">
       {/* -- Header -------------------------------------------------------- */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 12,
-            background: 'linear-gradient(135deg,#00a045,#00c853)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,200,83,0.30)',
-          }}>
-            <span style={{ fontSize: 18 }}>🛍️</span>
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-sm">
+            <span className="text-xl">🏬</span>
           </div>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 900, color: '#0a1628', margin: 0, fontFamily: 'var(--font-display)' }}>
-              All Stores
-            </h1>
-          </div>
+          <h1 className="text-3xl font-extrabold font-display tracking-tight text-slate-900 dark:text-zinc-50">
+            Showrooms & Departments
+          </h1>
         </div>
-        <p style={{ fontSize: 13, color: '#64748b', margin: 0, paddingLeft: 46 }}>
-          Browse {stores.length} stores — fresh & always reliable
+        <p className="text-sm text-slate-500 dark:text-zinc-400 pl-1">
+          Explore curated showrooms — high-end designer furniture and interior decor.
         </p>
       </div>
 
-      {/* -- Featured banner ------------------------------------------------ */}
-      <div style={{
-        background: 'linear-gradient(135deg,#00a045,#00c853,#1de9b6)',
-        backgroundSize: '200% 200%', animation: 'gradientShift 6s ease infinite',
-        borderRadius: 20, padding: '16px 18px', marginBottom: 20,
-        display: 'flex', alignItems: 'center', gap: 14,
-        boxShadow: '0 8px 24px rgba(0,200,83,0.28)',
-        position: 'relative', overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', right: -20, top: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.10)' }} />
-        <div style={{ position: 'absolute', left: -20, bottom: -30, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-        <span style={{ fontSize: 40, zIndex: 1 }}>⚡</span>
-        <div style={{ zIndex: 1 }}>
-          <p style={{ fontSize: 14, fontWeight: 900, color: '#fff', margin: 0, fontFamily: 'var(--font-display)' }}>
-            Express Delivery
-          </p>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', margin: '2px 0 0' }}>
-            All categories · Fast delivery at your door
-          </p>
-        </div>
-        <div style={{
-          marginLeft: 'auto', background: 'rgba(255,255,255,0.20)',
-          border: '1px solid rgba(255,255,255,0.35)', borderRadius: 12,
-          padding: '6px 14px', fontSize: 11, fontWeight: 700, color: '#fff',
-          zIndex: 1, backdropFilter: 'blur(8px)', cursor: 'pointer',
-        }}>
-          Order Now
+      {/* -- Express Delivery Banner --------------------------------------- */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 border border-emerald-500/30 rounded-3xl p-6 md:p-8 mb-10 shadow-md">
+        <div className="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute -left-16 -bottom-16 w-40 h-40 bg-emerald-400/10 rounded-full blur-3xl" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+          <div className="flex items-center gap-4">
+            <span className="text-4xl">⚡</span>
+            <div>
+              <h3 className="text-xl font-bold font-display text-white">
+                Same-Day Showroom Delivery
+              </h3>
+              <p className="text-xs text-emerald-300/80 mt-1 font-medium">
+                Professional handling & free installation on orders above ₹199
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              if (stores.length > 0) {
+                router.push(`/category/${stores[0].id}`);
+              }
+            }}
+            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all active:scale-95 shadow-md flex items-center gap-1.5 self-start md:self-auto"
+          >
+            <span>Order Now</span>
+            <span>→</span>
+          </button>
         </div>
       </div>
 
-      {/* -- Category grid ---------------------------------------------------- */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {/* -- Showrooms Grid ------------------------------------------------- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {stores.map((s, i) => {
           const isComingSoon = s.isComingSoon === true;
-          const palette      = CARD_PALETTES[i % CARD_PALETTES.length];
-          const isHovered    = hovered === s.id;
+          const isHovered = hovered === s.id;
+          const fallbackImage = SHOWROOM_IMAGES[i % SHOWROOM_IMAGES.length];
 
           return (
-            <button
+            <div
               key={s.id}
-              onClick={() => { if (!isComingSoon) router.push(`/category/${s.id}`); }}
               onMouseEnter={() => setHovered(s.id)}
               onMouseLeave={() => setHovered(null)}
-              style={{
-                position: 'relative', overflow: 'hidden',
-                borderRadius: 20,
-                background: isComingSoon
-                  ? 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'
-                  : `linear-gradient(145deg, ${palette.from}18, ${palette.to}28)`,
-                border: isComingSoon
-                  ? '1.5px solid #e2e8f0'
-                  : `1.5px solid ${palette.from}30`,
-                padding: '0 0 14px',
-                cursor: isComingSoon ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-                transform: isHovered && !isComingSoon ? 'translateY(-4px) scale(1.01)' : 'translateY(0) scale(1)',
-                boxShadow: isHovered && !isComingSoon
-                  ? `0 12px 32px ${palette.from}30`
-                  : `0 2px 10px rgba(0,0,0,0.06)`,
-                textAlign: 'left',
-                animation: `fadeInUp 0.4s ${i * 70}ms ease-out both`,
+              onClick={() => {
+                if (!isComingSoon) router.push(`/category/${s.id}`);
               }}
+              className={`bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm transition-all duration-300 flex flex-col justify-between ${
+                isComingSoon
+                  ? 'opacity-60 cursor-not-allowed'
+                  : 'cursor-pointer hover:shadow-lg hover:border-emerald-500/20 hover:-translate-y-1'
+              }`}
             >
-              {/* Top gradient accent bar */}
-              {!isComingSoon && (
-                <div style={{
-                  height: 4, width: '100%',
-                  background: `linear-gradient(90deg, ${palette.from}, ${palette.to})`,
-                  marginBottom: 16,
-                }} />
-              )}
-              {isComingSoon && <div style={{ height: 4, width: '100%', background: '#e2e8f0', marginBottom: 16 }} />}
+              {/* Showroom Header Image */}
+              <div className="h-56 relative overflow-hidden bg-slate-50 dark:bg-zinc-800/50">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={s.imageUrl || fallbackImage}
+                  alt={s.name}
+                  className={`w-full h-full object-cover transition-transform duration-500 ${
+                    isHovered && !isComingSoon ? 'scale-105' : 'scale-100'
+                  }`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-              {/* Decorative circle */}
-              {!isComingSoon && (
-                <div style={{
-                  position: 'absolute', right: -14, top: 20, width: 70, height: 70,
-                  borderRadius: '50%',
-                  background: `radial-gradient(circle, ${palette.from}25 0%, transparent 70%)`,
-                }} />
-              )}
+                {/* Rating Badge */}
+                {!isComingSoon && (
+                  <div className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-white font-bold text-[10px] px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm uppercase tracking-wider">
+                    <span>★</span>
+                    <span>4.9 Curation</span>
+                  </div>
+                )}
 
-              <div style={{ padding: '0 14px' }}>
-                {/* Image / Icon */}
-                <div style={{
-                  width: 60, height: 60, borderRadius: 18,
-                  background: isComingSoon
-                    ? '#e2e8f0'
-                    : `linear-gradient(135deg, ${palette.from}20, ${palette.to}30)`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  overflow: 'hidden', marginBottom: 12,
-                  border: isComingSoon ? 'none' : `2px solid ${palette.from}25`,
-                  flexShrink: 0,
-                }}>
-                  {s.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={s.imageUrl} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isComingSoon ? 0.5 : 1 }} />
-                  ) : (
-                    <span style={{ fontSize: 28, opacity: isComingSoon ? 0.4 : 1 }}>🏪</span>
-                  )}
+                {/* Status Pill */}
+                <div className="absolute top-4 right-4 bg-emerald-500 text-white font-bold text-[10px] px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
+                  {isComingSoon ? '⏳ Coming Soon' : '🟢 Open'}
                 </div>
 
-                {/* Name */}
-                <h3 style={{
-                  fontWeight: 800, fontSize: 14, margin: '0 0 3px',
-                  color: isComingSoon ? '#94a3b8' : '#0a1628',
-                  fontFamily: 'var(--font-display)',
-                  lineHeight: 1.3,
-                }}>
-                  {s.name}
-                </h3>
-
-                {/* Sub line */}
-                {isComingSoon ? (
-                  <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, fontWeight: 500 }}>Coming soon…</p>
-                ) : (
-                  <p style={{ fontSize: 11, color: palette.from, margin: 0, fontWeight: 700 }}>Explore →</p>
-                )}
+                {/* Showroom Title Overlay */}
+                <div className="absolute bottom-4 left-4 right-4">
+                  <h3 className="text-xl font-extrabold font-display text-white tracking-tight leading-tight">
+                    {s.name}
+                  </h3>
+                </div>
               </div>
 
-              {/* Coming soon tape */}
-              {isComingSoon && (
-                <div style={{
-                  position: 'absolute', bottom: 0, left: 0, right: 0,
-                  background: 'linear-gradient(90deg,rgba(255,171,0,0.15),rgba(255,171,0,0.08))',
-                  borderTop: '1px solid rgba(255,171,0,0.25)',
-                  padding: '6px 0', backdropFilter: 'blur(4px)',
-                  display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 5,
-                }}>
-                  <span style={{ fontSize: 10, fontWeight: 900, color: '#d97706', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                    ⏳ Coming Soon
-                  </span>
-                </div>
-              )}
+              {/* Showroom Body */}
+              <div className="p-6 flex-1 flex flex-col justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400 leading-relaxed mb-5">
+                    {s.id === 'furniture-store'
+                      ? 'Browse our flagship collection of designer WFH chairs, cozy velvet lounge sofas, minimalist study desks, and aesthetic home decor.'
+                      : 'Exclusive curated interior designs and accessory departments tailored for modern luxury living spaces.'}
+                  </p>
 
-              {/* Animated glow on hover */}
-              {isHovered && !isComingSoon && (
-                <div style={{
-                  position: 'absolute', inset: 0, pointerEvents: 'none',
-                  background: `radial-gradient(circle at 50% 30%, ${palette.from}12 0%, transparent 70%)`,
-                  borderRadius: 20,
-                }} />
-              )}
-            </button>
+                  {/* Highlights Tags */}
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {['Premium Quality', 'Free Setup', 'Same-Day Delivery'].map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-800 border border-slate-200/40 dark:border-zinc-700/40 px-2.5 py-1 rounded-md"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Explore button */}
+                <div className="pt-4 border-t border-slate-50 dark:border-zinc-800 flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+                    Noida Showroom
+                  </span>
+                  
+                  {isComingSoon ? (
+                    <span className="text-xs font-bold text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/25">
+                      Launching Soon
+                    </span>
+                  ) : (
+                    <button className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-colors flex items-center gap-1 shadow-sm">
+                      <span>Explore Showroom</span>
+                      <span>→</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           );
         })}
       </div>
@@ -232,10 +194,11 @@ export default function StoreListPage() {
       {stores.length === 0 && (
         <EmptyState
           type="search"
-          title="No stores yet"
-          description="Check back soon — we're stocking up! 🎉"
+          title="No showrooms available"
+          description="Check back soon — our designers are curating new spaces! 🎉"
         />
       )}
     </div>
   );
 }
+

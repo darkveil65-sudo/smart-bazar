@@ -46,7 +46,7 @@ export default function HeroBannerSlider({
     firestoreBannerSlides.length > 0 ? firestoreBannerSlides : categoryBannerSlides
   ).length > 0
     ? (firestoreBannerSlides.length > 0 ? firestoreBannerSlides : categoryBannerSlides)
-    : [{ catId: '', gradient: HERO_GRADIENTS[0], emoji: '🛒', headline: 'Smart Bazar', sub: 'Fresh groceries at your door', cta: 'Explore', badge: '⚡ Express Delivery', imageUrl: null }];
+    : [{ catId: '', gradient: HERO_GRADIENTS[0], emoji: '🛒', headline: 'Smart Bazar', sub: 'Premium furniture at your door', cta: 'Explore', badge: '⚡ Express Delivery', imageUrl: null }];
 
   const hero = slides[heroSlide % slides.length];
 

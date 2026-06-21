@@ -34,9 +34,9 @@ const hindSiliguri = Hind_Siliguri({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Bazar - Grocery Delivery in 30 Minutes",
-  description: "Order groceries online and get them delivered to your doorstep in 30 minutes. Fresh vegetables, fruits, household items and more.",
-  keywords: "grocery delivery, online grocery, fresh vegetables, fruits, smart bazar",
+  title: "Smart Bazar - Premium Furniture & Home Decor",
+  description: "Shop premium luxury furniture and home decor online. Order elegant sofas, WFH ergonomic chairs, beds, lighting, and decor delivered right to your doorstep.",
+  keywords: "premium furniture, luxury home decor, online furniture shop, modern sofa, office chairs, home lighting, smart bazar",
 };
 
 export default function RootLayout({

@@ -74,7 +74,7 @@ export default function RegisterPage() {
             <span className="text-3xl">🛒</span>
           </div>
           <h1 className="text-3xl font-bold text-foreground">Smart Bazar</h1>
-          <p className="text-muted-foreground mt-1">Grocery delivery in 30 minutes</p>
+          <p className="text-muted-foreground mt-1">Premium Furniture & Decor</p>
           <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-semibold">
             🛒 New Customer Registration
           </div>

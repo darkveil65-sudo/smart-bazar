@@ -77,7 +77,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     // Cart
     'cart.title': 'Your Cart',
     'cart.empty': 'Your cart is empty',
-    'cart.emptySubtitle': 'Add some delicious items!',
+    'cart.emptySubtitle': 'Add some premium furniture & decor to your space!',
     'cart.shopNow': 'Shop Now',
     'cart.total': 'Total',
     'cart.checkout': 'Checkout',
@@ -218,7 +218,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     // Cart
     'cart.title': 'Apnar Cart',
     'cart.empty': 'Cart khali ache',
-    'cart.emptySubtitle': 'Kichhu product add korun!',
+    'cart.emptySubtitle': 'Ghorer jonno premium furniture add korun!',
     'cart.shopNow': 'Ekhoni Kinun',
     'cart.total': 'Mot',
     'cart.checkout': 'Checkout',
@@ -359,7 +359,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     // Cart
     'cart.title': 'আপনার কার্ট',
     'cart.empty': 'কার্ট খালি আছে',
-    'cart.emptySubtitle': 'কিছু পণ্য যোগ করুন!',
+    'cart.emptySubtitle': 'আপনার ঘরের জন্য প্রিমিয়াম আসবাবপত্র যোগ করুন!',
     'cart.shopNow': 'এখনই কিনুন',
     'cart.total': 'মোট',
     'cart.checkout': 'চেকআউট',
