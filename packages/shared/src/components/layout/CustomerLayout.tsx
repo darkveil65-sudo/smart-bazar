@@ -106,6 +106,12 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
   const [activeOrderCount, setActiveOrderCount] = useState(0);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [animateCart, setAnimateCart] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Set mounted on client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Global search states
   const [globalProducts, setGlobalProducts] = useState<Product[]>([]);
@@ -232,7 +238,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
     if (initialized && !userData) router.push('/');
   }, [userData, initialized, router]);
 
-  if (!initialized) return (
+  if (!mounted || !initialized) return (
     <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--background)', flexDirection: 'column', gap: 16 }}>
       <div style={{ position: 'relative', width: 56, height: 56 }}>
         <div style={{ width: 56, height: 56, border: '3px solid #e8fff1', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -427,22 +433,24 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
               ))}
             </div>
             {/* Mobile: Cycle button */}
-            <button
-              onClick={handleCycleLang}
-              className="press-effect md:hidden flex items-center justify-center"
-              style={{
-                width: 38, height: 38, borderRadius: 12, border: 'none',
-                background: 'rgba(0,200,83,0.08)',
-                cursor: 'pointer', transition: 'all 0.2s',
-                color: 'var(--foreground)',
-                fontSize: lang === 'bn' ? 12 : 11,
-                fontWeight: 800,
-                fontFamily: lang === 'bn' ? 'var(--font-hind-siliguri), sans-serif' : 'inherit',
-              }}
-              title="Change Language"
-            >
-              {LANGS.find((l) => l.code === lang)?.label || 'EN'}
-            </button>
+            <div className="md:hidden">
+              <button
+                onClick={handleCycleLang}
+                className="press-effect flex items-center justify-center"
+                style={{
+                  width: 38, height: 38, borderRadius: 12, border: 'none',
+                  background: 'rgba(0,200,83,0.08)',
+                  cursor: 'pointer', transition: 'all 0.2s',
+                  color: 'var(--foreground)',
+                  fontSize: lang === 'bn' ? 12 : 11,
+                  fontWeight: 800,
+                  fontFamily: lang === 'bn' ? 'var(--font-hind-siliguri), sans-serif' : 'inherit',
+                }}
+                title="Change Language"
+              >
+                {LANGS.find((l) => l.code === lang)?.label || 'EN'}
+              </button>
+            </div>
 
             {/* Theme Toggle Button */}
             <button

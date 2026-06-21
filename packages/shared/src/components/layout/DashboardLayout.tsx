@@ -48,6 +48,12 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({
   const pathname = usePathname();
   const { userData, loading, initialized, logout } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Set mounted on client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -79,7 +85,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({
   }, [userData, loading, initialized, pathname, router, protectedPrefix]);
 
   // Prevent flashing unauthenticated or unauthorized content
-  if (!initialized || (loading && !userData) || (userData && !isAuthorized)) {
+  if (!mounted || !initialized || (loading && !userData) || (userData && !isAuthorized)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
         <div className="w-8 h-8 border-4 border-slate-700 border-t-blue-500 rounded-full animate-spin"></div>
