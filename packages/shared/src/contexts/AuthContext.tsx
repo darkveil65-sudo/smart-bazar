@@ -40,6 +40,7 @@ export const AuthProvider = ({
   const init = useAuthStore((s) => s.init);
   const loading = useAuthStore((s) => s.loading);
   const initialized = useAuthStore((s) => s.initialized);
+  const authReady = useAuthStore((s) => s.authReady);
   const userData = useAuthStore((s) => s.userData);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
@@ -54,7 +55,8 @@ export const AuthProvider = ({
   }, [init]);
 
   useEffect(() => {
-    if (!mounted || !initialized) return;
+    // CRITICAL: Wait for authReady — cached/stale userData must NOT drive redirects
+    if (!mounted || !initialized || !authReady) return;
 
     if (!userData) {
       // Guest user
@@ -84,7 +86,7 @@ export const AuthProvider = ({
         }
       }
     }
-  }, [mounted, initialized, userData, pathname, router, allowedRoles, defaultAuthPath, isPublicPage]);
+  }, [mounted, initialized, authReady, userData, pathname, router, allowedRoles, defaultAuthPath, isPublicPage]);
 
   // Prevent hydration mismatch by rendering the spinner on the server 
   // and the very first client render, matching exactly what the server outputs.
@@ -92,11 +94,12 @@ export const AuthProvider = ({
   const isRedirecting = 
     mounted && 
     initialized && 
+    authReady &&
     ((!userData && !isPublicPage) || // guest trying to access protected route
      (userData && allowedRoles && !allowedRoles.includes(userData.role)) || // wrong role
      (userData && isPublicPage && defaultAuthPath)); // correct role but on public page
 
-  if (!mounted || loading || !initialized || isRedirecting) {
+  if (!mounted || loading || !initialized || !authReady || isRedirecting) {
     return <FullPageSpinner />;
   }
 

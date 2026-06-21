@@ -8,12 +8,14 @@ interface AuthStore {
   userData: UserData | null;
   loading: boolean;
   initialized: boolean;
+  /** True only after onAuthStateChanged fires — prevents role-based redirects from stale cache */
+  authReady: boolean;
   init: () => () => void;
   logout: () => Promise<void>;
   setUserData: (userData: UserData | null) => void;
 }
 
-// Attempt to read cache synchronously during store creation
+// Attempt to read cache synchronously during store creation for instant UI (not for auth decisions)
 let initialUserData = null;
 let initialLoading = true;
 let initialInitialized = false;
@@ -36,6 +38,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   userData: initialUserData,
   loading: initialLoading,
   initialized: initialInitialized,
+  authReady: false, // ← starts false; becomes true only after onAuthStateChanged fires
 
   setUserData: (userData) => set({ userData }),
 
@@ -54,9 +57,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
     // Safety fallback: if Firebase onAuthStateChanged hangs completely, release the loader after 4s
     const safetyTimeout = setTimeout(() => {
-      if (useAuthStore.getState().loading) {
-        useAuthStore.setState({ loading: false, initialized: true });
+      const state = useAuthStore.getState();
+      if (state.loading) {
+        useAuthStore.setState({ loading: false, initialized: true, authReady: true });
         console.warn("Firebase auth initialization timed out. Proceeding to login...");
+      }
+      // Also release if authReady is still false but we already have data
+      if (!state.authReady && state.initialized) {
+        useAuthStore.setState({ authReady: true });
       }
     }, 4000);
 
@@ -69,24 +77,24 @@ export const useAuthStore = create<AuthStore>((set) => ({
             const userData = { id: userDoc.id, ...userDoc.data() } as UserData;
             document.cookie = `userRole=${userData.role}; path=/; max-age=86400`;
             if (typeof window !== 'undefined') localStorage.setItem('sb_userData', JSON.stringify(userData));
-            set({ user, userData, loading: false, initialized: true });
+            set({ user, userData, loading: false, initialized: true, authReady: true });
           } else {
             // Keep cached data if it exists during transient errors, otherwise null
             const hasCache = typeof window !== 'undefined' && localStorage.getItem('sb_userData');
-            if (!hasCache) set({ user, userData: null, loading: false, initialized: true });
-            else set({ user, loading: false, initialized: true });
+            if (!hasCache) set({ user, userData: null, loading: false, initialized: true, authReady: true });
+            else set({ user, loading: false, initialized: true, authReady: true });
           }
          } catch (error) {
            console.error('Auth initialization error:', error);
            // Do not wipe userData aggressively on simple network errors
-           set({ user, loading: false, initialized: true });
+           set({ user, loading: false, initialized: true, authReady: true });
          } finally {
            clearTimeout(safetyTimeout);
          }
       } else {
         document.cookie = 'userRole=; path=/; max-age=0';
         if (typeof window !== 'undefined') localStorage.removeItem('sb_userData');
-        set({ user: null, userData: null, loading: false, initialized: true });
+        set({ user: null, userData: null, loading: false, initialized: true, authReady: true });
         clearTimeout(safetyTimeout);
       }
     });
