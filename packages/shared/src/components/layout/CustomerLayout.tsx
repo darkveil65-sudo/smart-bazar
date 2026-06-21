@@ -195,6 +195,13 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
     window.dispatchEvent(new Event('theme-change'));
   };
 
+  const handleCycleLang = () => {
+    const currentIndex = LANGS.findIndex((l) => l.code === lang);
+    const nextIndex = (currentIndex + 1) % LANGS.length;
+    setLang(LANGS[nextIndex].code);
+  };
+
+
   /* real-time active orders count for badge */
   useEffect(() => {
     if (!userData?.id) return;
@@ -400,7 +407,8 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
           {/* Right actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Language Switcher */}
-            <div style={{ display: 'flex', gap: 2, background: 'var(--border-light)', borderRadius: 10, padding: '3px' }}>
+            {/* Desktop: Full selector */}
+            <div className="hidden md:flex" style={{ gap: 2, background: 'var(--border-light)', borderRadius: 10, padding: '3px' }}>
               {LANGS.map(({ code, label }) => (
                 <button key={code} onClick={() => setLang(code)}
                   style={{
@@ -418,15 +426,32 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
                 </button>
               ))}
             </div>
+                  {/* Mobile: Cycle button */}
+            <button
+              onClick={handleCycleLang}
+              className="press-effect md:hidden"
+              style={{
+                width: 38, height: 38, borderRadius: 12, border: 'none',
+                background: 'rgba(0,200,83,0.08)',
+                display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', transition: 'all 0.2s',
+                color: 'var(--foreground)',
+                fontSize: lang === 'bn' ? 12 : 11,
+                fontWeight: 800,
+                fontFamily: lang === 'bn' ? 'var(--font-hind-siliguri), sans-serif' : 'inherit',
+              }}
+              title="Change Language"
+            >
+              {LANGS.find((l) => l.code === lang)?.label || 'EN'}
+            </button>
 
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="press-effect"
+              className="press-effect hidden md:flex items-center justify-center"
               style={{
                 width: 38, height: 38, borderRadius: 12, border: 'none',
                 background: 'rgba(0,200,83,0.08)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', transition: 'all 0.2s',
                 color: 'var(--foreground)',
               }}
@@ -457,13 +482,12 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
             {/* Cart */}
             <button
               onClick={() => router.push('/cart')}
-              className="press-effect cart-nav-btn"
+              className="press-effect cart-nav-btn hidden md:flex items-center justify-center"
               style={{
                 width: 38, height: 38, borderRadius: 12, border: 'none',
                 background: itemCount > 0
                   ? 'linear-gradient(135deg, #00a045, #00c853)'
                   : 'rgba(0,200,83,0.08)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', position: 'relative',
                 transition: 'all 0.2s',
                 boxShadow: itemCount > 0 ? '0 4px 14px rgba(0,200,83,0.35)' : 'none',
@@ -493,47 +517,49 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
         </div>
 
         {/* -- Search row --------------------------------------------- */}
-        <div className="w-full max-w-[430px] md:max-w-3xl mx-auto px-4 md:px-8 pb-2.5">
-          <div className="premium-search-pill">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search for products..."
-              value={globalSearchQuery}
-              onChange={(e) => setGlobalSearchQuery(e.target.value)}
-              style={{
-                flex: 1,
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                fontSize: 13,
-                color: 'var(--foreground)',
-                fontWeight: 500,
-              }}
-            />
-            {globalSearchQuery && (
-              <button 
-                onClick={() => { setGlobalSearchQuery(''); }} 
+        {pathname !== '/home' && (
+          <div className="w-full max-w-[430px] md:max-w-3xl mx-auto px-4 md:px-8 pb-2.5">
+            <div className="premium-search-pill">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search for products..."
+                value={globalSearchQuery}
+                onChange={(e) => setGlobalSearchQuery(e.target.value)}
                 style={{
-                  background: 'none',
+                  flex: 1,
+                  background: 'transparent',
                   border: 'none',
-                  cursor: 'pointer',
-                  color: '#94a3b8',
-                  padding: 0,
-                  fontSize: 14,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  outline: 'none',
+                  fontSize: 13,
+                  color: 'var(--foreground)',
+                  fontWeight: 500,
                 }}
-              >
-                ✕
-              </button>
-            )}
+              />
+              {globalSearchQuery && (
+                <button 
+                  onClick={() => { setGlobalSearchQuery(''); }} 
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#94a3b8',
+                    padding: 0,
+                    fontSize: 14,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </header>
 
       {/* === GLOBAL SEARCH OVERLAY ================================== */}
