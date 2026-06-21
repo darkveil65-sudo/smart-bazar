@@ -4,68 +4,108 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { productService } from '@smart-bazar/shared/lib/services/productService';
 import { categoryService } from '@smart-bazar/shared/lib/services/categoryService';
-import { storeService } from '@smart-bazar/shared/lib/services/storeService';
-import { heroBannerService } from '@smart-bazar/shared/lib/services/heroBannerService';
-import { Product, Category, Store, HeroBanner } from '@smart-bazar/shared/types/firestore';
+import { Product, Category } from '@smart-bazar/shared/types/firestore';
 import { useCartStore } from '@smart-bazar/shared/stores/cartStore';
 import { useAuthStore } from '@smart-bazar/shared/stores/authStore';
 import { useAppConfig } from '@smart-bazar/shared/contexts/AppConfigContext';
 import { useLanguage } from '@smart-bazar/shared/contexts/LanguageContext';
-import { pluralize } from '@smart-bazar/shared/lib/utils/string';
 import ProductCard from './_components/ProductCard';
 import EmptyState from '@smart-bazar/shared/components/ui/EmptyState';
 
-
-/* -- Color palette cycles across categories -------------------------------- */
-const CAT_PALETTES = [
-  { color: '#00c853', bg: '#e8fff1' },
-  { color: '#f43f5e', bg: '#fff1f2' },
-  { color: '#0ea5e9', bg: '#eff6ff' },
-  { color: '#ffab00', bg: '#fffbeb' },
-  { color: '#f97316', bg: '#fff7ed' },
-  { color: '#7c3aed', bg: '#f5f3ff' },
-  { color: '#14b8a6', bg: '#f0fdfa' },
-  { color: '#e11d48', bg: '#fff1f2' },
+const HERO_SLIDES = [
+  {
+    id: 'slide-1',
+    badge: '🌿 Ergonomic WFH',
+    headline: 'Ergonomic WFH',
+    sub: 'Designed for posture, crafted for comfort. Perfect support for long work sessions.',
+    cta: 'Shop Chairs',
+    promoCode: 'WFH40',
+    imageUrl: 'https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?auto=format&fit=crop&w=600&q=80',
+    category: 'chairs',
+  },
+  {
+    id: 'slide-2',
+    badge: '✨ Premium Choice',
+    headline: 'Luxury Velvet Sofas',
+    sub: 'Plush velvet fabrics in deep rich tones. Redefine your living room lounge.',
+    cta: 'Explore Sofas',
+    promoCode: 'LUXE30',
+    imageUrl: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=600&q=80',
+    category: 'sofas',
+  },
+  {
+    id: 'slide-3',
+    badge: '💡 Warm Vibe',
+    headline: 'Minimalist Lighting',
+    sub: 'Sleek slate base with ambient amber glows. Perfect study companion.',
+    cta: 'Explore Lamps',
+    promoCode: 'LIGHT15',
+    imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80',
+    category: 'lighting',
+  },
 ];
 
-/* -- Per-category hero gradient palettes ----------------------------------- */
-// const HERO_GRADIENTS = [
-//   'linear-gradient(135deg, #004d20 0%, #00c853 60%, #1de9b6 100%)',
-//   'linear-gradient(135deg, #0d47a1 0%, #1976d2 55%, #42a5f5 100%)',
-//   'linear-gradient(135deg, #7c1fa8 0%, #ab47bc 55%, #ce93d8 100%)',
-//   'linear-gradient(135deg, #b71c1c 0%, #e53935 55%, #ff8a65 100%)',
-//   'linear-gradient(135deg, #e65100 0%, #f57c00 55%, #ffd54f 100%)',
-// ];
-// const HERO_BADGES = ['⚡ Express Delivery', '🌿 100% Fresh', '💰 Best Prices', '🎁 Top Deals', '🚴 Fast Delivery'];
-// const HERO_EMOJIS = ['🛒', '🥦', '🍱', '🎀', '🍞'];
+const CATEGORIES_LIST = [
+  { name: 'Chairs', emoji: '🪑', id: 'chairs' },
+  { name: 'Tables', emoji: '🪵', id: 'tables' },
+  { name: 'Beds', emoji: '🛏️', id: 'beds' },
+  { name: 'Sofas', emoji: '🛋️', id: 'sofas' },
+  { name: 'Lighting', emoji: '💡', id: 'lighting' },
+  { name: 'Shelves', emoji: '🧱', id: 'shelves' },
+  { name: 'Decor', emoji: '🪴', id: 'decor' },
+];
 
-const Skeleton = ({ h = 160, r = 16, w = '100%' }: { h?: number; r?: number; w?: string }) => (
-  <div style={{ height: h, width: w, borderRadius: r }} className="animate-shimmer" />
-);
-
-/* =========================================================================== */
 export default function HomePage() {
   const router = useRouter();
   const { userData } = useAuthStore();
   const { getDeliverySlot } = useAppConfig();
   const { t } = useLanguage();
-  const [products, setProducts]       = useState<Product[]>([]);
-  const [dbStores, setDbStores]       = useState<Store[]>([]);
-  const [dbBanners, setDbBanners]     = useState<HeroBanner[]>([]);
-  const [loading, setLoading]         = useState(true);
+  
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [activeStore, setActiveStore]           = useState<string | null>(null);
-  const [categories, setCategories]             = useState<Category[]>([]);
-  const [activeCategory, setActiveCategory]     = useState<string | null>(null);
-  const [heroSlide, setHeroSlide]     = useState(0);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [heroSlide, setHeroSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  
   const searchRef = useRef<HTMLInputElement>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const { addItem, items, updateQuantity } = useCartStore();
+
+  const liveSlot = getDeliverySlot();
+  const firstName = userData?.name?.split(' ')[0] ?? 'Guest';
+
+  // Load products & categories
+  useEffect(() => {
+    const unsubProducts = productService.subscribeToProducts((prods) => {
+      setProducts(prods.filter((p) => p.isAvailable));
+      setLoading(false);
+    });
+
+    const unsubCategories = categoryService.subscribeToCategories('furniture-store', setCategories);
+
+    return () => {
+      unsubProducts();
+      unsubCategories();
+    };
+  }, []);
+
+  // Timer interval for Hero Slider
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setHeroSlide((s) => (s + 1) % HERO_SLIDES.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [isPaused]);
+
+  // Load recent searches
   useEffect(() => {
     try {
       const stored = localStorage.getItem('sb_recent_searches');
@@ -73,189 +113,36 @@ export default function HomePage() {
         setRecentSearches(JSON.parse(stored));
       }
     } catch (e) {
-      console.error(e);
+      // Ignored
     }
   }, []);
 
-  const saveSearchQuery = useCallback((query: string) => {
-    const trimmed = query.trim();
-    if (!trimmed) return;
-    setRecentSearches(prev => {
-      const filtered = prev.filter(q => q.toLowerCase() !== trimmed.toLowerCase());
-      const updated = [trimmed, ...filtered].slice(0, 5);
-      try {
-        localStorage.setItem('sb_recent_searches', JSON.stringify(updated));
-      } catch (e) {
-        console.error(e);
+  // Deal of the day ticking timer state
+  const [timeLeft, setTimeLeft] = useState({ hours: 12, minutes: 30, seconds: 0 });
+
+  useEffect(() => {
+    const updateTimer = () => {
+      const now = new Date();
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+      const diff = endOfDay.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setTimeLeft({ hours: 23, minutes: 59, seconds: 59 });
+      } else {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+        setTimeLeft({ hours, minutes, seconds });
       }
-      return updated;
-    });
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  const clearRecentSearches = useCallback(() => {
-    setRecentSearches([]);
-    try {
-      localStorage.removeItem('sb_recent_searches');
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
-
-  const handleRecentClick = useCallback((query: string) => {
-    setSearchQuery(query);
-    setDebouncedSearch(query);
-    saveSearchQuery(query);
-    setSearchFocused(false);
-  }, [saveSearchQuery]);
-
-  const handleCopyPromo = useCallback((e: React.MouseEvent, code: string) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(code);
-    setCopiedCode(code);
-    setTimeout(() => setCopiedCode(null), 2000);
-  }, []);
-
-  // Debounce search input — wait 300ms after last keystroke
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchQuery(value);
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => setDebouncedSearch(value), 300);
-  }, []);
-  const { addItem, items, updateQuantity } = useCartStore();
-
-  // Alias for backward compat in render code
-  const dbCategories = dbStores;
-  const subCategories = categories;
-  const activeSubCategory = activeCategory;
-  const setActiveSubCategory = setActiveCategory;
-
-  const liveSlot = getDeliverySlot();
-
-  useEffect(() => {
-    const u1 = productService.subscribeToProducts((prods) => {
-      setProducts(prods.filter((p) => p.isAvailable));
-      setLoading(false);
-    });
-    const u2 = storeService.subscribeToStores(setDbStores);
-    const u3 = heroBannerService.subscribe(setDbBanners);
-    return () => { u1(); u2(); u3(); };
-  }, []);
-
-  useEffect(() => {
-    if (activeStore) {
-      const u = categoryService.subscribeToCategories(activeStore, setCategories);
-      setActiveCategory(null);
-      return () => u();
-    } else {
-      setCategories([]);
-    }
-  }, [activeStore]);
-
-  const [isPaused, setIsPaused] = useState(false);
-
-
-  const getCartQty = (id: string) => items.find((i) => i.product.id === id)?.quantity || 0;
-
-  // Backward-compat: old products used `category` field with old IDs (e.g. 'mudikhana','beauty').
-  // If a product has no `store` field, map its old category to the closest store.
-  const OLD_CAT_TO_STORE: Record<string, string> = {
-    furniture: 'furniture-store', home: 'furniture-store',
-  };
-  const getEffectiveStore = (p: Product) =>
-    p.store || OLD_CAT_TO_STORE[(p.category || '').toLowerCase()] || 'furniture-store';
-
-  const filteredProducts = products.filter((p) => {
-    // Use debounced value for filtering (not raw input)
-    const matchSearch = !debouncedSearch || p.name.toLowerCase().includes(debouncedSearch.toLowerCase())
-      || p.description?.toLowerCase().includes(debouncedSearch.toLowerCase());
-    const effectiveStore = getEffectiveStore(p);
-    // Show ONLY 'furniture-store' products, removing grocery, beauty, and others
-    const matchStore    = effectiveStore === 'furniture-store';
-    const matchCategory = !activeCategory || p.category === activeCategory;
-    return matchSearch && matchStore && matchCategory;
-  });
-
-  // Build product groups using REAL Firestore stores, restricted to 'furniture-store' only
-  const productsByCategory = dbStores
-    .filter((s) => s.id === 'furniture-store')
-    .map((s, i) => ({
-      ...s,
-      palette: CAT_PALETTES[i % CAT_PALETTES.length],
-      products: products.filter((p) => getEffectiveStore(p) === s.id).slice(0, 8),
-    }))
-    .filter((g) => g.products.length > 0);
-
-  // Build hero slides: prefer Firestore banners, fall back to category-derived slides
-  const firestoreBannerSlides = dbBanners
-    .filter(b => b.isActive)
-    .map(b => ({
-      catId:    '',
-      gradient: b.gradient,
-      emoji:    '🛒',
-      headline: b.headline,
-      sub:      b.sub,
-      cta:      b.cta,
-      badge:    b.badge,
-      imageUrl: b.imageUrl ?? null,
-      promoCode: (b as any).promoCode ?? 'SBWELCOME',
-    }));
-
-  const categoryBannerSlides = dbStores
-    .filter(s => s.id === 'furniture-store')
-    .map((s) => ({
-      catId:    s.id,
-      gradient: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #10B981 100%)', // premium emerald gradient
-      emoji:    '🛋️',
-      headline: s.name,
-      sub:      'Premium interior & decor designs',
-      cta:      'Shop Now',
-      badge:    '🌿 Premium Choice',
-      imageUrl: s.imageUrl ?? null,
-      promoCode: 'FURNI20',
-    }));
-
-  const premiumSlides = [
-    {
-      catId:    'furniture-store',
-      gradient: 'linear-gradient(135deg, #0B1326 0%, #1E293B 50%, #00A6E0 100%)', // electric cyan gradient
-      emoji:    '🪑',
-      headline: 'Ergonomic Office',
-      sub:      'Upgrade your WFH setup with luxury chairs',
-      cta:      'Shop Chairs',
-      badge:    '🔥 Top Trend',
-      imageUrl: null,
-      promoCode: 'CHAIR20',
-    },
-    {
-      catId:    'furniture-store',
-      gradient: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #F59E0B 100%)', // warm amber gradient
-      emoji:    '💡',
-      headline: 'Ambient Lights',
-      sub:      'Designer desk lamps and warm study lighting',
-      cta:      'Explore Lamps',
-      badge:    '✨ Warm Vibe',
-      imageUrl: null,
-      promoCode: 'LIGHT15',
-    }
-  ];
-
-  // Use custom banners if any exist, otherwise fall back to category and premium slides
-  const heroSlidesFallback = firestoreBannerSlides.length > 0
-    ? firestoreBannerSlides
-    : [
-        ...categoryBannerSlides,
-        ...premiumSlides
-      ];
-
-  const firstName = userData?.name?.split(' ')[0] ?? 'Guest';
-
-  useEffect(() => {
-    if (isPaused || heroSlidesFallback.length <= 1) return;
-    const t = setInterval(() => {
-      setHeroSlide(s => (s + 1) % heroSlidesFallback.length);
-    }, 4000);
-    return () => clearInterval(t);
-  }, [isPaused, heroSlidesFallback.length]);
+  const formatTime = (val: number) => String(val).padStart(2, '0');
 
   // Swipe & drag gestures support for Hero banner
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -283,9 +170,9 @@ export default function HomePage() {
     }
     const distance = touchStartX - touchEndX;
     if (distance > minSwipeDistance) {
-      setHeroSlide(s => (s + 1) % heroSlidesFallback.length);
+      setHeroSlide((s) => (s + 1) % HERO_SLIDES.length);
     } else if (distance < -minSwipeDistance) {
-      setHeroSlide(s => (s - 1 + heroSlidesFallback.length) % heroSlidesFallback.length);
+      setHeroSlide((s) => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
     }
     setIsPaused(false);
   };
@@ -309,9 +196,9 @@ export default function HomePage() {
     if (!dragStartX || !dragEndX) return;
     const distance = dragStartX - dragEndX;
     if (distance > minSwipeDistance) {
-      setHeroSlide(s => (s + 1) % heroSlidesFallback.length);
+      setHeroSlide((s) => (s + 1) % HERO_SLIDES.length);
     } else if (distance < -minSwipeDistance) {
-      setHeroSlide(s => (s - 1 + heroSlidesFallback.length) % heroSlidesFallback.length);
+      setHeroSlide((s) => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
     }
   };
 
@@ -321,37 +208,391 @@ export default function HomePage() {
     }
   };
 
+  const saveSearchQuery = useCallback((query: string) => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    setRecentSearches((prev) => {
+      const filtered = prev.filter((q) => q.toLowerCase() !== trimmed.toLowerCase());
+      const updated = [trimmed, ...filtered].slice(0, 5);
+      try {
+        localStorage.setItem('sb_recent_searches', JSON.stringify(updated));
+      } catch (e) {
+        // Ignored
+      }
+      return updated;
+    });
+  }, []);
 
+  const clearRecentSearches = useCallback(() => {
+    setRecentSearches([]);
+    try {
+      localStorage.removeItem('sb_recent_searches');
+    } catch (e) {
+      // Ignored
+    }
+  }, []);
 
-  /* -------------------------------------------------------------------------- */
+  const handleRecentClick = useCallback((query: string) => {
+    setSearchQuery(query);
+    setDebouncedSearch(query);
+    saveSearchQuery(query);
+    setSearchFocused(false);
+  }, [saveSearchQuery]);
+
+  const handleCopyPromo = useCallback((e: React.MouseEvent, code: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  }, []);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => setDebouncedSearch(value), 300);
+  }, []);
+
+  const getCartQty = (id: string) => items.find((i) => i.product.id === id)?.quantity || 0;
+
+  const getEffectiveStore = (p: Product) =>
+    p.store || 'furniture-store';
+
+  const handleCategoryClick = (catId: string) => {
+    setActiveCategory((prev) => (prev === catId ? null : catId));
+  };
+
+  // Build item lists dynamically, with premium fallbacks
+  const getDealProducts = () => {
+    const list = products.filter((p) => p.isAvailable).slice(0, 3);
+    const mockFallbacks = [
+      {
+        id: 'deal-1',
+        name: 'Ergonomic Mesh WFH Chair',
+        price: 4999,
+        mrp: 7999,
+        imageUrl: 'https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?auto=format&fit=crop&w=400&q=80',
+        category: 'chairs',
+        isAvailable: true,
+        stock: 5,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'deal-2',
+        name: 'Nordic Oak Study Table',
+        price: 12999,
+        mrp: 18999,
+        imageUrl: 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=400&q=80',
+        category: 'tables',
+        isAvailable: true,
+        stock: 3,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'deal-3',
+        name: 'Velvet Lounge Sofa Chair',
+        price: 8499,
+        mrp: 12499,
+        imageUrl: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=400&q=80',
+        category: 'chairs',
+        isAvailable: true,
+        stock: 4,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+    ] as Product[];
+
+    return [...list, ...mockFallbacks.slice(list.length)];
+  };
+
+  const dealItems = getDealProducts();
+
+  const getBestSellers = () => {
+    const dealIds = new Set(dealItems.map((d) => d.id));
+    const available = products.filter((p) => p.isAvailable && !dealIds.has(p.id));
+
+    const mockFallbacks = [
+      {
+        id: 'best-1',
+        name: 'Minimalist Slate Study Desk',
+        price: 6499,
+        mrp: 8999,
+        imageUrl: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=400&q=80',
+        category: 'tables',
+        description: 'Sleek dark slate study desk featuring robust dual-level open metal shelves and premium cable organization slot.',
+        isAvailable: true,
+        stock: 12,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'best-2',
+        name: 'Amber Glow Minimalist Desk Lamp',
+        price: 1499,
+        mrp: 2499,
+        imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=400&q=80',
+        category: 'lighting',
+        isAvailable: true,
+        stock: 25,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'best-3',
+        name: 'Nordic Oak Bedside Drawer',
+        price: 3499,
+        mrp: 4999,
+        imageUrl: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=400&q=80',
+        category: 'shelves',
+        isAvailable: true,
+        stock: 8,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'best-4',
+        name: 'Velvet Lounge Sofa Cushion',
+        price: 899,
+        mrp: 1499,
+        imageUrl: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=400&q=80',
+        category: 'decor',
+        isAvailable: true,
+        stock: 45,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'best-5',
+        name: 'Oak wood floating shelves',
+        price: 1999,
+        mrp: 2999,
+        imageUrl: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=400&q=80',
+        category: 'shelves',
+        isAvailable: true,
+        stock: 15,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+    ] as Product[];
+
+    const result = [...available];
+    for (let i = result.length; i < 5; i++) {
+      result.push(mockFallbacks[i - result.length]);
+    }
+
+    return {
+      featured: result[0],
+      grid: result.slice(1, 5),
+    };
+  };
+
+  const { featured: bestFeatured, grid: bestGrid } = getBestSellers();
+
+  const getLatestProducts = () => {
+    const excludedIds = new Set([
+      ...dealItems.map((d) => d.id),
+      bestFeatured.id,
+      ...bestGrid.map((g) => g.id),
+    ]);
+    const available = products.filter((p) => p.isAvailable && !excludedIds.has(p.id));
+
+    const mockLatest = [
+      {
+        id: 'latest-1',
+        name: 'Scandinavian Shelving Rack',
+        price: 7999,
+        mrp: 10999,
+        imageUrl: 'https://images.unsplash.com/photo-1594620302200-9a7b2241a116?auto=format&fit=crop&w=400&q=80',
+        category: 'shelves',
+        isAvailable: true,
+        stock: 7,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'latest-2',
+        name: 'Hanging Industrial Pendant Lamp',
+        price: 2499,
+        mrp: 3999,
+        imageUrl: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=400&q=80',
+        category: 'lighting',
+        isAvailable: true,
+        stock: 14,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'latest-3',
+        name: 'Linen Accent Cushion Cover',
+        price: 699,
+        mrp: 999,
+        imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=400&q=80',
+        category: 'decor',
+        isAvailable: true,
+        stock: 30,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'latest-4',
+        name: 'Office Memory Foam Footrest',
+        price: 1299,
+        mrp: 1999,
+        imageUrl: 'https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?auto=format&fit=crop&w=400&q=80',
+        category: 'chairs',
+        isAvailable: true,
+        stock: 22,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'latest-5',
+        name: 'Aesthetic Oak Writing Desk',
+        price: 14999,
+        mrp: 21999,
+        imageUrl: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=400&q=80',
+        category: 'tables',
+        isAvailable: true,
+        stock: 4,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'latest-6',
+        name: 'Solid Oak Circular Coffee Table',
+        price: 5499,
+        mrp: 7999,
+        imageUrl: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=400&q=80',
+        category: 'tables',
+        isAvailable: true,
+        stock: 9,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'latest-7',
+        name: 'Metal Accent Arc Floor Lamp',
+        price: 3899,
+        mrp: 5999,
+        imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=400&q=80',
+        category: 'lighting',
+        isAvailable: true,
+        stock: 11,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'latest-8',
+        name: 'Rattan Circular Accent Mirror',
+        price: 1599,
+        mrp: 2499,
+        imageUrl: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&q=80',
+        category: 'decor',
+        isAvailable: true,
+        stock: 18,
+        store: 'furniture-store',
+        vendorId: 'vendor-1',
+        createdAt: new Date().toISOString(),
+      },
+    ] as Product[];
+
+    const result = [...available];
+    for (let i = result.length; i < 8; i++) {
+      result.push(mockLatest[i - result.length]);
+    }
+    return result.slice(0, 8);
+  };
+
+  const latestItems = getLatestProducts();
+
+  // Combine real + mock products for filter/search
+  const getUnifiedCatalog = () => {
+    const catalogMap = new Map<string, Product>();
+
+    const mocks = [
+      ...dealItems,
+      bestFeatured,
+      ...bestGrid,
+      ...latestItems,
+    ];
+    mocks.forEach((m) => catalogMap.set(m.id, m));
+
+    products.forEach((p) => {
+      if (p.isAvailable && getEffectiveStore(p) === 'furniture-store') {
+        catalogMap.set(p.id, p);
+      }
+    });
+
+    return Array.from(catalogMap.values());
+  };
+
+  const unifiedCatalog = getUnifiedCatalog();
+
+  const filteredProducts = unifiedCatalog.filter((p) => {
+    const matchSearch =
+      !debouncedSearch ||
+      p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      p.description?.toLowerCase().includes(debouncedSearch.toLowerCase());
+
+    let matchCategory = true;
+    if (activeCategory) {
+      const targetCatName = activeCategory.toLowerCase();
+      const productCat = (p.category || '').toLowerCase();
+      const productName = p.name.toLowerCase();
+
+      // Find real Firestore category name to match against
+      const realCatName = categories.find((c) => c.id === p.category)?.name.toLowerCase() || '';
+
+      matchCategory =
+        productCat === targetCatName ||
+        productName.includes(targetCatName) ||
+        realCatName.includes(targetCatName);
+    }
+    return matchSearch && matchCategory;
+  });
+
   return (
-    <div style={{ background: 'transparent', minHeight: '100vh' }}>
-
+    <div className="min-h-screen bg-slate-50/30 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 pb-16 font-sans">
       {/* === SEARCH BAR =================================================== */}
-      <div style={{
-        background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(16px)',
-        padding: '10px 16px', position: 'sticky', top: 0, zIndex: 20,
-        borderBottom: '1px solid rgba(0,200,83,0.10)',
-      }}>
+      <div className="sticky top-0 z-20 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md px-4 py-3 border-b border-slate-100 dark:border-zinc-800">
         <div
-          className="input-search"
-          style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '11px 14px', cursor: 'text',
-            boxShadow: searchFocused ? '0 0 0 3px rgba(0,200,83,0.15)' : '0 2px 8px rgba(0,0,0,0.06)',
-          }}
+          className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/50 dark:border-zinc-700/50 cursor-text shadow-sm focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-all"
           onClick={() => searchRef.current?.focus()}
         >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
-            stroke={searchFocused ? '#00c853' : '#94a3b8'} strokeWidth="2" style={{ flexShrink: 0, transition: 'color 0.2s' }}>
-            <circle cx="8" cy="8" r="5.5"/><path d="M13 13L16 16" strokeLinecap="round"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            stroke={searchFocused ? '#10B981' : '#94a3b8'}
+            strokeWidth="2.2"
+            className="flex-shrink-0 transition-colors"
+          >
+            <circle cx="8" cy="8" r="5.5" />
+            <path d="M13 13L16 16" strokeLinecap="round" />
           </svg>
           <input
             ref={searchRef}
             id="home-search"
             name="home-search"
             type="text"
-            placeholder={t('home.search')}
+            placeholder={t('home.search') || 'Search premium furniture & decor...'}
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             onFocus={() => setSearchFocused(true)}
@@ -362,11 +603,16 @@ export default function HomePage() {
                 searchRef.current?.blur();
               }
             }}
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 14, color: '#0a1628', fontFamily: 'var(--font-sans)' }}
+            className="flex-1 bg-transparent border-none outline-none text-sm font-medium text-slate-800 dark:text-zinc-100 placeholder-slate-400"
           />
           {searchQuery && (
-            <button onClick={() => { setSearchQuery(''); setDebouncedSearch(''); }}
-              style={{ background: '#f1f5f9', border: 'none', padding: '2px 6px', borderRadius: 6, cursor: 'pointer', fontSize: 11, color: '#64748b', fontWeight: 700 }}>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setDebouncedSearch('');
+              }}
+              className="p-1 rounded-md bg-slate-200/60 dark:bg-zinc-700 text-slate-500 dark:text-zinc-400 hover:bg-slate-300/60 transition-colors text-xs"
+            >
               ✕
             </button>
           )}
@@ -374,58 +620,32 @@ export default function HomePage() {
 
         {/* Search Overlay */}
         {searchFocused && !searchQuery && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            background: 'var(--card)',
-            boxShadow: '0 12px 28px rgba(0,0,0,0.12)',
-            borderBottom: '1.5px solid rgba(0,200,83,0.12)',
-            borderBottomLeftRadius: 16,
-            borderBottomRightRadius: 16,
-            padding: '18px 16px',
-            zIndex: 30,
-            animation: 'fadeInDown 0.2s ease-out',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 16,
-          }}>
+          <div className="absolute top-full left-0 right-0 bg-white dark:bg-zinc-900 shadow-xl border-b border-slate-100 dark:border-zinc-800 rounded-b-2xl p-5 z-30 animate-fadeInDown flex flex-col gap-5">
             {recentSearches.length > 0 && (
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recent Searches</span>
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-xs font-bold font-display text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+                    Recent Searches
+                  </span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       clearRecentSearches();
                     }}
-                    style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}
+                    className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors"
                   >
                     Clear All
                   </button>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <div className="flex flex-wrap gap-2">
                   {recentSearches.map((q, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleRecentClick(q)}
-                      style={{
-                        background: 'var(--muted)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '20px',
-                        padding: '6px 14px',
-                        fontSize: 12,
-                        color: 'var(--foreground)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                      }}
-                      className="category-chip"
+                      className="px-4 py-2 text-xs font-semibold rounded-full bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-all flex items-center gap-1.5"
                     >
-                      <span style={{ fontSize: 12 }}>🕒</span>
-                      <span style={{ fontWeight: 600 }}>{q}</span>
+                      <span className="opacity-60">🕒</span>
+                      <span>{q}</span>
                     </button>
                   ))}
                 </div>
@@ -433,486 +653,685 @@ export default function HomePage() {
             )}
 
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                <span style={{ fontSize: 13 }}>🔥</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trending Searches</span>
+              <div className="flex items-center gap-1.5 mb-3">
+                <span className="text-sm">🔥</span>
+                <span className="text-xs font-bold font-display text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+                  Trending Searches
+                </span>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {['Fresh Milk', 'Organic Banana', 'Chocolate cookies', 'Premium Tea', 'Sofa'].map((q, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleRecentClick(q)}
-                    style={{
-                      background: 'rgba(0, 200, 83, 0.06)',
-                      border: '1px solid rgba(0, 200, 83, 0.18)',
-                      borderRadius: '20px',
-                      padding: '6px 14px',
-                      fontSize: 12,
-                      color: '#00a045',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                    }}
-                    className="category-chip"
-                  >
-                    <span style={{ fontSize: 12 }}>📈</span>
-                    <span style={{ fontWeight: 600 }}>{q}</span>
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {['Ergonomic Chairs', 'Study Desk', 'Velvet Sofas', 'Pendant Lamps', 'Decor Drawer'].map(
+                  (q, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleRecentClick(q)}
+                      className="px-4 py-2 text-xs font-bold rounded-full bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100/50 dark:border-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100/50 dark:hover:bg-emerald-950/40 transition-all flex items-center gap-1.5"
+                    >
+                      <span>📈</span>
+                      <span>{q}</span>
+                    </button>
+                  )
+                )}
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* === CATEGORY CHIPS (top scroll row) ============================= */}
-      {!searchQuery && (
-        <div style={{
-          background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(0,200,83,0.08)', padding: '12px 0',
-        }}>
-          <div style={{ display: 'flex', overflowX: 'auto', padding: '0 16px', gap: 10, scrollbarWidth: 'none' }} className="hide-scrollbar">
-            {[...dbStores].filter(s => s.id === 'furniture-store').map((s, i) => {
-              const isActive     = activeStore === s.id;
-              const isComingSoon = s.isComingSoon === true;
-              return (
-                <div key={s.id} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', animation: `fadeInUp 0.4s ${i * 60}ms ease-out both` }}>
-                  <button
-                    className="category-chip"
-                    onClick={() => { if (!isComingSoon) router.push(`/category/${s.id}`); }}
-                    style={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
-                      padding: '4px 6px', border: 'none', minWidth: 64, flexShrink: 0,
-                      background: 'transparent',
-                      cursor: isComingSoon ? 'not-allowed' : 'pointer',
-                      opacity: isComingSoon ? 0.65 : 1,
-                    }}
-                  >
-                    <div style={{
-                      width: 58, height: 58, borderRadius: 18, overflow: 'hidden',
-                      background: isActive ? 'linear-gradient(135deg,#00a045,#00c853)' : 'rgba(255,255,255,0.9)',
-                      display: 'flex', justifyContent: 'center', alignItems: 'center',
-                      border: isActive ? '2.5px solid #00c853' : '2px solid rgba(0,200,83,0.12)',
-                      boxShadow: isActive ? '0 6px 18px rgba(0,200,83,0.30)' : '0 2px 10px rgba(0,0,0,0.06)',
-                      transform: isActive ? 'scale(1.06)' : 'scale(1)',
-                      transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-                      padding: s.imageUrl ? 3 : 0,
-                    }}>
-                      {s.imageUrl
-                        // eslint-disable-next-line @next/next/no-img-element
-                        ? <img src={s.imageUrl} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 15 }} />
-                        : <span style={{ fontSize: 26 }}>🪑</span>
-                      }
-                    </div>
-                    <span style={{ fontSize: 10, fontWeight: isActive ? 800 : 600, whiteSpace: 'nowrap', color: isActive ? '#00a045' : '#475569' }}>
-                      {s.name}
-                    </span>
-                  </button>
-                  {isComingSoon && (
-                    <div style={{
-                      position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)',
-                      background: 'linear-gradient(135deg,#ffab00,#ff8f00)', color: '#fff',
-                      fontSize: 7, fontWeight: 800, padding: '2px 6px', borderRadius: 6,
-                      whiteSpace: 'nowrap', letterSpacing: '0.06em', zIndex: 5,
-                      boxShadow: '0 2px 8px rgba(255,171,0,0.4)',
-                    }}>SOON</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      <div style={{ paddingBottom: 80 }}>
-
-        {/* === SEARCH RESULTS ============================================== */}
-        {searchQuery && (
-          <div style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)', padding: '16px', marginBottom: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-              <span style={{ fontSize: 14 }}>🔍</span>
-              <p style={{ fontSize: 13, color: '#64748b', fontWeight: 600, margin: 0 }}>
-                <span style={{ color: '#0a1628', fontWeight: 800 }}>{filteredProducts.length}</span> {pluralize(filteredProducts.length, 'result', 'results')} for &quot;{searchQuery}&quot;
-              </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20">
+        {/* === FILTERED / SEARCH RESULT VIEW ============================== */}
+        {searchQuery || activeCategory ? (
+          <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+              <div>
+                <h2 className="text-3xl font-extrabold font-display text-slate-900 dark:text-zinc-100 tracking-tight">
+                  {searchQuery
+                    ? `Results for "${searchQuery}"`
+                    : `${activeCategory?.toUpperCase()} Collection`}
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1.5">
+                  Showing {filteredProducts.length} premium design options
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setDebouncedSearch('');
+                  setActiveCategory(null);
+                }}
+                className="px-5 py-2.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-full font-bold text-sm hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-all active:scale-95"
+              >
+                Reset Filters ✕
+              </button>
             </div>
+
             {filteredProducts.length === 0 ? (
               <EmptyState
                 type="search"
-                title="No results found"
-                description="Try a different keyword"
+                title="No products found"
+                description="We couldn't find matches. Try adjusting your search query or categories."
               />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-                {filteredProducts.map((product, i) => (
-                  <ProductCard key={product.id} product={product} qty={getCartQty(product.id)}
-                               onAdd={() => addItem(product)} onInc={() => updateQuantity(product.id, getCartQty(product.id) + 1)}
-                               onDec={() => updateQuantity(product.id, getCartQty(product.id) - 1)}
-                               delay={i * 50} deliverySlot={liveSlot}
-                               onClick={() => {
-                                 saveSearchQuery(searchQuery);
-                                 router.push(`/product/${product.id}`);
-                               }} />
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    qty={getCartQty(product.id)}
+                    onAdd={() => addItem(product)}
+                    onInc={() => updateQuantity(product.id, getCartQty(product.id) + 1)}
+                    onDec={() => updateQuantity(product.id, getCartQty(product.id) - 1)}
+                    deliverySlot={liveSlot}
+                    onClick={() => router.push(`/product/${product.id}`)}
+                  />
                 ))}
               </div>
             )}
           </div>
-        )}
-
-        {/* === CATEGORY FILTERED VIEW ====================================== */}
-        {activeCategory && activeCategory !== 'all' && !searchQuery && (
-          <div style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)', padding: '16px', marginBottom: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0a1628', margin: 0, fontFamily: 'var(--font-display)' }}>
-                {dbCategories.find(c => c.id === activeCategory)?.name}
-              </h3>
-              <button onClick={() => setActiveCategory(null)}
-                style={{ fontSize: 12, color: '#00a045', fontWeight: 700, background: 'rgba(0,200,83,0.08)', border: 'none', cursor: 'pointer', padding: '5px 12px', borderRadius: 20 }}>
-                Clear ✕
-              </button>
-            </div>
-            {subCategories.length > 0 && (
-              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 12, marginBottom: 14, scrollbarWidth: 'none' }} className="hide-scrollbar">
-                <button onClick={() => setActiveSubCategory(null)} style={{
-                  padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', border: 'none',
-                  background: !activeSubCategory ? 'linear-gradient(135deg,#00a045,#00c853)' : 'rgba(0,0,0,0.05)',
-                  color: !activeSubCategory ? '#fff' : '#64748b', cursor: 'pointer',
-                  boxShadow: !activeSubCategory ? '0 4px 12px rgba(0,200,83,0.3)' : 'none', transition: 'all 0.2s',
-                }}>All</button>
-                {subCategories.map((subcat) => (
-                  <button key={subcat.id} onClick={() => setActiveSubCategory(subcat.id)} style={{
-                    padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap',
-                    border: 'none', display: 'flex', alignItems: 'center', gap: 5,
-                    background: activeSubCategory === subcat.id ? 'linear-gradient(135deg,#00a045,#00c853)' : 'rgba(0,0,0,0.05)',
-                    color: activeSubCategory === subcat.id ? '#fff' : '#64748b', cursor: 'pointer',
-                    boxShadow: activeSubCategory === subcat.id ? '0 4px 12px rgba(0,200,83,0.3)' : 'none', transition: 'all 0.2s',
-                  }}>
-                    {subcat.imageUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={subcat.imageUrl} alt="" style={{ width: 16, height: 16, borderRadius: 4, objectFit: 'cover' }} />
-                    )}
-                    {subcat.name}
-                  </button>
-                ))}
-              </div>
-            )}
-            {filteredProducts.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <div style={{ fontSize: 56, marginBottom: 10 }}>📦</div>
-                <p style={{ fontWeight: 700, color: '#0a1628', marginBottom: 4 }}>No products yet</p>
-                <p style={{ fontSize: 13, color: '#94a3b8' }}>Products will appear soon</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-                {filteredProducts.map((product, i) => (
-                  <ProductCard key={product.id} product={product} qty={getCartQty(product.id)}
-                               onAdd={() => addItem(product)} onInc={() => updateQuantity(product.id, getCartQty(product.id) + 1)}
-                               onDec={() => updateQuantity(product.id, getCartQty(product.id) - 1)}
-                               delay={i * 50} deliverySlot={liveSlot}
-                               onClick={() => router.push(`/product/${product.id}`)} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* === HOME CONTENT ================================================ */}
-        {!searchQuery && !activeStore && !activeCategory && (
+        ) : (
+          /* === MAIN HOME PAGE BLOCKS ===================================== */
           <>
-            {/* -- Hero Banner ----------------------------------------------- */}
-            <div className="px-4 md:px-0 pt-3.5 md:pt-6">
+            {/* Top Greeting Row */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
+              <div>
+                <h1 className="text-3xl font-extrabold font-display text-slate-900 dark:text-zinc-50 tracking-tight">
+                  Hi, {firstName}!
+                </h1>
+                <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1">
+                  Welcome to your premium furniture curation.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 px-3.5 py-1.5 rounded-full shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Delivering today in: {liveSlot}</span>
+              </div>
+            </div>
+
+            {/* 1. Hero Slider Banner */}
+            <div
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
+              className="relative overflow-hidden bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-sm h-[340px] md:h-[420px]"
+            >
               <div
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseLeave}
-                className="min-h-[160px] md:min-h-[300px]"
                 style={{
-                  borderRadius: 22,
-                  position: 'relative',
-                  overflow: 'hidden',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.16)',
-                  cursor: isDragging ? 'grabbing' : 'grab',
-                  userSelect: 'none',
-                }}
-              >
-                <div style={{
                   display: 'flex',
                   transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: `translateX(-${heroSlide * 100}%)`,
-                  width: `${heroSlidesFallback.length * 100}%`,
+                  width: `${HERO_SLIDES.length * 100}%`,
                   height: '100%',
-                }}>
-                  {heroSlidesFallback.map((slide, index) => (
-                    <div
-                      key={index}
-                      className="min-h-[160px] md:min-h-[300px] py-5 md:py-8 px-5 md:px-10"
-                      style={{
-                        flex: '0 0 100%',
-                        width: '100%',
-                        background: slide.gradient,
-                        position: 'relative',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <div style={{ position: 'absolute', right: -30, top: -30, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.10)' }} />
-                      <div style={{ position: 'absolute', right: 20, bottom: -40, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
-                      <div style={{ position: 'relative', zIndex: 1 }}>
-                        <div style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 5,
-                          background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)',
-                          border: '1px solid rgba(255,255,255,0.35)',
-                          borderRadius: 20, padding: '4px 12px', marginBottom: 10,
-                        }}>
-                          <span style={{ fontSize: 11, color: '#fff', fontWeight: 700, letterSpacing: '0.03em' }}>{slide.badge}</span>
+                }}
+              >
+                {HERO_SLIDES.map((slide) => (
+                  <div
+                    key={slide.id}
+                    className="w-full h-full flex flex-col md:flex-row justify-between items-center p-8 md:p-14 relative overflow-hidden"
+                    style={{ flex: '0 0 100%' }}
+                  >
+                    {/* Left text block */}
+                    <div className="flex flex-col justify-center items-start z-10 max-w-xl text-left">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 mb-4 border border-emerald-100/50 dark:border-emerald-900/30">
+                        {slide.badge}
+                      </span>
+                      <h2 className="text-3xl md:text-5.5xl font-extrabold font-display text-slate-900 dark:text-zinc-50 leading-tight mb-4 tracking-tight">
+                        {slide.headline}
+                      </h2>
+                      <p className="text-sm md:text-base text-slate-500 dark:text-zinc-400 mb-6 max-w-md leading-relaxed">
+                        {slide.sub}
+                      </p>
+
+                      <div className="flex flex-wrap items-center gap-4">
+                        <button
+                          onClick={() => handleCategoryClick(slide.category)}
+                          className="px-6 py-3 bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-slate-950 text-white font-bold rounded-xl text-sm transition-all active:scale-95 shadow-sm flex items-center gap-1.5"
+                        >
+                          <span>{slide.cta}</span>
+                          <span>→</span>
+                        </button>
+
+                        <div
+                          onClick={(e) => handleCopyPromo(e, slide.promoCode)}
+                          className="inline-flex items-center gap-2 bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 border border-dashed border-slate-300 dark:border-zinc-600 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-zinc-300 cursor-pointer select-none transition-all active:scale-95"
+                        >
+                          <span>🎟️ {slide.promoCode}</span>
+                          <span className="text-[10px] bg-slate-200/60 dark:bg-zinc-700 px-2 py-0.5 rounded text-slate-600 dark:text-zinc-400 font-semibold">
+                            {copiedCode === slide.promoCode ? 'Copied!' : 'Copy'}
+                          </span>
                         </div>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: 4 }}>
-                          👋 Hi {firstName}!
-                        </p>
-                        <h2 className="text-2xl md:text-4xl" style={{
-                          fontWeight: 900, color: '#fff', margin: '0 0 6px',
-                          lineHeight: 1.15, fontFamily: 'var(--font-display)',
-                        }}>
-                          {slide.headline}<br />
-                          <span className="text-[18px] md:text-[22px]" style={{ opacity: 0.85 }}>{slide.sub}</span>
-                        </h2>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginTop: 12 }}>
-                          <button onClick={() => slide.catId ? router.push(`/category/${slide.catId}`) : router.push('/category')} style={{
-                            background: 'rgba(255,255,255,0.95)', border: 'none', borderRadius: 12, padding: '10px 22px',
-                            fontSize: 13, fontWeight: 800, cursor: 'pointer', color: '#10B981',
-                            boxShadow: '0 4px 16px rgba(0,0,0,0.15)', transition: 'all 0.2s', letterSpacing: 0.2,
-                          }}>
-                            {slide.cta} →
-                          </button>
-                          
-                          {slide.promoCode && (
-                            <div
-                              onClick={(e) => handleCopyPromo(e, slide.promoCode)}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: 6,
-                                background: 'rgba(255, 255, 255, 0.18)',
-                                backdropFilter: 'blur(8px)',
-                                border: '1.5px dashed rgba(255, 255, 255, 0.4)',
-                                borderRadius: 12,
-                                padding: '8px 14px',
-                                fontSize: 12,
-                                fontWeight: 700,
-                                color: '#fff',
-                                cursor: 'pointer',
-                                userSelect: 'none',
-                                transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                              }}
-                              className="hover:scale-105 active:scale-95"
-                            >
-                              <span>🎟️ {slide.promoCode}</span>
-                              <span style={{ fontSize: 10, opacity: 0.9, background: 'rgba(0, 0, 0, 0.2)', padding: '2px 6px', borderRadius: 6 }}>
-                                {copiedCode === slide.promoCode ? '✓ Copied' : 'Copy'}
-                              </span>
+                      </div>
+                    </div>
+
+                    {/* Right image display */}
+                    <div className="hidden md:flex w-1/2 h-full justify-center items-center relative">
+                      <div className="absolute w-[320px] h-[320px] bg-emerald-50/40 dark:bg-emerald-950/10 rounded-full blur-3xl -z-10" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={slide.imageUrl}
+                        alt={slide.headline}
+                        className="max-h-[300px] w-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Dots indicators */}
+              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+                {HERO_SLIDES.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setHeroSlide(i)}
+                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                      i === heroSlide ? 'bg-slate-800 dark:bg-zinc-100 w-6' : 'bg-slate-300 dark:bg-zinc-700'
+                    }`}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* 2. Features Trust Row */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 my-8">
+              {[
+                {
+                  title: 'Free Shipping',
+                  desc: 'On orders over ₹199',
+                  icon: (
+                    <svg className="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125a1.125 1.125 0 0 0 1.125-1.125V9.75M8.25 18.75a1.5 1.5 0 0 1-3 0M15.75 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75-15h11.25c.621 0 1.125.504 1.125 1.125V14.25m-13.5 0h13.5" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'Returns',
+                  desc: '30-day return policy',
+                  icon: (
+                    <svg className="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'Secured Payment',
+                  desc: '100% safe & encrypted',
+                  icon: (
+                    <svg className="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'Special Gifts',
+                  desc: 'Wraps & promo cards',
+                  icon: (
+                    <svg className="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h17.25c.621 0 1.125-.504 1.125-1.125V9.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.125c0 .621.504 1.125 1.125 1.125Z" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'Support 24/7',
+                  desc: 'Get assistance anytime',
+                  icon: (
+                    <svg className="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 0 1-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z" />
+                    </svg>
+                  ),
+                },
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-slate-100 dark:border-zinc-800 p-5 flex flex-col items-center text-center shadow-sm hover:shadow transition-shadow"
+                >
+                  <div className="mb-3 bg-emerald-50 dark:bg-emerald-950/20 p-3 rounded-full flex items-center justify-center">
+                    {item.icon}
+                  </div>
+                  <h4 className="font-semibold text-slate-800 dark:text-zinc-200 text-sm font-display mb-1">
+                    {item.title}
+                  </h4>
+                  <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-medium leading-normal">
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* 7. Shop By Category (Circular Slider) */}
+            <div className="my-8">
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold font-display text-slate-800 dark:text-zinc-100 tracking-tight">
+                  Shop By Category
+                </h3>
+                <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
+                  Discover curated products tailored to your preferences
+                </p>
+              </div>
+
+              <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-width-none hide-scrollbar">
+                {CATEGORIES_LIST.map((cat) => {
+                  const isActive = activeCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => handleCategoryClick(cat.id)}
+                      className="flex flex-col items-center gap-2.5 flex-shrink-0 cursor-pointer focus:outline-none group"
+                    >
+                      <div
+                        className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl transition-all duration-300 shadow-sm ${
+                          isActive
+                            ? 'bg-slate-900 dark:bg-zinc-100 text-white dark:text-slate-900 scale-105 ring-4 ring-emerald-500/20 dark:ring-emerald-400/20'
+                            : 'bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 group-hover:scale-105 border border-slate-100 dark:border-zinc-800'
+                        }`}
+                      >
+                        {cat.emoji}
+                      </div>
+                      <span
+                        className={`text-xs font-semibold font-display transition-colors ${
+                          isActive
+                            ? 'text-slate-900 dark:text-zinc-100 font-bold'
+                            : 'text-slate-500 dark:text-zinc-400 group-hover:text-slate-900 dark:group-hover:text-zinc-200'
+                        }`}
+                      >
+                        {cat.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 6. Deal of the Day (3 timers products) */}
+            <div className="my-10">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold font-display text-slate-800 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                    <span>⚡ Deal of the Day</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
+                    Hurry! Ticking deals on exclusive premium designs
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-900/30 px-4 py-2 rounded-full font-bold font-display text-sm">
+                  <span>Ends In:</span>
+                  <span className="font-mono">
+                    {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:{formatTime(timeLeft.seconds)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {dealItems.map((p) => {
+                  const discountPercent =
+                    p.mrp && p.mrp > p.price ? Math.round((1 - p.price / p.mrp) * 100) : 25;
+
+                  return (
+                    <div
+                      key={p.id}
+                      className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-slate-100 dark:border-zinc-800 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+                    >
+                      <div className="absolute top-4 left-4 bg-rose-500 text-white font-bold text-xs px-2.5 py-1 rounded-full z-10 shadow-sm">
+                        {discountPercent}% OFF
+                      </div>
+
+                      <div className="absolute top-4 right-4 bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold text-[11px] px-2.5 py-1 rounded-full z-10 flex items-center gap-1 border border-amber-200/50 dark:border-amber-900/30">
+                        <span>⏱️</span>
+                        <span className="font-mono">
+                          {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:
+                          {formatTime(timeLeft.seconds)}
+                        </span>
+                      </div>
+
+                      <div className="h-48 relative overflow-hidden rounded-xl bg-slate-50 dark:bg-zinc-800/30 flex items-center justify-center mb-4 mt-6">
+                        {p.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={p.imageUrl}
+                            alt={p.name}
+                            className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <span className="text-5xl">🛋️</span>
+                        )}
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold text-slate-800 dark:text-zinc-200 line-clamp-1 mb-1 font-display">
+                          {p.name}
+                        </h4>
+                        <div className="flex items-center gap-1 mb-3">
+                          <span className="text-yellow-500 text-xs">★</span>
+                          <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
+                            {(p as any).rating || '4.8'}
+                          </span>
+                          <span className="text-[10px] text-slate-400 dark:text-zinc-500">
+                            ({(p as any).reviews || '80'})
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-50 dark:border-zinc-800">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-lg font-extrabold text-slate-900 dark:text-zinc-100">
+                              ₹{p.price}
+                            </span>
+                            <span className="text-xs text-slate-400 dark:text-zinc-500 line-through">
+                              ₹{p.mrp || Math.round(p.price * 1.3)}
+                            </span>
+                          </div>
+
+                          {getCartQty(p.id) > 0 ? (
+                            <div className="flex items-center gap-2.5 bg-emerald-600 text-white rounded-lg p-1 justify-between shadow-sm">
+                              <button
+                                onClick={() => updateQuantity(p.id, getCartQty(p.id) - 1)}
+                                className="w-6 h-6 flex items-center justify-center font-bold hover:bg-emerald-700 rounded transition-colors text-xs"
+                              >
+                                -
+                              </button>
+                              <span className="font-bold text-xs">{getCartQty(p.id)}</span>
+                              <button
+                                onClick={() => updateQuantity(p.id, getCartQty(p.id) + 1)}
+                                className="w-6 h-6 flex items-center justify-center font-bold hover:bg-emerald-700 rounded transition-colors text-xs"
+                              >
+                                +
+                              </button>
                             </div>
+                          ) : (
+                            <button
+                              onClick={() => addItem(p)}
+                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all active:scale-95 flex items-center gap-1 shadow-sm"
+                            >
+                              <span>Add</span>
+                              <span>+</span>
+                            </button>
                           )}
                         </div>
                       </div>
-                      <div style={{ position: 'absolute', right: 14, bottom: 16, animation: 'bounceSubtle 2.5s ease-in-out infinite' }}>
-                        {slide.imageUrl
-                          // eslint-disable-next-line @next/next/no-img-element
-                          ? <img src={slide.imageUrl} alt={slide.headline} style={{ width: 80, height: 80, objectFit: 'contain', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.25))' }} />
-                          : <span style={{ fontSize: 64 }}>{slide.emoji}</span>
-                        }
-                      </div>
                     </div>
-                  ))}
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 4. Double Promo Banners */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10">
+              <div
+                onClick={() => handleCategoryClick('chairs')}
+                className="h-64 rounded-3xl overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
+              >
+                <div className="absolute inset-0 bg-slate-955/45 z-10 transition-colors group-hover:bg-slate-950/35" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://images.unsplash.com/photo-1505797149-43b0069ec26b?auto=format&fit=crop&w=800&q=80"
+                  alt="WFH Chairs Collection"
+                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 z-20 p-8 flex flex-col justify-between text-white">
+                  <div>
+                    <span className="bg-emerald-500 text-white font-bold font-display text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      Ergonomic Comfort
+                    </span>
+                    <h3 className="text-3xl font-extrabold font-display mt-4 leading-tight">
+                      WFH Chairs
+                    </h3>
+                    <p className="text-sm text-slate-200 mt-2 max-w-xs opacity-90">
+                      Premium mesh & leather office chairs designed for focus.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold border-b-2 border-white pb-0.5 group-hover:border-emerald-400 transition-colors">
+                      Shop Chairs
+                    </span>
+                    <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
                 </div>
-                <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 5, zIndex: 10 }}>
-                  {heroSlidesFallback.map((_, i) => (
-                    <div key={i} onClick={(e) => { e.stopPropagation(); setHeroSlide(i); }} style={{
-                      width: (i === heroSlide) ? 18 : 6, height: 6, borderRadius: 3,
-                      background: (i === heroSlide) ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.45)',
-                      transition: 'all 0.3s ease', cursor: 'pointer',
-                    }} />
+              </div>
+
+              <div
+                onClick={() => handleCategoryClick('lighting')}
+                className="h-64 rounded-3xl overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
+              >
+                <div className="absolute inset-0 bg-slate-955/45 z-10 transition-colors group-hover:bg-slate-950/35" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80"
+                  alt="Designer Lighting"
+                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 z-20 p-8 flex flex-col justify-between text-white">
+                  <div>
+                    <span className="bg-amber-500 text-white font-bold font-display text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      Warm Study Vibe
+                    </span>
+                    <h3 className="text-3xl font-extrabold font-display mt-4 leading-tight">
+                      Amber & Slate Lamps
+                    </h3>
+                    <p className="text-sm text-slate-200 mt-2 max-w-xs opacity-90">
+                      Aesthetic warm desk lamps and minimalist accent lighting.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold border-b-2 border-white pb-0.5 group-hover:border-amber-400 transition-colors">
+                      Explore Lamps
+                    </span>
+                    <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 5. Best Selling Products */}
+            <div className="my-10">
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold font-display text-slate-800 dark:text-zinc-100 tracking-tight">
+                  🔥 Best Sellers
+                </h3>
+                <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
+                  Popular interior selections highly rated by customers
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Left: spacious featured card */}
+                <div className="lg:col-span-5 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                  <div className="absolute top-4 left-4 bg-emerald-500 text-white font-bold font-display text-[10px] px-3 py-1 rounded-full z-10 shadow-sm">
+                    BEST SELLER
+                  </div>
+
+                  <div className="h-64 relative overflow-hidden rounded-2xl bg-slate-50 dark:bg-zinc-800/30 flex items-center justify-center mb-6">
+                    {bestFeatured.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={bestFeatured.imageUrl}
+                        alt={bestFeatured.name}
+                        className="w-full h-full object-contain p-6 group-hover:scale-102 transition-transform duration-500"
+                      />
+                    ) : (
+                      <span className="text-6xl">🪑</span>
+                    )}
+                  </div>
+
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="text-yellow-500 text-sm">★</span>
+                        <span className="text-sm font-semibold text-slate-800 dark:text-zinc-200">
+                          {(bestFeatured as any).rating || '4.8'}
+                        </span>
+                        <span className="text-xs text-slate-400 dark:text-zinc-500">
+                          ({(bestFeatured as any).reviews || '142'} reviews)
+                        </span>
+                      </div>
+
+                      <h4 className="text-xl font-bold font-display text-slate-900 dark:text-zinc-100 leading-tight mb-2">
+                        {bestFeatured.name}
+                      </h4>
+
+                      <p className="text-sm text-slate-500 dark:text-zinc-400 line-clamp-3 mb-6 leading-relaxed">
+                        {bestFeatured.description ||
+                          'Premium aesthetic meets modern layout. Crafted from sustainable materials for long-lasting WFH support.'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-zinc-800">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-extrabold text-slate-900 dark:text-zinc-100">
+                          ₹{bestFeatured.price}
+                        </span>
+                        {bestFeatured.mrp && bestFeatured.mrp > bestFeatured.price && (
+                          <span className="text-sm text-slate-400 dark:text-zinc-500 line-through">
+                            ₹{bestFeatured.mrp}
+                          </span>
+                        )}
+                      </div>
+
+                      {getCartQty(bestFeatured.id) > 0 ? (
+                        <div className="flex items-center gap-3 bg-emerald-600 text-white rounded-xl p-1.5 justify-between w-36 shadow-sm">
+                          <button
+                            onClick={() => updateQuantity(bestFeatured.id, getCartQty(bestFeatured.id) - 1)}
+                            className="w-8 h-8 flex items-center justify-center font-bold hover:bg-emerald-700 rounded-lg transition-colors text-sm"
+                          >
+                            -
+                          </button>
+                          <span className="font-bold text-sm">{getCartQty(bestFeatured.id)}</span>
+                          <button
+                            onClick={() => updateQuantity(bestFeatured.id, getCartQty(bestFeatured.id) + 1)}
+                            className="w-8 h-8 flex items-center justify-center font-bold hover:bg-emerald-700 rounded-lg transition-colors text-sm"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => addItem(bestFeatured)}
+                          className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-sm active:scale-95 flex items-center gap-1.5 text-sm"
+                        >
+                          <span>Add to Cart</span>
+                          <span>+</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: 4-product grid */}
+                <div className="lg:col-span-7 grid grid-cols-2 gap-6">
+                  {bestGrid.map((p) => (
+                    <ProductCard
+                      key={p.id}
+                      product={p}
+                      qty={getCartQty(p.id)}
+                      onAdd={() => addItem(p)}
+                      onInc={() => updateQuantity(p.id, getCartQty(p.id) + 1)}
+                      onDec={() => updateQuantity(p.id, getCartQty(p.id) - 1)}
+                      deliverySlot={liveSlot}
+                      onClick={() => router.push(`/product/${p.id}`)}
+                    />
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* -- Offer Cards ----------------------------------------------- */}
-            <div style={{ padding: '10px 16px 14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <div style={{ background: 'linear-gradient(135deg,#e8fff1,#f0fdf4)', border: '1px solid rgba(0,200,83,0.2)', borderRadius: 18, padding: '14px', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,200,83,0.10)' }}>
-                  <div style={{ position: 'absolute', right: -10, top: -10, width: 70, height: 70, borderRadius: '50%', background: 'rgba(0,200,83,0.08)' }} />
-                  <span style={{ fontSize: 28, display: 'block', marginBottom: 6 }}>💰</span>
-                  <p style={{ fontSize: 16, fontWeight: 900, color: '#00a045', margin: 0, fontFamily: 'var(--font-display)' }}>Flat ₹50 OFF</p>
-                  <p style={{ fontSize: 11, color: '#64748b', margin: '3px 0 0' }}>1st order above ₹299</p>
-                  <div style={{ marginTop: 8, display: 'inline-block', background: 'rgba(0,200,83,0.12)', borderRadius: 8, padding: '3px 10px', fontSize: 10, fontWeight: 700, color: '#00a045' }}>USE: FIRST50</div>
-                </div>
-                <div style={{ background: 'linear-gradient(135deg,#eff6ff,#dbeafe)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 18, padding: '14px', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 16px rgba(59,130,246,0.10)' }}>
-                  <div style={{ position: 'absolute', right: -10, top: -10, width: 70, height: 70, borderRadius: '50%', background: 'rgba(59,130,246,0.08)' }} />
-                  <span style={{ fontSize: 28, display: 'block', marginBottom: 6 }}>🚴</span>
-                  <p style={{ fontSize: 16, fontWeight: 900, color: '#1d4ed8', margin: 0, fontFamily: 'var(--font-display)' }}>Free Delivery</p>
-                  <p style={{ fontSize: 11, color: '#64748b', margin: '3px 0 0' }}>First 10 orders</p>
-                  <div style={{ marginTop: 8, display: 'inline-block', background: 'rgba(59,130,246,0.10)', borderRadius: 8, padding: '3px 10px', fontSize: 10, fontWeight: 700, color: '#1d4ed8' }}>Auto Applied</div>
-                </div>
+            {/* 3. Latest Products Section */}
+            <div className="my-10">
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold font-display text-slate-800 dark:text-zinc-100 tracking-tight">
+                  ✨ Latest Arrivals
+                </h3>
+                <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
+                  Explore fresh designs and seasonal updates for your spaces
+                </p>
               </div>
+
+              {loading ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className="h-[260px] rounded-2xl bg-slate-100 dark:bg-zinc-800 animate-pulse"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                  {latestItems.map((p) => (
+                    <ProductCard
+                      key={p.id}
+                      product={p}
+                      qty={getCartQty(p.id)}
+                      onAdd={() => addItem(p)}
+                      onInc={() => updateQuantity(p.id, getCartQty(p.id) + 1)}
+                      onDec={() => updateQuantity(p.id, getCartQty(p.id) - 1)}
+                      deliverySlot={liveSlot}
+                      onClick={() => router.push(`/product/${p.id}`)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* -- Shop by Store (Categories) ------------ */}
-            {dbCategories.filter(c => !c.isComingSoon).length > 0 && (
-              <div style={{ background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(12px)', padding: '14px 16px 16px', marginBottom: 8 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <h3 style={{ fontSize: 18, fontWeight: 900, color: '#1e293b', margin: 0 }}>
-                    Shop by store
-                  </h3>
-                  <button onClick={() => router.push('/category')}
-                    style={{ fontSize: 13, color: '#00a045', fontWeight: 800, background: 'none', border: 'none', cursor: 'pointer' }}>
-                    See all →
+            {/* 8. Bottom Promo Banners */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-10">
+              {[
+                {
+                  title: 'Desk Organizers',
+                  desc: 'Streamline your productivity with solid oak trays.',
+                  tag: 'Desk Accessories',
+                  emoji: '📥',
+                  cat: 'decor',
+                  action: 'View All',
+                },
+                {
+                  title: 'Velvet Pillows',
+                  desc: 'Add plush velvet details for instant accent comfort.',
+                  tag: 'Living Room',
+                  emoji: '🛋️',
+                  cat: 'decor',
+                  action: 'Explore',
+                },
+                {
+                  title: 'Study Planners',
+                  desc: 'Aesthetic task sheets and leather desk planners.',
+                  tag: 'Stationery',
+                  emoji: '📅',
+                  cat: 'decor',
+                  action: 'Shop Now',
+                },
+              ].map((card, idx) => (
+                <div
+                  key={idx}
+                  className="bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-zinc-900 dark:to-zinc-800/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800 p-6 flex flex-col justify-between shadow-sm hover:shadow transition-shadow group relative overflow-hidden"
+                >
+                  <div className="absolute -right-4 -bottom-4 text-7xl opacity-10 dark:opacity-5 group-hover:scale-110 transition-transform duration-300 pointer-events-none">
+                    {card.emoji}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                      {card.tag}
+                    </span>
+                    <h4 className="text-xl font-bold font-display text-slate-900 dark:text-zinc-100 mt-2">
+                      {card.title}
+                    </h4>
+                    <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1.5 max-w-[200px] leading-relaxed">
+                      {card.desc}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleCategoryClick(card.cat)}
+                    className="text-xs font-bold text-slate-800 dark:text-zinc-200 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 mt-6 self-start"
+                  >
+                    <span>{card.action}</span>
+                    <span>→</span>
                   </button>
                 </div>
-                <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }} className="hide-scrollbar">
-                  {dbCategories.filter(c => c.id === 'furniture-store').map((cat, i) => {
-                    const pal = CAT_PALETTES[i % CAT_PALETTES.length];
-                    const isNameStore = cat.name.toLowerCase().includes('store');
-                    const displayName = isNameStore ? cat.name : cat.name;
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => router.push(`/category/${cat.id}`)}
-                        style={{
-                          flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                          padding: 0, border: 'none', cursor: 'pointer',
-                          background: 'transparent', transition: 'transform 0.2s', width: 90,
-                          animation: `fadeInUp 0.4s ${i * 60}ms ease-out both`,
-                        }}
-                      >
-                        <div style={{
-                          width: '100%', height: 75, borderRadius: 16, overflow: 'hidden',
-                          background: `linear-gradient(135deg, ${pal.color}bb, ${pal.color})`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: `0 4px 12px ${pal.color}35`,
-                        }}>
-                          {cat.imageUrl
-                            // eslint-disable-next-line @next/next/no-img-element
-                            ? <img src={cat.imageUrl} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            : <span style={{ fontSize: 36 }}>📦</span>
-                          }
-                        </div>
-                        <span style={{ fontSize: 12, fontWeight: 800, color: '#1e293b', textAlign: 'center', lineHeight: 1.25 }}>
-                          {displayName}{!isNameStore && <><br />Store</>}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* -- Products by Store  ------------------------------------ */}
-            {loading ? (
-              <div className="bg-white/88 py-6 md:py-8 px-4 md:px-6 mb-4 md:mb-8 md:rounded-2xl md:shadow-sm md:border md:border-slate-100/60">
-                <Skeleton h={20} r={8} w="160px" />
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mt-4">
-                  {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} h={200} r={16} />)}
-                </div>
-              </div>
-            ) : productsByCategory.length === 0 ? (
-              <div style={{ background: 'rgba(255,255,255,0.88)', padding: '60px 16px', textAlign: 'center', marginBottom: 8 }}>
-                <div style={{ fontSize: 64, marginBottom: 12 }}>🛒</div>
-                <p style={{ fontWeight: 800, fontSize: 18, color: '#0a1628', marginBottom: 6, fontFamily: 'var(--font-display)' }}>No products yet</p>
-                <p style={{ fontSize: 13, color: '#94a3b8' }}>Products will appear here soon</p>
-              </div>
-            ) : (
-              productsByCategory.map((group, gIndex) => (
-                <div 
-                  key={group.id} 
-                  className="bg-white/88 backdrop-blur-md py-6 md:py-8 mb-4 md:mb-8 md:rounded-2xl md:shadow-sm md:border md:border-slate-100/60"
-                  style={{
-                    animation: `fadeInUp 0.4s ${gIndex * 80}ms ease-out both`,
-                  }}
-                >
-                  {/* Section header */}
-                  <div className="flex justify-between items-center px-4 md:px-6 mb-4">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{
-                        width: 40, height: 40, borderRadius: 12,
-                        background: `${group.palette.color}18`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                        border: `1px solid ${group.palette.color}25`,
-                      }}>
-                        {group.imageUrl
-                          // eslint-disable-next-line @next/next/no-img-element
-                          ? <img src={group.imageUrl as string} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={group.name} />
-                          : <span style={{ fontSize: 20 }}>📦</span>
-                        }
-                      </div>
-                      <div>
-                        <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0a1628', margin: 0, fontFamily: 'var(--font-display)' }}>
-                          {group.name}{!group.name.toLowerCase().includes('store') ? ' Store' : ''}
-                        </h3>
-                        <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>{pluralize(group.products.length, 'item', 'items')}</p>
-                      </div>
-                    </div>
-                    <button onClick={() => router.push(`/category/${group.id}`)} style={{
-                      fontSize: 12, color: '#00a045', fontWeight: 700,
-                      background: 'rgba(0,200,83,0.08)', border: 'none',
-                      borderRadius: 20, padding: '5px 14px', cursor: 'pointer',
-                    }}>
-                      See all →
-                    </button>
-                  </div>
-
-                  {/* Product grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 px-4 md:px-6">
-                    {group.products.map((product, i) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                        qty={getCartQty(product.id)}
-                        onAdd={() => addItem(product)}
-                        onInc={() => updateQuantity(product.id, getCartQty(product.id) + 1)}
-                        onDec={() => updateQuantity(product.id, getCartQty(product.id) - 1)}
-                        accentColor={group.palette.color}
-                        delay={i * 60}
-                        deliverySlot={liveSlot}
-                        onClick={() => router.push(`/product/${product.id}`)}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Inter-section delivery banner every 2nd group */}
-                  {gIndex % 2 === 1 && (
-                    <div style={{ margin: '16px 16px 4px' }}>
-                      <div style={{
-                        background: 'linear-gradient(135deg,#00a045,#00c853)',
-                        borderRadius: 16, padding: '14px 16px',
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        boxShadow: '0 6px 20px rgba(0,200,83,0.25)',
-                        position: 'relative', overflow: 'hidden',
-                      }}>
-                        <div style={{ position: 'absolute', right: -10, top: -10, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.10)' }} />
-                        <span style={{ fontSize: 32 }}>🚴</span>
-                        <div>
-                          <p style={{ fontSize: 14, fontWeight: 800, color: '#fff', margin: 0, fontFamily: 'var(--font-display)' }}>Free delivery on ₹199+</p>
-                          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', margin: '2px 0 0' }}>Delivered {liveSlot}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
+              ))}
+            </div>
           </>
         )}
       </div>
     </div>
   );
 }
-
-
