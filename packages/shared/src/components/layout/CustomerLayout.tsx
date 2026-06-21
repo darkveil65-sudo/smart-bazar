@@ -107,10 +107,17 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [animateCart, setAnimateCart] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Set mounted on client
+  // Set mounted on client and check window width
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
     setMounted(true);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Global search states
@@ -414,43 +421,47 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Language Switcher */}
             {/* Desktop: Full selector */}
-            <div className="hidden md:flex" style={{ gap: 2, background: 'var(--border-light)', borderRadius: 10, padding: '3px' }}>
-              {LANGS.map(({ code, label }) => (
-                <button key={code} onClick={() => setLang(code)}
-                  style={{
-                    padding: '3px 7px', borderRadius: 7, border: 'none', cursor: 'pointer',
-                    fontSize: code === 'bn' ? 11 : 10,
-                    fontWeight: 700,
-                    fontFamily: code === 'bn' ? 'var(--font-hind-siliguri), sans-serif' : 'inherit',
-                    background: lang === code ? 'var(--card)' : 'transparent',
-                    color: lang === code ? 'var(--primary-dark)' : 'var(--muted-foreground)',
-                    boxShadow: lang === code ? 'var(--shadow-xs)' : 'none',
-                    transition: 'all 0.2s',
-                    lineHeight: 1.4,
-                  }}>
-                  {label}
-                </button>
-              ))}
-            </div>
+            {!isMobile && (
+              <div className="hidden md:flex" style={{ gap: 2, background: 'var(--border-light)', borderRadius: 10, padding: '3px' }}>
+                {LANGS.map(({ code, label }) => (
+                  <button key={code} onClick={() => setLang(code)}
+                    style={{
+                      padding: '3px 7px', borderRadius: 7, border: 'none', cursor: 'pointer',
+                      fontSize: code === 'bn' ? 11 : 10,
+                      fontWeight: 700,
+                      fontFamily: code === 'bn' ? 'var(--font-hind-siliguri), sans-serif' : 'inherit',
+                      background: lang === code ? 'var(--card)' : 'transparent',
+                      color: lang === code ? 'var(--primary-dark)' : 'var(--muted-foreground)',
+                      boxShadow: lang === code ? 'var(--shadow-xs)' : 'none',
+                      transition: 'all 0.2s',
+                      lineHeight: 1.4,
+                    }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
             {/* Mobile: Cycle button */}
-            <div className="md:hidden">
-              <button
-                onClick={handleCycleLang}
-                className="press-effect flex items-center justify-center"
-                style={{
-                  width: 38, height: 38, borderRadius: 12, border: 'none',
-                  background: 'rgba(0,200,83,0.08)',
-                  cursor: 'pointer', transition: 'all 0.2s',
-                  color: 'var(--foreground)',
-                  fontSize: lang === 'bn' ? 12 : 11,
-                  fontWeight: 800,
-                  fontFamily: lang === 'bn' ? 'var(--font-hind-siliguri), sans-serif' : 'inherit',
-                }}
-                title="Change Language"
-              >
-                {LANGS.find((l) => l.code === lang)?.label || 'EN'}
-              </button>
-            </div>
+            {isMobile && (
+              <div className="md:hidden">
+                <button
+                  onClick={handleCycleLang}
+                  className="press-effect flex items-center justify-center"
+                  style={{
+                    width: 38, height: 38, borderRadius: 12, border: 'none',
+                    background: 'rgba(0,200,83,0.08)',
+                    cursor: 'pointer', transition: 'all 0.2s',
+                    color: 'var(--foreground)',
+                    fontSize: lang === 'bn' ? 12 : 11,
+                    fontWeight: 800,
+                    fontFamily: lang === 'bn' ? 'var(--font-hind-siliguri), sans-serif' : 'inherit',
+                  }}
+                  title="Change Language"
+                >
+                  {LANGS.find((l) => l.code === lang)?.label || 'EN'}
+                </button>
+              </div>
+            )}
 
             {/* Theme Toggle Button */}
             <button
