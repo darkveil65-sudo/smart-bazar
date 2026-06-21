@@ -762,7 +762,7 @@ export default function HomePage() {
                 style={{
                   display: 'flex',
                   transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transform: `translateX(-${heroSlide * 100}%)`,
+                  transform: `translateX(-${(heroSlide * 100) / HERO_SLIDES.length}%)`,
                   width: `${HERO_SLIDES.length * 100}%`,
                   height: '100%',
                 }}
@@ -771,7 +771,7 @@ export default function HomePage() {
                   <div
                     key={slide.id}
                     className="w-full h-full flex flex-col md:flex-row justify-between items-center p-8 md:p-14 relative overflow-hidden"
-                    style={{ flex: '0 0 100%' }}
+                    style={{ flex: `0 0 ${100 / HERO_SLIDES.length}%` }}
                   >
                     {/* Left text block */}
                     <div className="flex flex-col justify-center items-start z-10 max-w-xl text-left">
