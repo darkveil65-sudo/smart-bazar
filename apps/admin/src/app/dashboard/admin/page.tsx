@@ -105,6 +105,7 @@ export default function AdminDashboard() {
     { key: 'overview', label: 'Overview', icon: '📊', href: '/dashboard/admin' },
     { key: 'users', label: 'User Directory', icon: '👥', href: '/dashboard/admin/users' },
     { key: 'orders', label: 'Live Orders', icon: '🛒', href: '/dashboard/admin/orders' },
+    { key: 'banners', label: 'Hero Banners', icon: '🎨', href: '/dashboard/admin/banners' },
     { key: 'applications', label: 'Applications', icon: '📝', href: '/dashboard/admin/applications' },
     { key: 'settings', label: 'System Settings', icon: '⚙️', href: '/dashboard/admin/settings' },
   ] as const;

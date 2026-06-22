@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { productService } from '@smart-bazar/shared/lib/services/productService';
 import { categoryService } from '@smart-bazar/shared/lib/services/categoryService';
-import { Product, Category } from '@smart-bazar/shared/types/firestore';
+import { heroBannerService } from '@smart-bazar/shared/lib/services/heroBannerService';
+import { Product, Category, HeroBanner } from '@smart-bazar/shared/types/firestore';
 import { useCartStore } from '@smart-bazar/shared/stores/cartStore';
 import { useAuthStore } from '@smart-bazar/shared/stores/authStore';
 import { useAppConfig } from '@smart-bazar/shared/contexts/AppConfigContext';
@@ -67,6 +68,7 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [dbBanners, setDbBanners] = useState<HeroBanner[]>([]);
   const [heroSlide, setHeroSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -81,7 +83,7 @@ export default function HomePage() {
   const liveSlot = getDeliverySlot();
   const firstName = userData?.name?.split(' ')[0] ?? 'Guest';
 
-  // Load products & categories
+  // Load products, categories & live hero banners
   useEffect(() => {
     const unsubProducts = productService.subscribeToProducts((prods) => {
       setProducts(prods.filter((p) => p.isAvailable));
@@ -90,20 +92,40 @@ export default function HomePage() {
 
     const unsubCategories = categoryService.subscribeToCategories('furniture-store', setCategories);
 
+    const unsubBanners = heroBannerService.subscribe((data) => {
+      setDbBanners(data.filter((b) => b.isActive));
+    });
+
     return () => {
       unsubProducts();
       unsubCategories();
+      unsubBanners();
     };
   }, []);
+
+  // Merge DB banners with hardcoded fallback
+  const activeBanners = dbBanners.length > 0
+    ? dbBanners.map((b) => ({
+        id: b.id,
+        badge: b.badge,
+        headline: b.headline,
+        sub: b.sub,
+        cta: b.cta,
+        promoCode: '',
+        imageUrl: b.imageUrl ?? '',
+        category: '',
+        gradient: b.gradient,
+      }))
+    : HERO_SLIDES;
 
   // Timer interval for Hero Slider
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
-      setHeroSlide((s) => (s + 1) % HERO_SLIDES.length);
+      setHeroSlide((s) => (s + 1) % activeBanners.length);
     }, 4500);
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [isPaused, activeBanners.length]);
 
   // Load recent searches
   useEffect(() => {
@@ -170,9 +192,9 @@ export default function HomePage() {
     }
     const distance = touchStartX - touchEndX;
     if (distance > minSwipeDistance) {
-      setHeroSlide((s) => (s + 1) % HERO_SLIDES.length);
+      setHeroSlide((s) => (s + 1) % activeBanners.length);
     } else if (distance < -minSwipeDistance) {
-      setHeroSlide((s) => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+      setHeroSlide((s) => (s - 1 + activeBanners.length) % activeBanners.length);
     }
     setIsPaused(false);
   };
@@ -196,9 +218,9 @@ export default function HomePage() {
     if (!dragStartX || !dragEndX) return;
     const distance = dragStartX - dragEndX;
     if (distance > minSwipeDistance) {
-      setHeroSlide((s) => (s + 1) % HERO_SLIDES.length);
+      setHeroSlide((s) => (s + 1) % activeBanners.length);
     } else if (distance < -minSwipeDistance) {
-      setHeroSlide((s) => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+      setHeroSlide((s) => (s - 1 + activeBanners.length) % activeBanners.length);
     }
   };
 
@@ -762,16 +784,16 @@ export default function HomePage() {
                 style={{
                   display: 'flex',
                   transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transform: `translateX(-${(heroSlide * 100) / HERO_SLIDES.length}%)`,
-                  width: `${HERO_SLIDES.length * 100}%`,
+                  transform: `translateX(-${(heroSlide * 100) / activeBanners.length}%)`,
+                  width: `${activeBanners.length * 100}%`,
                   height: '100%',
                 }}
               >
-                {HERO_SLIDES.map((slide) => (
+                {activeBanners.map((slide) => (
                   <div
                     key={slide.id}
                     className="w-full h-full flex flex-col md:flex-row justify-between items-center p-8 md:p-14 relative overflow-hidden"
-                    style={{ flex: `0 0 ${100 / HERO_SLIDES.length}%` }}
+                    style={{ flex: `0 0 ${100 / activeBanners.length}%` }}
                   >
                     {/* Left text block */}
                     <div className="flex flex-col justify-center items-start z-10 max-w-xl text-left">
@@ -822,7 +844,7 @@ export default function HomePage() {
 
               {/* Dots indicators */}
               <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
-                {HERO_SLIDES.map((_, i) => (
+                {activeBanners.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setHeroSlide(i)}
