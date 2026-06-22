@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, FC, ReactNode } from 'react';
+import { useState, useEffect, useCallback, FC, ReactNode } from 'react';
 
 interface ToastProps {
   id?: string;
@@ -14,7 +14,7 @@ interface ToastProps {
 const Toast: FC<ToastProps> = ({
   children,
   type = 'info',
-  duration = 2000,
+  duration = 4000, // Show for 4 seconds instead of 2 seconds
   onClose,
   title,
 }) => {
@@ -80,78 +80,105 @@ const Toast: FC<ToastProps> = ({
 
   const config = {
     success: {
-      border: 'border-l-emerald-500',
-      bgBar: 'bg-emerald-500',
+      color: '#10b981', // Emerald
       defaultTitle: 'Success',
       icon: (
-        <div className="p-1.5 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
+        <svg style={{ width: 16, height: 16, color: '#10b981' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
       ),
     },
     error: {
-      border: 'border-l-rose-500',
-      bgBar: 'bg-rose-500',
+      color: '#f43f5e', // Rose
       defaultTitle: 'Error',
       icon: (
-        <div className="p-1.5 rounded-lg bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </div>
+        <svg style={{ width: 16, height: 16, color: '#f43f5e' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
       ),
     },
     warning: {
-      border: 'border-l-amber-500',
-      bgBar: 'bg-amber-500',
+      color: '#f59e0b', // Amber
       defaultTitle: 'Warning',
       icon: (
-        <div className="p-1.5 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
+        <svg style={{ width: 16, height: 16, color: '#f59e0b' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
       ),
     },
     info: {
-      border: 'border-l-blue-500',
-      bgBar: 'bg-blue-500',
+      color: '#06b6d4', // Cyan
       defaultTitle: 'Info',
       icon: (
-        <div className="p-1.5 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
+        <svg style={{ width: 16, height: 16, color: '#06b6d4' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
       ),
     },
   }[type];
-
-  // Combine transition states to produce class name
-  const animClass = isExiting
-    ? 'opacity-0 translate-x-12 scale-95 duration-300'
-    : isMounted
-    ? 'opacity-100 translate-x-0 scale-100'
-    : 'opacity-0 translate-x-12 scale-95';
 
   return (
     <div
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative overflow-hidden pointer-events-auto flex items-start gap-3 w-80 max-w-sm p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md shadow-xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-2xl hover:scale-[1.02] border-l-4 ${config.border} ${animClass}`}
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        pointerEvents: 'auto',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '12px',
+        width: '320px',
+        padding: '16px',
+        borderRadius: '16px',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        borderLeft: `4px solid ${config.color}`,
+        background: 'rgba(15, 23, 42, 0.95)', // Dark premium slate background
+        backdropFilter: 'blur(16px)',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        opacity: isExiting ? 0 : isMounted ? 1 : 0,
+        transform: isExiting 
+          ? 'translateX(50px) scale(0.95)' 
+          : isMounted 
+          ? 'translateX(0) scale(1)' 
+          : 'translateX(50px) scale(0.95)',
+      }}
       role="alert"
     >
-      {/* Icon */}
-      <div className="flex-shrink-0 mt-0.5">{config.icon}</div>
+      {/* Icon Wrapper */}
+      <div style={{
+        flexShrink: 0,
+        marginTop: '2px',
+        padding: '6px',
+        borderRadius: '8px',
+        background: `${config.color}15`, // 15% opacity tint of accent color
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        {config.icon}
+      </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0 pr-2">
-        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-0.5">
+      <div style={{ flex: 1, minWidth: 0, paddingRight: '8px' }}>
+        <h4 style={{
+          fontSize: '14px',
+          fontWeight: 800,
+          color: '#ffffff', // Guaranteed crystal white
+          margin: '0 0 4px 0',
+          letterSpacing: '0.01em',
+          lineHeight: '1.2'
+        }}>
           {title || config.defaultTitle}
         </h4>
-        <div className="text-xs text-slate-600 dark:text-slate-300 font-medium leading-relaxed break-words">
+        <div style={{
+          fontSize: '12px',
+          color: '#cbd5e1', // Guaranteed light slate grey
+          fontWeight: 500,
+          lineHeight: '1.4',
+          wordBreak: 'break-word'
+        }}>
           {children}
         </div>
       </div>
@@ -159,19 +186,44 @@ const Toast: FC<ToastProps> = ({
       {/* Close Button */}
       <button
         onClick={triggerClose}
-        className="flex-shrink-0 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
+        style={{
+          flexShrink: 0,
+          background: 'transparent',
+          border: 'none',
+          padding: '4px',
+          cursor: 'pointer',
+          color: '#94a3b8',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+          transition: 'all 0.15s'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+        onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}
         aria-label="Close"
       >
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <svg style={{ width: 14, height: 14 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
 
       {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-slate-100 dark:bg-slate-800/50">
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '3px',
+        background: 'rgba(255, 255, 255, 0.08)'
+      }}>
         <div
-          className={`h-full ${config.bgBar} transition-all duration-[30ms] ease-linear`}
-          style={{ width: `${progress}%` }}
+          style={{
+            height: '100%',
+            background: config.color,
+            width: `${progress}%`,
+            transition: 'width 30ms linear'
+          }}
         />
       </div>
     </div>
