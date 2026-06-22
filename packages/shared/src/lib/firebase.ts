@@ -71,6 +71,8 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0
 export const clientAuth = getAuth(app);
 export const clientDb = getFirestore(app);
 export const clientStorage = getStorage(app);
+clientStorage.maxUploadRetryTime = 6000;
+clientStorage.maxOperationRetryTime = 6000;
 
 export {
   collection, doc, getDoc, getDocs, setDoc, addDoc,

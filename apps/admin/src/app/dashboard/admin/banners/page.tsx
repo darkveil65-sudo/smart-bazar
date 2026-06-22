@@ -303,16 +303,27 @@ export default function HeroBannerPage() {
 
               {/* Image */}
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Banner Image (optional)</label>
+                <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Banner Image</label>
                 <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} style={{ display: 'none' }} />
                 <button onClick={() => fileRef.current?.click()} style={{
                   width: '100%', padding: '10px', borderRadius: 10, border: '2px dashed #e2e8f0',
                   background: '#f8fafc', cursor: 'pointer', fontSize: 13, color: '#64748b', fontWeight: 600,
                 }}>
-                  {imagePreview ? '📷 Change Image' : '📷 Upload Image'}
+                  {imageFile ? '📷 Change Uploaded File' : '📷 Upload Image File'}
                 </button>
+                
+                <div style={{ margin: '8px 0', textAlign: 'center', fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>— OR —</div>
+                
+                <input type="text" value={form.imageUrl} onChange={e => {
+                  setForm(f => ({ ...f, imageUrl: e.target.value }));
+                  setImagePreview(e.target.value);
+                  setImageFile(null); // Clear uploaded file if URL is pasted
+                }}
+                  placeholder="Paste public Image URL (e.g., https://unsplash.com/...)"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+
                 {imagePreview && (
-                  <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={imagePreview} alt="" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, border: '1px solid #e2e8f0' }} />
                     <button onClick={() => { setImageFile(null); setImagePreview(''); setForm(f => ({ ...f, imageUrl: '' })); }}
