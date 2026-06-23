@@ -1,22 +1,19 @@
 import {
   clientDb,
-  clientStorage,
   doc,
   getDoc,
   setDoc,
   onSnapshot,
 } from '@smart-bazar/shared/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { AppConfig, DEFAULT_APP_CONFIG } from '@smart-bazar/shared/types/firestore';
+import { uploadToCloudinary } from './cloudinaryService';
 
 const CONFIG_DOC_PATH = 'config/app';
 
 export const configService = {
   /** Upload UPI QR code image */
   async uploadQrCode(imageFile: File): Promise<string> {
-    const storageRef = ref(clientStorage, `config/upi_qr_code_${Date.now()}_${imageFile.name}`);
-    await uploadBytes(storageRef, imageFile);
-    return getDownloadURL(storageRef);
+    return await uploadToCloudinary(imageFile);
   },
   /** One-time fetch of the app config */
   async getConfig(): Promise<AppConfig> {

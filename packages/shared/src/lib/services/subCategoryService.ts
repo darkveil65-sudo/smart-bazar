@@ -1,6 +1,6 @@
-import { clientDb, clientStorage, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, query, where, onSnapshot } from '@smart-bazar/shared/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { clientDb, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, query, where, onSnapshot } from '@smart-bazar/shared/lib/firebase';
 import { SubCategory } from '@smart-bazar/shared/types/firestore';
+import { uploadToCloudinary } from './cloudinaryService';
 
 const withTimeout = <T>(promise: Promise<T>, ms: number, errorMsg: string): Promise<T> => {
   let timer: any;
@@ -62,24 +62,7 @@ export const subCategoryService = {
     let imageUrl = '';
     if (imageFile) {
       console.log('Starting image upload for', imageFile.name);
-      try {
-        const storageRef = ref(clientStorage, `subcategories/${id}/${imageFile.name}`);
-        const snapshot = await withTimeout(
-          uploadBytes(storageRef, imageFile),
-          15000,
-          'timeout'
-        );
-        console.log('Upload successful. Fetching download URL...');
-        imageUrl = await getDownloadURL(snapshot.ref);
-      } catch (err) {
-        console.error('Storage upload failed, falling back to Base64:', err);
-        imageUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(imageFile);
-        });
-      }
+      imageUrl = await uploadToCloudinary(imageFile);
     }
     
     console.log('Saving subcategory metadata to Firestore...');
@@ -103,24 +86,7 @@ export const subCategoryService = {
     let imageUrl = existingImageUrl || '';
     if (imageFile) {
       console.log('Starting image upload for', imageFile.name);
-      try {
-        const storageRef = ref(clientStorage, `subcategories/${id}/${imageFile.name}`);
-        const snapshot = await withTimeout(
-          uploadBytes(storageRef, imageFile),
-          15000,
-          'timeout'
-        );
-        console.log('Upload successful. Fetching download URL...');
-        imageUrl = await getDownloadURL(snapshot.ref);
-      } catch (err) {
-        console.error('Storage upload failed, falling back to Base64:', err);
-        imageUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(imageFile);
-        });
-      }
+      imageUrl = await uploadToCloudinary(imageFile);
     }
     
     console.log('Updating subcategory metadata in Firestore...');

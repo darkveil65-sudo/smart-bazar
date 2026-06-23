@@ -12,8 +12,7 @@ import { couponService } from '@smart-bazar/shared/lib/services/couponService';
 import { useToast } from '@smart-bazar/shared/contexts/ui/ToastContext';
 import { Coupon } from '@smart-bazar/shared/types/firestore';
 import EmptyState from '@smart-bazar/shared/components/ui/EmptyState';
-import { clientStorage } from '@smart-bazar/shared/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadToCloudinary } from '@smart-bazar/shared/lib/services/cloudinaryService';
 
 interface DeliveryAddress {
   customerName: string;
@@ -289,9 +288,7 @@ export default function CheckoutPage() {
     try {
       let uploadedImageUrl = '';
       if (paymentMethod === 'upi' && paymentProofFile) {
-        const storageRef = ref(clientStorage, `paymentProofs/${user.uid}_${Date.now()}_${paymentProofFile.name}`);
-        await uploadBytes(storageRef, paymentProofFile);
-        uploadedImageUrl = await getDownloadURL(storageRef);
+        uploadedImageUrl = await uploadToCloudinary(paymentProofFile);
       }
 
       let priceMismatch = false;

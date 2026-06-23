@@ -1,6 +1,6 @@
-import { clientDb, clientStorage, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, onSnapshot, orderBy, query } from '@smart-bazar/shared/lib/firebase';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { clientDb, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, onSnapshot, orderBy, query } from '@smart-bazar/shared/lib/firebase';
 import { HeroBanner } from '../../types/firestore';
+import { uploadToCloudinary } from './cloudinaryService';
 
 const COL = 'heroBanners';
 
@@ -26,9 +26,7 @@ export const heroBannerService = {
     let imageUrl = data.imageUrl ?? '';
 
     if (imageFile) {
-      const storageRef = ref(clientStorage, `heroBanners/${id}`);
-      await uploadBytes(storageRef, imageFile);
-      imageUrl = await getDownloadURL(storageRef);
+      imageUrl = await uploadToCloudinary(imageFile);
     }
 
     await setDoc(doc(clientDb, COL, id), {
@@ -43,10 +41,7 @@ export const heroBannerService = {
     const updates: Record<string, unknown> = { ...data };
 
     if (imageFile) {
-      try { await deleteObject(ref(clientStorage, `heroBanners/${id}`)); } catch {}
-      const storageRef = ref(clientStorage, `heroBanners/${id}`);
-      await uploadBytes(storageRef, imageFile);
-      updates.imageUrl = await getDownloadURL(storageRef);
+      updates.imageUrl = await uploadToCloudinary(imageFile);
     }
 
     await updateDoc(doc(clientDb, COL, id), updates);
@@ -54,7 +49,6 @@ export const heroBannerService = {
 
   /** Delete a banner */
   async delete(id: string): Promise<void> {
-    try { await deleteObject(ref(clientStorage, `heroBanners/${id}`)); } catch {}
     await deleteDoc(doc(clientDb, COL, id));
   },
 

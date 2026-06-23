@@ -3,8 +3,9 @@ import {
   updateDoc, deleteDoc, query, where, onSnapshot,
   clientStorage
 } from '@smart-bazar/shared/lib/firebase';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, deleteObject } from 'firebase/storage';
 import { Product } from '@smart-bazar/shared/types/firestore';
+import { uploadToCloudinary } from './cloudinaryService';
 
 /**
  * Firestore rejects `undefined` values.
@@ -118,13 +119,7 @@ export const productService = {
   },
 
   async uploadProductImage(file: File): Promise<string> {
-    const storageRef = ref(clientStorage, `products/${Date.now()}_${file.name}`);
-    const snapshot = await withTimeout(
-      uploadBytes(storageRef, file),
-      15000,
-      'timeout'
-    );
-    return await getDownloadURL(snapshot.ref);
+    return await uploadToCloudinary(file);
   },
 
   subscribeToProducts(callback: (products: Product[]) => void) {
