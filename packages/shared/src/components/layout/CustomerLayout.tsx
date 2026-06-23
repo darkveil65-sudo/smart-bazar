@@ -318,9 +318,9 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
             {/* Logo orb */}
             <div style={{
               width: 38, height: 38, borderRadius: 12, flexShrink: 0,
-              background: 'linear-gradient(135deg, #10b981, #059669)',
+              background: 'linear-gradient(135deg, #14b8a6, #0d9488)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(16, 185, 129, 0.25)',
+              boxShadow: '0 4px 16px rgba(20, 184, 166, 0.25)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
             }}>
               <span style={{ fontSize: 20 }}>🛒</span>
@@ -336,7 +336,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
                   fontFamily: 'var(--font-display)',
                   letterSpacing: '-0.02em'
                 }}>
-                  {config.businessName || 'Smart Bazar'}
+                  {config.businessName || 'Allkart'}
                 </span>
                 
                 {/* Live delivery pulse */}
@@ -346,10 +346,10 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
                   gap: 3,
                   padding: '1.5px 5px',
                   borderRadius: 5,
-                  background: 'rgba(16, 185, 129, 0.08)',
+                  background: 'rgba(20, 184, 166, 0.08)',
                   fontSize: 8.5,
                   fontWeight: 800,
-                  color: '#10b981',
+                  color: '#14b8a6',
                   textTransform: 'uppercase',
                   letterSpacing: '0.02em',
                 }}>
@@ -357,7 +357,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
                     width: 4,
                     height: 4,
                     borderRadius: '50%',
-                    background: '#10b981',
+                    background: '#14b8a6',
                     animation: 'pingPulse 1.5s ease-out infinite',
                   }} />
                   {getLiveSlot()}
@@ -370,14 +370,14 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
                 title="Change location"
               >
                 {/* Emerald pin icon */}
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
                 <span style={{
                   fontSize: 9.5,
                   fontWeight: 800,
-                  color: '#10b981',
+                  color: '#14b8a6',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -386,7 +386,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
                 }}>
                   Home - Sector 62, Noida
                 </span>
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
               </div>
@@ -538,7 +538,7 @@ const CustomerLayout: FC<CustomerLayoutProps> = ({ children }) => {
         {pathname !== '/home' && (
           <div className="w-full max-w-[430px] md:max-w-3xl mx-auto px-4 md:px-8 pb-2.5">
             <div className="premium-search-pill">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>

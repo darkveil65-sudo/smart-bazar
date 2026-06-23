@@ -312,18 +312,6 @@ export default function OrdersPage() {
 
   return (
     <div className="px-4 py-5 animate-fadeIn">
-      {/* Dynamic inline styles for pulse animation */}
-      <style>{`
-        @keyframes stepper-pulse {
-          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-          70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
-          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-        .animate-stepper-pulse {
-          animation: stepper-pulse 2s infinite ease-in-out;
-        }
-      `}</style>
-
       {/* Header */}
       <h1 className="text-xl font-extrabold mb-1">My Orders</h1>
       <p className="text-sm text-muted-foreground mb-4">{orders.length} order{orders.length !== 1 ? 's' : ''} placed</p>

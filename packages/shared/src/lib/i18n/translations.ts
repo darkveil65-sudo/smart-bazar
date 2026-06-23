@@ -42,7 +42,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Auth — Signup
     'auth.signup.title': 'Create account ✨',
-    'auth.signup.subtitle': 'Join Smart Bazar today',
+    'auth.signup.subtitle': 'Join Allkart today',
     'auth.signup.name': 'Full Name',
     'auth.signup.namePlaceholder': 'Your full name',
     'auth.signup.email': 'Email',
@@ -124,7 +124,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Toast / Error messages
     'toast.loginSuccess': 'Welcome back! 👋',
-    'toast.signupSuccess': 'Welcome to Smart Bazar! 🎉',
+    'toast.signupSuccess': 'Welcome to Allkart! 🎉',
     'toast.fillAllFields': 'Please fill all fields',
     'toast.passwordShort': 'Password must be at least 6 characters',
     'toast.emailExists': 'Email already registered',
@@ -135,7 +135,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'toast.enterEmail': 'Please enter your email',
     'toast.noAccount': 'No account found with this email',
     'toast.resetFailed': 'Failed to send reset email',
-    'toast.loading': 'Loading Smart Bazar…',
+    'toast.loading': 'Loading Allkart…',
 
     // Maintenance
     'maintenance.title': 'Under Maintenance',
@@ -183,7 +183,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Auth — Signup
     'auth.signup.title': 'Account Banao ✨',
-    'auth.signup.subtitle': 'Aj-i Smart Bazar e jog din',
+    'auth.signup.subtitle': 'Aj-i Allkart e jog din',
     'auth.signup.name': 'Purno Nam',
     'auth.signup.namePlaceholder': 'Apnar nam',
     'auth.signup.email': 'Email',
@@ -265,7 +265,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Toast / Error messages
     'toast.loginSuccess': 'Swagatam! 👋',
-    'toast.signupSuccess': 'Smart Bazar e Swagatam! 🎉',
+    'toast.signupSuccess': 'Allkart e Swagatam! 🎉',
     'toast.fillAllFields': 'Sob ghur purno korun',
     'toast.passwordShort': 'Password kom-pakkhe 6 character hote hobe',
     'toast.emailExists': 'Email already registered ache',
@@ -276,7 +276,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'toast.enterEmail': 'Email diye jaan',
     'toast.noAccount': 'Ei email e kono account nei',
     'toast.resetFailed': 'Reset email pathano jaeni',
-    'toast.loading': 'Smart Bazar load hocche…',
+    'toast.loading': 'Allkart load hocche…',
 
     // Maintenance
     'maintenance.title': 'Maintenance Cholchhe',
@@ -324,7 +324,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Auth — Signup
     'auth.signup.title': 'অ্যাকাউন্ট তৈরি করুন ✨',
-    'auth.signup.subtitle': 'আজই Smart Bazar এ যোগ দিন',
+    'auth.signup.subtitle': 'আজই Allkart এ যোগ দিন',
     'auth.signup.name': 'পুরো নাম',
     'auth.signup.namePlaceholder': 'আপনার নাম',
     'auth.signup.email': 'ইমেইল',
@@ -406,7 +406,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Toast / Error messages
     'toast.loginSuccess': 'স্বাগতম! 👋',
-    'toast.signupSuccess': 'Smart Bazar এ স্বাগতম! 🎉',
+    'toast.signupSuccess': 'Allkart এ স্বাগতম! 🎉',
     'toast.fillAllFields': 'সব ঘর পূরণ করুন',
     'toast.passwordShort': 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে',
     'toast.emailExists': 'ইমেইল ইতিমধ্যে নিবন্ধিত',
@@ -417,7 +417,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'toast.enterEmail': 'ইমেইল দিন',
     'toast.noAccount': 'এই ইমেইলে কোন অ্যাকাউন্ট নেই',
     'toast.resetFailed': 'রিসেট ইমেইল পাঠানো যায়নি',
-    'toast.loading': 'Smart Bazar লোড হচ্ছে…',
+    'toast.loading': 'Allkart লোড হচ্ছে…',
 
     // Maintenance
     'maintenance.title': 'রক্ষণাবেক্ষণ চলছে',

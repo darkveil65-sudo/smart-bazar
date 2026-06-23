@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { productService } from '@smart-bazar/shared/lib/services/productService';
 import { categoryService } from '@smart-bazar/shared/lib/services/categoryService';
@@ -16,44 +16,24 @@ import EmptyState from '@smart-bazar/shared/components/ui/EmptyState';
 const HERO_SLIDES = [
   {
     id: 'slide-1',
-    badge: '🌿 Ergonomic WFH',
-    headline: 'Ergonomic WFH',
-    sub: 'Designed for posture, crafted for comfort. Perfect support for long work sessions.',
-    cta: 'Shop Chairs',
-    promoCode: 'WFH40',
-    imageUrl: 'https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?auto=format&fit=crop&w=600&q=80',
-    category: 'chairs',
+    badge: '🌿 Artistic Designs',
+    headline: 'Artistic Floral Wardrobes',
+    sub: 'Premium quality closets adorned with classic floral prints.',
+    cta: 'Shop Wardrobes',
+    promoCode: 'WARDROBE15',
+    imageUrl: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=600&q=80',
+    category: 'wardrobes',
   },
   {
     id: 'slide-2',
-    badge: '✨ Premium Choice',
-    headline: 'Luxury Velvet Sofas',
-    sub: 'Plush velvet fabrics in deep rich tones. Redefine your living room lounge.',
-    cta: 'Explore Sofas',
-    promoCode: 'LUXE30',
-    imageUrl: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=600&q=80',
-    category: 'sofas',
+    badge: '✨ Makeup Vanities',
+    headline: 'Elegant Dressing Tables',
+    sub: 'Sleek makeup stations with premium mirrors and storage drawers.',
+    cta: 'Explore Dressing Tables',
+    promoCode: 'VANITY20',
+    imageUrl: 'https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?auto=format&fit=crop&w=600&q=80',
+    category: 'dressing-tables',
   },
-  {
-    id: 'slide-3',
-    badge: '💡 Warm Vibe',
-    headline: 'Minimalist Lighting',
-    sub: 'Sleek slate base with ambient amber glows. Perfect study companion.',
-    cta: 'Explore Lamps',
-    promoCode: 'LIGHT15',
-    imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80',
-    category: 'lighting',
-  },
-];
-
-const CATEGORIES_LIST = [
-  { name: 'Chairs', emoji: '🪑', id: 'chairs' },
-  { name: 'Tables', emoji: '🪵', id: 'tables' },
-  { name: 'Beds', emoji: '🛏️', id: 'beds' },
-  { name: 'Sofas', emoji: '🛋️', id: 'sofas' },
-  { name: 'Lighting', emoji: '💡', id: 'lighting' },
-  { name: 'Shelves', emoji: '🧱', id: 'shelves' },
-  { name: 'Decor', emoji: '🪴', id: 'decor' },
 ];
 
 export default function HomePage() {
@@ -283,277 +263,121 @@ export default function HomePage() {
     setActiveCategory((prev) => (prev === catId ? null : catId));
   };
 
-  // Build item lists dynamically, with premium fallbacks
-  const getDealProducts = () => {
-    const list = products.filter((p) => p.isAvailable).slice(0, 3);
-    const mockFallbacks = [
-      {
-        id: 'deal-1',
-        name: 'Ergonomic Mesh WFH Chair',
-        price: 4999,
-        mrp: 7999,
-        imageUrl: 'https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?auto=format&fit=crop&w=400&q=80',
-        category: 'chairs',
-        isAvailable: true,
-        stock: 5,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'deal-2',
-        name: 'Nordic Oak Study Table',
-        price: 12999,
-        mrp: 18999,
-        imageUrl: 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=400&q=80',
-        category: 'tables',
-        isAvailable: true,
-        stock: 3,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'deal-3',
-        name: 'Velvet Lounge Sofa Chair',
-        price: 8499,
-        mrp: 12499,
-        imageUrl: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=400&q=80',
-        category: 'chairs',
-        isAvailable: true,
-        stock: 4,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-    ] as Product[];
+  // Stable mock rating & reviews generator based on product ID
+  const getStableRating = useCallback((id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+      hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const score = 4.1 + (Math.abs(hash) % 9) * 0.1;
+    const reviews = 12 + (Math.abs(hash) % 230);
+    return { rating: score, reviews };
+  }, []);
 
-    return [...list, ...mockFallbacks.slice(list.length)];
-  };
+  // Build item lists dynamically
+  const getDealProducts = useCallback(() => {
+    // Filter and compute discount for products
+    const productsWithDiscounts = products.map((p) => {
+      const mrp = p.mrp || (p as any).mrp;
+      const discountPercent =
+        mrp && mrp > p.price
+          ? ((mrp - p.price) / mrp) * 100
+          : p.discountPercent || 0;
+      return { product: p, discountPercent };
+    });
 
-  const dealItems = getDealProducts();
+    // Split into those with real discounts vs those without
+    const realDeals = productsWithDiscounts.filter((item) => item.discountPercent > 0);
 
-  const getBestSellers = () => {
+    // Sort real deals by discount percentage descending
+    realDeals.sort((a, b) => b.discountPercent - a.discountPercent);
+
+    // If we have at least 3, return the top 3
+    if (realDeals.length >= 3) {
+      return realDeals.slice(0, 3).map((item) => item.product);
+    }
+
+    // Otherwise, fill the remaining slots with available products that have a high stable rating
+    const dealProducts = realDeals.map((item) => item.product);
+    const dealIds = new Set(dealProducts.map((p) => p.id));
+
+    const others = products
+      .filter((p) => !dealIds.has(p.id))
+      .map((p) => {
+        const { rating } = getStableRating(p.id);
+        const ratingVal = (p as any).rating || rating;
+        return { product: p, ratingVal };
+      })
+      .sort((a, b) => b.ratingVal - a.ratingVal);
+
+    const needed = 3 - dealProducts.length;
+    const fillers = others.slice(0, needed).map((item) => item.product);
+
+    return [...dealProducts, ...fillers];
+  }, [products, getStableRating]);
+
+  const dealItems = useMemo(() => getDealProducts(), [getDealProducts]);
+
+  const getBestSellers = useCallback(() => {
     const dealIds = new Set(dealItems.map((d) => d.id));
     const available = products.filter((p) => p.isAvailable && !dealIds.has(p.id));
 
-    const mockFallbacks = [
-      {
-        id: 'best-1',
-        name: 'Minimalist Slate Study Desk',
-        price: 6499,
-        mrp: 8999,
-        imageUrl: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=400&q=80',
-        category: 'tables',
-        description: 'Sleek dark slate study desk featuring robust dual-level open metal shelves and premium cable organization slot.',
-        isAvailable: true,
-        stock: 12,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'best-2',
-        name: 'Amber Glow Minimalist Desk Lamp',
-        price: 1499,
-        mrp: 2499,
-        imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=400&q=80',
-        category: 'lighting',
-        isAvailable: true,
-        stock: 25,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'best-3',
-        name: 'Nordic Oak Bedside Drawer',
-        price: 3499,
-        mrp: 4999,
-        imageUrl: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=400&q=80',
-        category: 'shelves',
-        isAvailable: true,
-        stock: 8,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'best-4',
-        name: 'Velvet Lounge Sofa Cushion',
-        price: 899,
-        mrp: 1499,
-        imageUrl: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=400&q=80',
-        category: 'decor',
-        isAvailable: true,
-        stock: 45,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'best-5',
-        name: 'Oak wood floating shelves',
-        price: 1999,
-        mrp: 2999,
-        imageUrl: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=400&q=80',
-        category: 'shelves',
-        isAvailable: true,
-        stock: 15,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-    ] as Product[];
+    const ratedProducts = available.map((p) => {
+      const { rating, reviews } = getStableRating(p.id);
+      const ratingVal = (p as any).rating || rating;
+      const reviewsVal = (p as any).reviews || reviews;
+      return { product: p, ratingVal, reviewsVal };
+    });
 
-    const result = [...available];
-    for (let i = result.length; i < 5; i++) {
-      result.push(mockFallbacks[i - result.length]);
-    }
+    // Sort by rating descending, then by reviews count descending
+    ratedProducts.sort((a, b) => {
+      if (b.ratingVal !== a.ratingVal) {
+        return b.ratingVal - a.ratingVal;
+      }
+      return b.reviewsVal - a.reviewsVal;
+    });
+
+    const sortedAvailable = ratedProducts.map((item) => item.product);
 
     return {
-      featured: result[0],
-      grid: result.slice(1, 5),
+      featured: sortedAvailable[0] || null,
+      grid: sortedAvailable.slice(1, 5),
     };
-  };
+  }, [products, dealItems, getStableRating]);
 
-  const { featured: bestFeatured, grid: bestGrid } = getBestSellers();
+  const { featured: bestFeatured, grid: bestGrid } = useMemo(
+    () => getBestSellers(),
+    [getBestSellers]
+  );
 
-  const getLatestProducts = () => {
+  const getLatestProducts = useCallback(() => {
     const excludedIds = new Set([
       ...dealItems.map((d) => d.id),
-      bestFeatured.id,
+      ...(bestFeatured ? [bestFeatured.id] : []),
       ...bestGrid.map((g) => g.id),
     ]);
     const available = products.filter((p) => p.isAvailable && !excludedIds.has(p.id));
 
-    const mockLatest = [
-      {
-        id: 'latest-1',
-        name: 'Scandinavian Shelving Rack',
-        price: 7999,
-        mrp: 10999,
-        imageUrl: 'https://images.unsplash.com/photo-1594620302200-9a7b2241a116?auto=format&fit=crop&w=400&q=80',
-        category: 'shelves',
-        isAvailable: true,
-        stock: 7,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'latest-2',
-        name: 'Hanging Industrial Pendant Lamp',
-        price: 2499,
-        mrp: 3999,
-        imageUrl: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=400&q=80',
-        category: 'lighting',
-        isAvailable: true,
-        stock: 14,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'latest-3',
-        name: 'Linen Accent Cushion Cover',
-        price: 699,
-        mrp: 999,
-        imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=400&q=80',
-        category: 'decor',
-        isAvailable: true,
-        stock: 30,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'latest-4',
-        name: 'Office Memory Foam Footrest',
-        price: 1299,
-        mrp: 1999,
-        imageUrl: 'https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?auto=format&fit=crop&w=400&q=80',
-        category: 'chairs',
-        isAvailable: true,
-        stock: 22,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'latest-5',
-        name: 'Aesthetic Oak Writing Desk',
-        price: 14999,
-        mrp: 21999,
-        imageUrl: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=400&q=80',
-        category: 'tables',
-        isAvailable: true,
-        stock: 4,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'latest-6',
-        name: 'Solid Oak Circular Coffee Table',
-        price: 5499,
-        mrp: 7999,
-        imageUrl: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=400&q=80',
-        category: 'tables',
-        isAvailable: true,
-        stock: 9,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'latest-7',
-        name: 'Metal Accent Arc Floor Lamp',
-        price: 3899,
-        mrp: 5999,
-        imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=400&q=80',
-        category: 'lighting',
-        isAvailable: true,
-        stock: 11,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'latest-8',
-        name: 'Rattan Circular Accent Mirror',
-        price: 1599,
-        mrp: 2499,
-        imageUrl: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&q=80',
-        category: 'decor',
-        isAvailable: true,
-        stock: 18,
-        store: 'furniture-store',
-        vendorId: 'vendor-1',
-        createdAt: new Date().toISOString(),
-      },
-    ] as Product[];
+    // Sort by createdAt descending
+    const sortedAvailable = [...available].sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
 
-    const result = [...available];
-    for (let i = result.length; i < 8; i++) {
-      result.push(mockLatest[i - result.length]);
-    }
-    return result.slice(0, 8);
-  };
+    return sortedAvailable.slice(0, 8);
+  }, [products, dealItems, bestFeatured, bestGrid]);
 
-  const latestItems = getLatestProducts();
+  const latestItems = useMemo(() => getLatestProducts(), [getLatestProducts]);
 
-  // Combine real + mock products for filter/search
+  // Combine real products for filter/search
   const getUnifiedCatalog = () => {
     const catalogMap = new Map<string, Product>();
 
-    const mocks = [
-      ...dealItems,
-      bestFeatured,
-      ...bestGrid,
-      ...latestItems,
-    ];
-    mocks.forEach((m) => catalogMap.set(m.id, m));
+    dealItems.forEach((p) => catalogMap.set(p.id, p));
+    if (bestFeatured) catalogMap.set(bestFeatured.id, bestFeatured);
+    bestGrid.forEach((p) => catalogMap.set(p.id, p));
+    latestItems.forEach((p) => catalogMap.set(p.id, p));
 
     products.forEach((p) => {
       if (p.isAvailable && getEffectiveStore(p) === 'furniture-store') {
@@ -682,7 +506,7 @@ export default function HomePage() {
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
-                {['Ergonomic Chairs', 'Study Desk', 'Velvet Sofas', 'Pendant Lamps', 'Decor Drawer'].map(
+                                {['Artistic Wardrobes', 'Steel Almirahs', 'Dressing Tables', 'Pink Vanity'].map(
                   (q, idx) => (
                     <button
                       key={idx}
@@ -935,7 +759,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-width-none hide-scrollbar">
-                {CATEGORIES_LIST.map((cat) => {
+                {categories.map((cat) => {
                   const isActive = activeCategory === cat.id;
                   return (
                     <button
@@ -950,7 +774,7 @@ export default function HomePage() {
                             : 'bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 group-hover:scale-105 border border-slate-100 dark:border-zinc-800'
                         }`}
                       >
-                        {cat.emoji}
+                        {cat.emoji || '📦'}
                       </div>
                       <span
                         className={`text-xs font-semibold font-display transition-colors ${
@@ -968,144 +792,146 @@ export default function HomePage() {
             </div>
 
             {/* 6. Deal of the Day (3 timers products) */}
-            <div className="my-10">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold font-display text-slate-800 dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                    <span>⚡ Deal of the Day</span>
-                  </h3>
-                  <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
-                    Hurry! Ticking deals on exclusive premium designs
-                  </p>
+            {dealItems.length > 0 && (
+              <div className="my-10">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                  <div>
+                    <h3 className="text-2xl font-bold font-display text-slate-800 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                      <span>⚡ Deal of the Day</span>
+                    </h3>
+                    <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
+                      Hurry! Ticking deals on exclusive premium designs
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-900/30 px-4 py-2 rounded-full font-bold font-display text-sm">
+                    <span>Ends In:</span>
+                    <span className="font-mono">
+                      {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:{formatTime(timeLeft.seconds)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-900/30 px-4 py-2 rounded-full font-bold font-display text-sm">
-                  <span>Ends In:</span>
-                  <span className="font-mono">
-                    {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:{formatTime(timeLeft.seconds)}
-                  </span>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {dealItems.map((p) => {
-                  const discountPercent =
-                    p.mrp && p.mrp > p.price ? Math.round((1 - p.price / p.mrp) * 100) : 25;
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {dealItems.map((p) => {
+                    const discountPercent =
+                      p.mrp && p.mrp > p.price ? Math.round((1 - p.price / p.mrp) * 100) : 25;
 
-                  return (
-                    <div
-                      key={p.id}
-                      className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-slate-100 dark:border-zinc-800 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
-                    >
-                      <div className="absolute top-4 left-4 bg-rose-500 text-white font-bold text-xs px-2.5 py-1 rounded-full z-10 shadow-sm">
-                        {discountPercent}% OFF
-                      </div>
+                    return (
+                      <div
+                        key={p.id}
+                        className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-slate-100 dark:border-zinc-800 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+                      >
+                        <div className="absolute top-4 left-4 bg-rose-500 text-white font-bold text-xs px-2.5 py-1 rounded-full z-10 shadow-sm">
+                          {discountPercent}% OFF
+                        </div>
 
-                      <div className="absolute top-4 right-4 bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold text-[11px] px-2.5 py-1 rounded-full z-10 flex items-center gap-1 border border-amber-200/50 dark:border-amber-900/30">
-                        <span>⏱️</span>
-                        <span className="font-mono">
-                          {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:
-                          {formatTime(timeLeft.seconds)}
-                        </span>
-                      </div>
-
-                      <div className="h-48 relative overflow-hidden rounded-xl bg-slate-50 dark:bg-zinc-800/30 flex items-center justify-center mb-4 mt-6">
-                        {p.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={p.imageUrl}
-                            alt={p.name}
-                            className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <span className="text-5xl">🛋️</span>
-                        )}
-                      </div>
-
-                      <div>
-                        <h4 className="font-semibold text-slate-800 dark:text-zinc-200 line-clamp-1 mb-1 font-display">
-                          {p.name}
-                        </h4>
-                        <div className="flex items-center gap-1 mb-3">
-                          <span className="text-yellow-500 text-xs">★</span>
-                          <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
-                            {(p as any).rating || '4.8'}
-                          </span>
-                          <span className="text-[10px] text-slate-400 dark:text-zinc-500">
-                            ({(p as any).reviews || '80'})
+                        <div className="absolute top-4 right-4 bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold text-[11px] px-2.5 py-1 rounded-full z-10 flex items-center gap-1 border border-amber-200/50 dark:border-amber-900/30">
+                          <span>⏱️</span>
+                          <span className="font-mono">
+                            {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:
+                            {formatTime(timeLeft.seconds)}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-50 dark:border-zinc-800">
-                          <div className="flex items-baseline gap-1.5">
-                            <span className="text-lg font-extrabold text-slate-900 dark:text-zinc-100">
-                              ₹{p.price}
+                        <div className="h-48 relative overflow-hidden rounded-xl bg-slate-50 dark:bg-zinc-800/30 flex items-center justify-center mb-4 mt-6">
+                          {p.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={p.imageUrl}
+                              alt={p.name}
+                              className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : (
+                            <span className="text-5xl">🛋️</span>
+                          )}
+                        </div>
+
+                        <div>
+                          <h4 className="font-semibold text-slate-800 dark:text-zinc-200 line-clamp-1 mb-1 font-display">
+                            {p.name}
+                          </h4>
+                          <div className="flex items-center gap-1 mb-3">
+                            <span className="text-yellow-500 text-xs">★</span>
+                            <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
+                              {(p as any).rating || '4.8'}
                             </span>
-                            <span className="text-xs text-slate-400 dark:text-zinc-500 line-through">
-                              ₹{p.mrp || Math.round(p.price * 1.3)}
+                            <span className="text-[10px] text-slate-400 dark:text-zinc-500">
+                              ({(p as any).reviews || '80'})
                             </span>
                           </div>
 
-                          {getCartQty(p.id) > 0 ? (
-                            <div className="flex items-center gap-2.5 bg-emerald-600 text-white rounded-lg p-1 justify-between shadow-sm">
-                              <button
-                                onClick={() => updateQuantity(p.id, getCartQty(p.id) - 1)}
-                                className="w-6 h-6 flex items-center justify-center font-bold hover:bg-emerald-700 rounded transition-colors text-xs"
-                              >
-                                -
-                              </button>
-                              <span className="font-bold text-xs">{getCartQty(p.id)}</span>
-                              <button
-                                onClick={() => updateQuantity(p.id, getCartQty(p.id) + 1)}
-                                className="w-6 h-6 flex items-center justify-center font-bold hover:bg-emerald-700 rounded transition-colors text-xs"
-                              >
-                                +
-                              </button>
+                          <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-50 dark:border-zinc-800">
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-lg font-extrabold text-slate-900 dark:text-zinc-100">
+                                ₹{p.price}
+                              </span>
+                              <span className="text-xs text-slate-400 dark:text-zinc-500 line-through">
+                                ₹{p.mrp || Math.round(p.price * 1.3)}
+                              </span>
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => addItem(p)}
-                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all active:scale-95 flex items-center gap-1 shadow-sm"
-                            >
-                              <span>Add</span>
-                              <span>+</span>
-                            </button>
-                          )}
+
+                            {getCartQty(p.id) > 0 ? (
+                              <div className="flex items-center gap-2.5 bg-emerald-600 text-white rounded-lg p-1 justify-between shadow-sm">
+                                <button
+                                  onClick={() => updateQuantity(p.id, getCartQty(p.id) - 1)}
+                                  className="w-6 h-6 flex items-center justify-center font-bold hover:bg-emerald-700 rounded transition-colors text-xs"
+                                >
+                                  -
+                                </button>
+                                <span className="font-bold text-xs">{getCartQty(p.id)}</span>
+                                <button
+                                  onClick={() => updateQuantity(p.id, getCartQty(p.id) + 1)}
+                                  className="w-6 h-6 flex items-center justify-center font-bold hover:bg-emerald-700 rounded transition-colors text-xs"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => addItem(p)}
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all active:scale-95 flex items-center gap-1 shadow-sm"
+                              >
+                                <span>Add</span>
+                                <span>+</span>
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* 4. Double Promo Banners */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10">
               <div
-                onClick={() => handleCategoryClick('chairs')}
+                onClick={() => handleCategoryClick('wardrobes')}
                 className="h-64 rounded-3xl overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
               >
-                <div className="absolute inset-0 bg-slate-955/45 z-10 transition-colors group-hover:bg-slate-950/35" />
+                <div className="absolute inset-0 bg-slate-900/40 z-10 transition-colors group-hover:bg-slate-900/30" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1505797149-43b0069ec26b?auto=format&fit=crop&w=800&q=80"
-                  alt="WFH Chairs Collection"
+                  src="https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80"
+                  alt="Artistic Wardrobes"
                   className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 z-20 p-8 flex flex-col justify-between text-white">
                   <div>
                     <span className="bg-emerald-500 text-white font-bold font-display text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      Ergonomic Comfort
+                      Spacious Storage
                     </span>
                     <h3 className="text-3xl font-extrabold font-display mt-4 leading-tight">
-                      WFH Chairs
+                      Artistic Wardrobes
                     </h3>
                     <p className="text-sm text-slate-200 mt-2 max-w-xs opacity-90">
-                      Premium mesh & leather office chairs designed for focus.
+                      Premium steel and wooden almirahs decorated with artistic prints.
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold border-b-2 border-white pb-0.5 group-hover:border-emerald-400 transition-colors">
-                      Shop Chairs
+                      Shop Wardrobes
                     </span>
                     <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
                   </div>
@@ -1113,31 +939,31 @@ export default function HomePage() {
               </div>
 
               <div
-                onClick={() => handleCategoryClick('lighting')}
+                onClick={() => handleCategoryClick('dressing-tables')}
                 className="h-64 rounded-3xl overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300"
               >
-                <div className="absolute inset-0 bg-slate-955/45 z-10 transition-colors group-hover:bg-slate-950/35" />
+                <div className="absolute inset-0 bg-slate-900/40 z-10 transition-colors group-hover:bg-slate-900/30" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80"
-                  alt="Designer Lighting"
+                  src="https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?auto=format&fit=crop&w=800&q=80"
+                  alt="Modern Dressing Tables"
                   className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 z-20 p-8 flex flex-col justify-between text-white">
                   <div>
                     <span className="bg-amber-500 text-white font-bold font-display text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      Warm Study Vibe
+                      Vanity Elegance
                     </span>
                     <h3 className="text-3xl font-extrabold font-display mt-4 leading-tight">
-                      Amber & Slate Lamps
+                      Dressing Tables
                     </h3>
                     <p className="text-sm text-slate-200 mt-2 max-w-xs opacity-90">
-                      Aesthetic warm desk lamps and minimalist accent lighting.
+                      Elegant vanity stations with mirrors and dedicated compartments.
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold border-b-2 border-white pb-0.5 group-hover:border-amber-400 transition-colors">
-                      Explore Lamps
+                      Explore Vanities
                     </span>
                     <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
                   </div>
@@ -1146,180 +972,186 @@ export default function HomePage() {
             </div>
 
             {/* 5. Best Selling Products */}
-            <div className="my-10">
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold font-display text-slate-800 dark:text-zinc-100 tracking-tight">
-                  🔥 Best Sellers
-                </h3>
-                <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
-                  Popular interior selections highly rated by customers
-                </p>
-              </div>
+            {bestFeatured && (
+              <div className="my-10">
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold font-display text-slate-800 dark:text-zinc-100 tracking-tight">
+                    🔥 Best Sellers
+                  </h3>
+                  <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
+                    Popular interior selections highly rated by customers
+                  </p>
+                </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left: spacious featured card */}
-                <div className="lg:col-span-5 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                  <div className="absolute top-4 left-4 bg-emerald-500 text-white font-bold font-display text-[10px] px-3 py-1 rounded-full z-10 shadow-sm">
-                    BEST SELLER
-                  </div>
-
-                  <div className="h-64 relative overflow-hidden rounded-2xl bg-slate-50 dark:bg-zinc-800/30 flex items-center justify-center mb-6">
-                    {bestFeatured.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={bestFeatured.imageUrl}
-                        alt={bestFeatured.name}
-                        className="w-full h-full object-contain p-6 group-hover:scale-102 transition-transform duration-500"
-                      />
-                    ) : (
-                      <span className="text-6xl">🪑</span>
-                    )}
-                  </div>
-
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <span className="text-yellow-500 text-sm">★</span>
-                        <span className="text-sm font-semibold text-slate-800 dark:text-zinc-200">
-                          {(bestFeatured as any).rating || '4.8'}
-                        </span>
-                        <span className="text-xs text-slate-400 dark:text-zinc-500">
-                          ({(bestFeatured as any).reviews || '142'} reviews)
-                        </span>
-                      </div>
-
-                      <h4 className="text-xl font-bold font-display text-slate-900 dark:text-zinc-100 leading-tight mb-2">
-                        {bestFeatured.name}
-                      </h4>
-
-                      <p className="text-sm text-slate-500 dark:text-zinc-400 line-clamp-3 mb-6 leading-relaxed">
-                        {bestFeatured.description ||
-                          'Premium aesthetic meets modern layout. Crafted from sustainable materials for long-lasting WFH support.'}
-                      </p>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Left: spacious featured card */}
+                  <div className={`${bestGrid.length > 0 ? 'lg:col-span-5' : 'lg:col-span-12'} bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-3xl border border-slate-100 dark:border-zinc-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group`}>
+                    <div className="absolute top-4 left-4 bg-emerald-500 text-white font-bold font-display text-[10px] px-3 py-1 rounded-full z-10 shadow-sm">
+                      BEST SELLER
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-zinc-800">
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-2xl font-extrabold text-slate-900 dark:text-zinc-100">
-                          ₹{bestFeatured.price}
-                        </span>
-                        {bestFeatured.mrp && bestFeatured.mrp > bestFeatured.price && (
-                          <span className="text-sm text-slate-400 dark:text-zinc-500 line-through">
-                            ₹{bestFeatured.mrp}
-                          </span>
-                        )}
-                      </div>
-
-                      {getCartQty(bestFeatured.id) > 0 ? (
-                        <div className="flex items-center gap-3 bg-emerald-600 text-white rounded-xl p-1.5 justify-between w-36 shadow-sm">
-                          <button
-                            onClick={() => updateQuantity(bestFeatured.id, getCartQty(bestFeatured.id) - 1)}
-                            className="w-8 h-8 flex items-center justify-center font-bold hover:bg-emerald-700 rounded-lg transition-colors text-sm"
-                          >
-                            -
-                          </button>
-                          <span className="font-bold text-sm">{getCartQty(bestFeatured.id)}</span>
-                          <button
-                            onClick={() => updateQuantity(bestFeatured.id, getCartQty(bestFeatured.id) + 1)}
-                            className="w-8 h-8 flex items-center justify-center font-bold hover:bg-emerald-700 rounded-lg transition-colors text-sm"
-                          >
-                            +
-                          </button>
-                        </div>
+                    <div className="h-64 relative overflow-hidden rounded-2xl bg-slate-50 dark:bg-zinc-800/30 flex items-center justify-center mb-6">
+                      {bestFeatured.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={bestFeatured.imageUrl}
+                          alt={bestFeatured.name}
+                          className="w-full h-full object-contain p-6 group-hover:scale-102 transition-transform duration-500"
+                        />
                       ) : (
-                        <button
-                          onClick={() => addItem(bestFeatured)}
-                          className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-sm active:scale-95 flex items-center gap-1.5 text-sm"
-                        >
-                          <span>Add to Cart</span>
-                          <span>+</span>
-                        </button>
+                        <span className="text-6xl">🪑</span>
                       )}
                     </div>
-                  </div>
-                </div>
 
-                {/* Right: 4-product grid */}
-                <div className="lg:col-span-7 grid grid-cols-2 gap-6">
-                  {bestGrid.map((p) => (
-                    <ProductCard
-                      key={p.id}
-                      product={p}
-                      qty={getCartQty(p.id)}
-                      onAdd={() => addItem(p)}
-                      onInc={() => updateQuantity(p.id, getCartQty(p.id) + 1)}
-                      onDec={() => updateQuantity(p.id, getCartQty(p.id) - 1)}
-                      deliverySlot={liveSlot}
-                      onClick={() => router.push(`/product/${p.id}`)}
-                    />
-                  ))}
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className="text-yellow-500 text-sm">★</span>
+                          <span className="text-sm font-semibold text-slate-800 dark:text-zinc-200">
+                            {(bestFeatured as any).rating || '4.8'}
+                          </span>
+                          <span className="text-xs text-slate-400 dark:text-zinc-500">
+                            ({(bestFeatured as any).reviews || '142'} reviews)
+                          </span>
+                        </div>
+
+                        <h4 className="text-xl font-bold font-display text-slate-900 dark:text-zinc-100 leading-tight mb-2">
+                          {bestFeatured.name}
+                        </h4>
+
+                        <p className="text-sm text-slate-500 dark:text-zinc-400 line-clamp-3 mb-6 leading-relaxed">
+                          {bestFeatured.description ||
+                            'Premium aesthetic meets modern layout. Crafted from sustainable materials for long-lasting WFH support.'}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-zinc-800">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-2xl font-extrabold text-slate-900 dark:text-zinc-100">
+                            ₹{bestFeatured.price}
+                          </span>
+                          {bestFeatured.mrp && bestFeatured.mrp > bestFeatured.price && (
+                            <span className="text-sm text-slate-400 dark:text-zinc-500 line-through">
+                              ₹{bestFeatured.mrp}
+                            </span>
+                          )}
+                        </div>
+
+                        {getCartQty(bestFeatured.id) > 0 ? (
+                          <div className="flex items-center gap-3 bg-emerald-600 text-white rounded-xl p-1.5 justify-between w-36 shadow-sm">
+                            <button
+                              onClick={() => updateQuantity(bestFeatured.id, getCartQty(bestFeatured.id) - 1)}
+                              className="w-8 h-8 flex items-center justify-center font-bold hover:bg-emerald-700 rounded-lg transition-colors text-sm"
+                            >
+                              -
+                            </button>
+                            <span className="font-bold text-sm">{getCartQty(bestFeatured.id)}</span>
+                            <button
+                              onClick={() => updateQuantity(bestFeatured.id, getCartQty(bestFeatured.id) + 1)}
+                              className="w-8 h-8 flex items-center justify-center font-bold hover:bg-emerald-700 rounded-lg transition-colors text-sm"
+                            >
+                              +
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => addItem(bestFeatured)}
+                            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-sm active:scale-95 flex items-center gap-1.5 text-sm"
+                          >
+                            <span>Add to Cart</span>
+                            <span>+</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: 4-product grid */}
+                  {bestGrid.length > 0 && (
+                    <div className="lg:col-span-7 grid grid-cols-2 gap-6">
+                      {bestGrid.map((p) => (
+                        <ProductCard
+                          key={p.id}
+                          product={p}
+                          qty={getCartQty(p.id)}
+                          onAdd={() => addItem(p)}
+                          onInc={() => updateQuantity(p.id, getCartQty(p.id) + 1)}
+                          onDec={() => updateQuantity(p.id, getCartQty(p.id) - 1)}
+                          deliverySlot={liveSlot}
+                          onClick={() => router.push(`/product/${p.id}`)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* 3. Latest Products Section */}
-            <div className="my-10">
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold font-display text-slate-800 dark:text-zinc-100 tracking-tight">
-                  ✨ Latest Arrivals
-                </h3>
-                <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
-                  Explore fresh designs and seasonal updates for your spaces
-                </p>
-              </div>
+            {latestItems.length > 0 && (
+              <div className="my-10">
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold font-display text-slate-800 dark:text-zinc-100 tracking-tight">
+                    ✨ Latest Arrivals
+                  </h3>
+                  <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">
+                    Explore fresh designs and seasonal updates for your spaces
+                  </p>
+                </div>
 
-              {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div
-                      key={i}
-                      className="h-[260px] rounded-2xl bg-slate-100 dark:bg-zinc-800 animate-pulse"
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                  {latestItems.map((p) => (
-                    <ProductCard
-                      key={p.id}
-                      product={p}
-                      qty={getCartQty(p.id)}
-                      onAdd={() => addItem(p)}
-                      onInc={() => updateQuantity(p.id, getCartQty(p.id) + 1)}
-                      onDec={() => updateQuantity(p.id, getCartQty(p.id) - 1)}
-                      deliverySlot={liveSlot}
-                      onClick={() => router.push(`/product/${p.id}`)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+                {loading ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-4">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div
+                        key={i}
+                        className="h-[260px] rounded-2xl bg-slate-100 dark:bg-zinc-800 animate-pulse"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    {latestItems.map((p) => (
+                      <ProductCard
+                        key={p.id}
+                        product={p}
+                        qty={getCartQty(p.id)}
+                        onAdd={() => addItem(p)}
+                        onInc={() => updateQuantity(p.id, getCartQty(p.id) + 1)}
+                        onDec={() => updateQuantity(p.id, getCartQty(p.id) - 1)}
+                        deliverySlot={liveSlot}
+                        onClick={() => router.push(`/product/${p.id}`)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* 8. Bottom Promo Banners */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-10">
               {[
                 {
-                  title: 'Desk Organizers',
-                  desc: 'Streamline your productivity with solid oak trays.',
-                  tag: 'Desk Accessories',
-                  emoji: '📥',
-                  cat: 'decor',
+                  title: 'Classic Almirahs',
+                  desc: 'Sturdy steel and wooden almirahs built for safety.',
+                  tag: 'Wardrobes Collection',
+                  emoji: '🚪',
+                  cat: 'wardrobes',
                   action: 'View All',
                 },
                 {
-                  title: 'Velvet Pillows',
-                  desc: 'Add plush velvet details for instant accent comfort.',
-                  tag: 'Living Room',
-                  emoji: '🛋️',
-                  cat: 'decor',
+                  title: 'Makeup Vanities',
+                  desc: 'Elegant dressing tables with smart storage drawers.',
+                  tag: 'Vanity Station',
+                  emoji: '🪞',
+                  cat: 'dressing-tables',
                   action: 'Explore',
                 },
                 {
-                  title: 'Study Planners',
-                  desc: 'Aesthetic task sheets and leather desk planners.',
-                  tag: 'Stationery',
-                  emoji: '📅',
-                  cat: 'decor',
+                  title: 'Floral Closets',
+                  desc: 'Aesthetic wardrobes decorated with artistic patterns.',
+                  tag: 'Artistic Bedrooms',
+                  emoji: '🌸',
+                  cat: 'wardrobes',
                   action: 'Shop Now',
                 },
               ].map((card, idx) => (

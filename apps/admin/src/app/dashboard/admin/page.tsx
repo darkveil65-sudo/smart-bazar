@@ -134,10 +134,10 @@ export default function AdminDashboard() {
           ))
         ) : (
           [
-            { label: 'Total Users', value: stats.totalUsers, sub: '+12% this week', icon: '👥', color: '#10b981' },
+            { label: 'Total Users', value: stats.totalUsers, sub: '+12% this week', icon: '👥', color: '#14b8a6' },
             { label: 'Active Orders', value: stats.totalOrders, sub: '8% increase', icon: '📦', color: '#06b6d4' },
-            { label: 'Total Revenue', value: `₹${stats.totalRevenue.toLocaleString()}`, sub: 'From completed orders', icon: '💰', color: '#10b981' },
-            { label: 'Pending Tasks', value: stats.pendingApps + stats.pendingOrders, sub: 'Needs attention', icon: '⚡', color: '#f59e0b' },
+            { label: 'Total Revenue', value: `₹${stats.totalRevenue.toLocaleString()}`, sub: 'From completed orders', icon: '💰', color: '#14b8a6' },
+            { label: 'Pending Tasks', value: stats.pendingApps + stats.pendingOrders, sub: 'Needs attention', icon: '⚡', color: '#f97316' },
           ].map((s, i) => (
             <div key={s.label} className="card-admin p-5 animate-fadeInUp relative overflow-hidden group hover:scale-[1.02] transition-all duration-300" style={{ animationDelay: `${i * 100}ms` }}>
               <div className="flex justify-between items-start mb-4 relative z-10">

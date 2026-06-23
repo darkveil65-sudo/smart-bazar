@@ -61,7 +61,6 @@ export default function DeliveryMapPage() {
 
     let map: any = null;
     let cancelled = false;
-    let animationInterval: any = null;
 
     const initMap = async () => {
       const L = (await import('leaflet')).default;
@@ -93,21 +92,21 @@ export default function DeliveryMapPage() {
       }).addTo(map);
 
       const startIcon = L.divIcon({
-        html: `<div style="background-color:#10b981;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);">🏪</div>`,
+        html: `<div style="background-color:#14b8a6;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);">🏪</div>`,
         iconSize: [32, 32],
         iconAnchor: [16, 16],
       });
 
       const destIcon = L.divIcon({
-        html: `<div style="background-color:#ef4444;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);">📍</div>`,
+        html: `<div style="background-color:#f97316;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);">📍</div>`,
         iconSize: [32, 32],
         iconAnchor: [16, 16],
       });
 
       const riderIcon = L.divIcon({
         html: `<div style="
-          background-color:#3b82f6;width:42px;height:42px;border-radius:50%;
-          border:3px solid white;box-shadow:0 4px 14px rgba(59,130,246,0.5);
+          background-color:#14b8a6;width:42px;height:42px;border-radius:50%;
+          border:3px solid white;box-shadow:0 4px 14px rgba(20,184,166,0.5);
           display:flex;align-items:center;justify-content:center;
           animation: pulse-slow 2s infinite;
         "><span style="font-size:22px;">🛵</span></div>`,
@@ -127,7 +126,7 @@ export default function DeliveryMapPage() {
       // Add Start (Store) Marker
       startMarkerRef.current = L.marker([startLat, startLng], { icon: startIcon })
         .addTo(map)
-        .bindPopup('<b>Smart Bazar Store</b>');
+        .bindPopup('<b>Allkart Store</b>');
 
       // Add Destination (Customer) Marker
       destinationMarkerRef.current = L.marker([destinationLat, destinationLng], { icon: destIcon })
@@ -241,11 +240,11 @@ export default function DeliveryMapPage() {
     <div className="animate-fadeIn h-full flex flex-col w-full max-w-7xl mx-auto py-6 px-4 md:px-0" style={{ minHeight: 'calc(100vh - 64px)' }}>
       {/* Top Banner details */}
       {order ? (
-        <div className="bg-white border border-slate-100 rounded-3xl p-5 mb-4 shadow-sm">
+        <div className="bg-card border border-border rounded-3xl p-5 mb-4 shadow-lg">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">Active Delivery Route</p>
-              <h2 className="text-base font-black text-slate-900 mt-0.5">
+              <h2 className="text-base font-black text-foreground mt-0.5">
                 #{order.id.slice(0, 8).toUpperCase()} • {order.items.length} Items • ₹{order.totalAmount}
               </h2>
             </div>
@@ -255,8 +254,8 @@ export default function DeliveryMapPage() {
                 disabled={isSimulating}
                 className={`px-4 py-2 rounded-2xl text-xs font-bold text-white transition-all shadow-sm ${
                   isSimulating 
-                    ? 'bg-blue-400 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 active:scale-95'
+                    ? 'bg-orange-500/50 cursor-not-allowed text-white/70' 
+                    : 'bg-gradient-to-r from-teal-500 to-teal-600 hover:opacity-90 active:scale-95'
                 }`}
               >
                 {isSimulating ? '🧭 Simulating...' : '🛵 Start Simulation'}
@@ -264,11 +263,11 @@ export default function DeliveryMapPage() {
             </div>
           </div>
           {addr && (
-            <div className="mt-3 flex items-start gap-2 bg-orange-50/70 border border-orange-100 rounded-2xl px-4 py-3 text-xs">
+            <div className="mt-3 flex items-start gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-4 py-3 text-xs">
               <span className="text-base shrink-0">📍</span>
               <div>
-                <p className="font-bold text-orange-600 uppercase text-[9px]">Destination</p>
-                <p className="font-semibold text-slate-800 mt-0.5">
+                <p className="font-bold text-orange-500 uppercase text-[9px]">Destination</p>
+                <p className="font-semibold text-foreground mt-0.5">
                   {addr.street}, {addr.city}{addr.pincode ? ` - ${addr.pincode}` : ''}
                 </p>
               </div>
@@ -276,18 +275,18 @@ export default function DeliveryMapPage() {
           )}
         </div>
       ) : (
-        <div className="bg-white border border-slate-100 rounded-3xl p-5 mb-4 shadow-sm flex items-center justify-between gap-3 flex-wrap">
+        <div className="bg-card border border-border rounded-3xl p-5 mb-4 shadow-lg flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <h2 className="text-sm font-bold text-slate-900">Demo Route Simulation Sandbox</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Test map movement & order delivery path tracing</p>
+            <h2 className="text-sm font-bold text-foreground">Demo Route Simulation Sandbox</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Test map movement & order delivery path tracing</p>
           </div>
           <button
             onClick={startSimulation}
             disabled={isSimulating}
             className={`px-4 py-2 rounded-2xl text-xs font-bold text-white transition-all shadow-sm ${
               isSimulating 
-                ? 'bg-blue-400 cursor-not-allowed' 
-                : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 active:scale-95'
+                ? 'bg-orange-500/50 cursor-not-allowed text-white/70' 
+                : 'bg-gradient-to-r from-teal-500 to-teal-600 hover:opacity-90 active:scale-95'
             }`}
           >
             {isSimulating ? '🧭 Simulating...' : '🛵 Start Demo Route'}
@@ -297,16 +296,16 @@ export default function DeliveryMapPage() {
 
       {/* Map simulator panel */}
       {isSimulating && (
-        <div className="mb-4 bg-blue-50 border border-blue-100 rounded-2xl p-3 flex items-center gap-3">
-          <div className="w-1.5 h-6 bg-blue-500 rounded-full animate-pulse shrink-0" />
+        <div className="mb-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl p-3 flex items-center gap-3">
+          <div className="w-1.5 h-6 bg-orange-500 rounded-full animate-pulse shrink-0" />
           <div className="flex-1">
-            <div className="flex justify-between text-xs font-semibold text-blue-700">
+            <div className="flex justify-between text-xs font-semibold text-orange-400">
               <span>Simulated Route progress</span>
               <span>{simulationProgress}%</span>
             </div>
-            <div className="w-full h-2 bg-blue-100 rounded-full mt-1.5 overflow-hidden">
+            <div className="w-full h-2 bg-muted rounded-full mt-1.5 overflow-hidden">
               <div 
-                className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                className="h-full bg-orange-500 rounded-full transition-all duration-300"
                 style={{ width: `${simulationProgress}%` }}
               />
             </div>
@@ -315,13 +314,13 @@ export default function DeliveryMapPage() {
       )}
 
       {/* Map Container */}
-      <div className="flex-1 rounded-3xl overflow-hidden border border-slate-200 shadow-xl relative" style={{ minHeight: '400px' }}>
+      <div className="flex-1 rounded-3xl overflow-hidden border border-border shadow-xl relative" style={{ minHeight: '400px' }}>
         <div ref={mapRef} className="w-full h-full" style={{ minHeight: '400px' }} />
 
         {!mapLoaded && (
-          <div className="absolute inset-0 bg-slate-50 flex flex-col items-center justify-center z-[1000]">
+          <div className="absolute inset-0 bg-background flex flex-col items-center justify-center z-[1000]">
             <p className="text-4xl mb-3 animate-bounce">🗺️</p>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading Map Engine...</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Loading Map Engine...</p>
           </div>
         )}
       </div>

@@ -689,7 +689,7 @@ export default function OrderTrackingPage() {
           <button
             onClick={() => router.push('/home')}
             className="w-full py-3.5 rounded-2xl text-white font-bold press-effect"
-            style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
+            style={{ background: 'linear-gradient(135deg, #0d9488, #14b8a6)' }}
           >
             🛒 Order Again
           </button>

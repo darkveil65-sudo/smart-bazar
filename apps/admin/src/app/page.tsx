@@ -139,7 +139,7 @@ export default function AdminLoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 shadow-lg shadow-blue-500/20 mb-4">
             <span className="text-3xl">🛒</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Smart Bazar</h1>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">Allkart</h1>
           <p className="text-slate-400 font-medium mt-1">Admin Control Center</p>
         </div>
 
@@ -272,7 +272,7 @@ export default function AdminLoginPage() {
         </div>
 
         <p className="text-center text-[10px] text-slate-600 mt-8 uppercase tracking-[0.3em] font-bold">
-          Protected · Smart Bazar Admin · Authorized Access Only
+          Protected · Allkart Admin · Authorized Access Only
         </p>
       </div>
 

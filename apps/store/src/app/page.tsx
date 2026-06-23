@@ -208,7 +208,7 @@ export default function StoreAuthPage() {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-amber-500 to-amber-600 rounded-3xl mb-4 shadow-2xl">
             <span className="text-4xl">🏪</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Smart Bazar Store</h1>
+          <h1 className="text-2xl font-bold text-white">Allkart Store</h1>
           <p className="text-slate-400 text-sm mt-1">Store Partner Panel</p>
         </div>
 

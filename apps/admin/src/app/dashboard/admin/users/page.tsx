@@ -25,8 +25,8 @@ const ROLE_META: Record<UserRole, { label: string; color: string; bg: string; do
   'co-admin': { label: 'Co-Admin', color: '#ec4899', bg: 'rgba(236,72,153,0.12)', dot: '#ec4899' },
   manager: { label: 'Manager', color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', dot: '#a78bfa' },
   store: { label: 'Store', color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', dot: '#60a5fa' },
-  delivery: { label: 'Delivery', color: '#34d399', bg: 'rgba(52,211,153,0.12)', dot: '#34d399' },
-  customer: { label: 'Customer', color: '#10b981', bg: 'rgba(16,185,129,0.12)', dot: '#10b981' },
+  delivery: { label: 'Delivery', color: '#2dd4bf', bg: 'rgba(45,212,191,0.12)', dot: '#2dd4bf' },
+  customer: { label: 'Customer', color: '#14b8a6', bg: 'rgba(20,184,166,0.12)', dot: '#14b8a6' },
 };
 
 const ASSIGNABLE_ROLES: { value: UserRole; label: string; desc: string }[] = [
@@ -363,8 +363,8 @@ export default function AdminUsersPage() {
             {/* Stats chips */}
             <div className="flex gap-3 flex-wrap">
               {[
-                { label: 'Total', value: users.length, color: '#10b981' },
-                { label: 'Active', value: users.filter((u) => u.status !== 'inactive').length, color: '#34d399' },
+                { label: 'Total', value: users.length, color: '#14b8a6' },
+                { label: 'Active', value: users.filter((u) => u.status !== 'inactive').length, color: '#2dd4bf' },
                 { label: 'Suspended', value: users.filter((u) => u.status === 'inactive').length, color: '#f43f5e' },
               ].map(({ label, value, color }) => (
                 <div

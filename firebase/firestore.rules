@@ -228,8 +228,8 @@ service cloud.firestore {
     // The app-wide config lives at /config/app (a single document)
 
     match /config/{configId} {
-      // Any authenticated user can read config (delivery slots, min order, etc.)
-      allow read: if isSignedIn();
+      // Anyone can read config (delivery slots, min order, etc. for landing page)
+      allow read: if true;
 
       // Only admins can write config
       allow write: if isAdmin();

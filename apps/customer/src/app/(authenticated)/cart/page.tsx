@@ -105,7 +105,7 @@ export default function CartPage() {
   const getCategoryIcon = (categoryId: string) =>
     CATEGORIES.find((c) => c.id === categoryId)?.icon || '📦';
   const getCategoryColor = (categoryId: string) =>
-    CATEGORIES.find((c) => c.id === categoryId)?.color || '#059669';
+    CATEGORIES.find((c) => c.id === categoryId)?.color || '#0d9488';
 
   const hasPreorderItems = items.some(item => (item.variantId ? (item.product.variants?.find(v => v.id === item.variantId)?.stock ?? item.product.stock) : item.product.stock) <= 0);
 
@@ -495,8 +495,8 @@ export default function CartPage() {
                 }}
                 className="w-full py-3.5 rounded-xl text-white font-extrabold font-display text-xs tracking-wide uppercase transition-all press-effect shadow-md"
                 style={{ 
-                  background: 'linear-gradient(135deg, #059669, #10b981)', 
-                  boxShadow: '0 6px 20px rgba(5,150,105,0.25)' 
+                  background: 'linear-gradient(135deg, #0d9488, #14b8a6)', 
+                  boxShadow: '0 6px 20px rgba(13,148,136,0.25)' 
                 }}
               >
                 Checkout (₹{total})

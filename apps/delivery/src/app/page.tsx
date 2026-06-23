@@ -206,7 +206,7 @@ export default function DeliveryAuthPage() {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500 to-lime-500 rounded-3xl mb-4 shadow-2xl">
             <span className="text-4xl">🚚</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Smart Bazar Delivery</h1>
+          <h1 className="text-2xl font-bold text-white">Allkart Delivery</h1>
           <p className="text-slate-400 text-sm mt-1">Delivery Partner Panel</p>
         </div>
 

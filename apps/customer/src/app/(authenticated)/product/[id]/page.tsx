@@ -184,11 +184,11 @@ export default function ProductDetailsPage() {
       specs.push({ label: 'Unit/Size', value: p.unit });
     }
 
-    let brand = 'Smart Bazar Select';
+    let brand = 'Allkart Select';
     const nameParts = p.name.split(' ');
     if (nameParts.length > 1 && nameParts[0].length > 2) {
       const firstWord = nameParts[0];
-      if (!['fresh', 'organic', 'premium', 'natural', 'smart', 'bazar'].includes(firstWord.toLowerCase())) {
+      if (!['fresh', 'organic', 'premium', 'natural', 'allkart'].includes(firstWord.toLowerCase())) {
         brand = firstWord;
       }
     }
@@ -1131,7 +1131,7 @@ export default function ProductDetailsPage() {
                   <div key={stars} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 11, color: '#64748b', width: 10 }}>{stars}</span>
                     <div style={{ flex: 1, height: 6, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', background: stars > 3 ? '#10b981' : stars === 3 ? '#f59e0b' : '#ef4444', 
+                      <div style={{ height: '100%', background: stars > 3 ? '#14b8a6' : stars === 3 ? '#f97316' : '#ef4444', 
                                     width: stars === 5 ? '75%' : stars === 4 ? '15%' : stars === 3 ? '5%' : '2%' }} />
                     </div>
                   </div>

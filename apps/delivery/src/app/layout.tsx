@@ -18,9 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Bazar - Grocery Delivery in 30 Minutes",
+  title: "Allkart - Grocery Delivery in 30 Minutes",
   description: "Order groceries online and get them delivered to your doorstep in 30 minutes. Fresh vegetables, fruits, household items and more.",
-  keywords: "grocery delivery, online grocery, fresh vegetables, fruits, smart bazar",
+  keywords: "grocery delivery, online grocery, fresh vegetables, fruits, allkart",
 };
 
 export default function RootLayout({

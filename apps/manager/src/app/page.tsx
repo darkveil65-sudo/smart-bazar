@@ -207,7 +207,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-3xl mb-4 shadow-2xl">
             <span className="text-4xl">📋</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Smart Bazar Manager</h1>
+          <h1 className="text-2xl font-bold text-white">Allkart Manager</h1>
           <p className="text-slate-400 text-sm mt-1">Operations Management Panel</p>
         </div>
 
@@ -370,7 +370,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-[10px] text-slate-700 mt-6 uppercase tracking-wider font-semibold">
-          Smart Bazar • Operational Control Portal
+          Allkart • Operational Control Portal
         </p>
       </div>
     </div>

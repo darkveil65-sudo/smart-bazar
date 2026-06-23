@@ -113,7 +113,7 @@ export default function ProfilePage() {
     <div className="animate-fadeIn pb-10">
 
       {/* -- Hero Banner -- */}
-      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #064e3b 0%, #065f46 40%, #059669 100%)', paddingBottom: 56 }}>
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #032f30 0%, #044e50 40%, #0d9488 100%)', paddingBottom: 56 }}>
         {/* Decorative circles */}
         <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
         <div style={{ position: 'absolute', bottom: -20, left: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
@@ -203,7 +203,7 @@ export default function ProfilePage() {
             />
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={handleSaveName} disabled={loading} className="press-effect"
-                style={{ flex: 1, padding: '11px 0', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #059669, #10b981)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: loading ? 0.6 : 1 }}>
+                style={{ flex: 1, padding: '11px 0', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #0d9488, #14b8a6)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: loading ? 0.6 : 1 }}>
                 {loading ? 'Saving...' : 'Save'}
               </button>
               <button onClick={() => { setEditingName(false); setName(userData?.name || ''); }} className="press-effect"
@@ -246,7 +246,7 @@ export default function ProfilePage() {
             <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Saved Addresses</p>
             {!showAddAddress && (
               <button onClick={() => setShowAddAddress(true)} className="press-effect"
-                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 10, border: 'none', background: 'rgba(5,150,105,0.1)', color: '#059669', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 10, border: 'none', background: 'rgba(20,184,166,0.1)', color: '#0d9488', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
                 <span>＋</span> Add New
               </button>
             )}
@@ -258,7 +258,7 @@ export default function ProfilePage() {
               <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--foreground)', marginBottom: 4 }}>No saved addresses</p>
               <p style={{ fontSize: 12, color: 'var(--muted-foreground)', marginBottom: 14 }}>Add your delivery address for faster checkout</p>
               <button onClick={() => setShowAddAddress(true)} className="press-effect"
-                style={{ padding: '10px 24px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #059669, #10b981)', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                style={{ padding: '10px 24px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #0d9488, #14b8a6)', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
                 Add Address
               </button>
             </div>
@@ -268,10 +268,10 @@ export default function ProfilePage() {
             {addresses.map((addr, i) => (
               <div key={i} className="animate-fadeInUp"
                 style={{ background: 'var(--card)', borderRadius: 16, border: '1px solid var(--border)', padding: 14, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(5,150,105,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>📍</div>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(20,184,166,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>📍</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--foreground)' }}>{addr.customerName || userData?.name}</p>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: '#059669', marginTop: 1 }}>{addr.mobile}</p>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: '#0d9488', marginTop: 1 }}>{addr.mobile}</p>
                   <p style={{ fontSize: 12, color: 'var(--foreground)', marginTop: 3 }}>{addr.street}{addr.para ? `, ${addr.para}` : ''}</p>
                   <p style={{ fontSize: 11, color: 'var(--muted-foreground)', marginTop: 2 }}>{addr.area}{addr.city ? `, ${addr.city}` : ''}{addr.state ? `, ${addr.state}` : ''} — {addr.pincode}</p>
                 </div>
@@ -355,7 +355,7 @@ export default function ProfilePage() {
                 {/* Action buttons */}
                 <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
                   <button onClick={handleAddAddress} disabled={loading} className="press-effect"
-                    style={{ flex: 1, padding: '13px 0', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #059669, #10b981)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: loading ? 0.7 : 1, boxShadow: '0 4px 14px rgba(5,150,105,0.3)' }}>
+                    style={{ flex: 1, padding: '13px 0', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #0d9488, #14b8a6)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: loading ? 0.7 : 1, boxShadow: '0 4px 14px rgba(13,148,136,0.3)' }}>
                     {loading
                       ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                           <svg style={{ animation: 'spin 0.8s linear infinite' }} width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" strokeWidth="3"/><path d="M12 2a10 10 0 0110 10" stroke="white" strokeWidth="3" strokeLinecap="round"/></svg>
@@ -385,7 +385,7 @@ export default function ProfilePage() {
             <button
               onClick={toggleTheme}
               style={{
-                background: theme === 'dark' ? '#00c853' : 'var(--border-light)',
+                background: theme === 'dark' ? '#14b8a6' : 'var(--border-light)',
                 border: 'none',
                 width: 46,
                 height: 26,
@@ -428,8 +428,8 @@ export default function ProfilePage() {
           <div style={{ background: 'var(--card)', borderRadius: 20, border: '1px solid var(--border)', overflow: 'hidden' }}>
             {[
               { icon: '📦', label: t('profile.orders'), sub: 'View your order history', action: () => router.push('/orders'), color: '#0ea5e9' },
-              { icon: '🛒', label: 'Browse Products', sub: 'Shop premium furniture', action: () => router.push('/home'), color: '#10b981' },
-              { icon: '🎁', label: 'Offers & Deals', sub: 'Special discounts for you', action: () => router.push('/home'), color: '#f59e0b' },
+              { icon: '🛒', label: 'Browse Products', sub: 'Shop premium furniture', action: () => router.push('/home'), color: '#14b8a6' },
+              { icon: '🎁', label: 'Offers & Deals', sub: 'Special discounts for you', action: () => router.push('/home'), color: '#f97316' },
               { icon: '💬', label: t('profile.support'), sub: 'Help & FAQs', action: () => {}, color: '#8b5cf6' },
             ].map((link, i, arr) => (
               <button key={i} onClick={link.action} className="press-effect"
@@ -471,7 +471,7 @@ export default function ProfilePage() {
         )}
 
         {/* Version tag */}
-        <p style={{ textAlign: 'center', fontSize: 10, color: 'var(--muted-foreground)', marginTop: 24 }}>Smart Bazar v1.0 • Made with ❤️</p>
+        <p style={{ textAlign: 'center', fontSize: 10, color: 'var(--muted-foreground)', marginTop: 24 }}>Allkart v1.0 • Made with ❤️</p>
       </div>
     </div>
   );

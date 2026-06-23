@@ -80,10 +80,10 @@ const Toast: FC<ToastProps> = ({
 
   const config = {
     success: {
-      color: '#10b981', // Emerald
+      color: '#14b8a6', // Teal
       defaultTitle: 'Success',
       icon: (
-        <svg style={{ width: 16, height: 16, color: '#10b981' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+        <svg style={{ width: 16, height: 16, color: '#14b8a6' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       ),
@@ -133,7 +133,7 @@ const Toast: FC<ToastProps> = ({
         borderRadius: '16px',
         border: '1px solid rgba(255, 255, 255, 0.12)',
         borderLeft: `4px solid ${config.color}`,
-        background: 'rgba(15, 23, 42, 0.95)', // Dark premium slate background
+        background: 'rgba(4, 6, 15, 0.95)', // Sleek Obsidian background
         backdropFilter: 'blur(16px)',
         boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',

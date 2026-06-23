@@ -16,8 +16,8 @@ type StockFilter = 'all' | 'in_stock' | 'low' | 'out';
 
 const STOCK_FILTERS: { value: StockFilter; label: string; icon: string; color: string }[] = [
   { value: 'all', label: 'All Stock', icon: '📦', color: '#94a3b8' },
-  { value: 'in_stock', label: 'In Stock', icon: '🟢', color: '#10b981' },
-  { value: 'low', label: 'Low Stock', icon: '🟡', color: '#f59e0b' },
+  { value: 'in_stock', label: 'In Stock', icon: '🟢', color: '#14b8a6' },
+  { value: 'low', label: 'Low Stock', icon: '🟡', color: '#f97316' },
   { value: 'out', label: 'Out of Stock', icon: '🔴', color: '#f43f5e' },
 ];
 
@@ -36,8 +36,8 @@ function getStockStatus(stock: number): 'in_stock' | 'low' | 'out' {
 const StockBadge = ({ stock }: { stock: number }) => {
   const status = getStockStatus(stock);
   const config = {
-    in_stock: { label: 'In Stock', color: '#10b981', bg: 'rgba(16,185,129,0.12)', dot: '#10b981' },
-    low: { label: 'Low Stock', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', dot: '#f59e0b' },
+    in_stock: { label: 'In Stock', color: '#14b8a6', bg: 'rgba(20,184,166,0.12)', dot: '#14b8a6' },
+    low: { label: 'Low Stock', color: '#f97316', bg: 'rgba(249,115,22,0.12)', dot: '#f97316' },
     out: { label: 'Out of Stock', color: '#f43f5e', bg: 'rgba(244,63,94,0.12)', dot: '#f43f5e' },
   }[status];
 
@@ -562,8 +562,8 @@ const AddProductModal = ({ stores, onClose, onSuccess, addToast }: AddProductMod
             disabled={saving}
             className="flex-[2] px-8 py-3 text-white text-sm font-bold rounded-xl transition-all press-effect disabled:opacity-60 flex items-center justify-center gap-2"
             style={{
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              boxShadow: '0 4px 16px rgba(16,185,129,0.35)',
+              background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+              boxShadow: '0 4px 16px rgba(20,184,166,0.35)',
             }}
           >
             {saving ? (
@@ -689,8 +689,8 @@ export default function InventoryPage() {
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-xs font-bold press-effect transition-all"
               style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                boxShadow: '0 4px 16px rgba(16,185,129,0.3)',
+                background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+                boxShadow: '0 4px 16px rgba(20,184,166,0.3)',
               }}
             >
               + Add Product
@@ -937,9 +937,9 @@ export default function InventoryPage() {
                               style={{
                                 background:
                                   stockStatus === 'in_stock'
-                                    ? '#10b981'
+                                    ? '#14b8a6'
                                     : stockStatus === 'low'
-                                    ? '#f59e0b'
+                                    ? '#f97316'
                                     : '#f43f5e',
                               }}
                             />
@@ -948,9 +948,9 @@ export default function InventoryPage() {
                               style={{
                                 color:
                                   stockStatus === 'in_stock'
-                                    ? '#10b981'
+                                    ? '#14b8a6'
                                     : stockStatus === 'low'
-                                    ? '#f59e0b'
+                                    ? '#f97316'
                                     : '#f43f5e',
                               }}
                             >
@@ -1018,7 +1018,7 @@ export default function InventoryPage() {
                         type="button"
                         onClick={() => setIsModalOpen(true)}
                         className="mt-1 px-4 py-2 rounded-xl text-xs font-bold text-white press-effect"
-                        style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                        style={{ background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)' }}
                       >
                         + Add First Product
                       </button>

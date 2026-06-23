@@ -126,7 +126,7 @@ export default function CheckoutPage() {
   const [copiedAmount, setCopiedAmount] = useState(false);
 
   const handleCopyUpi = () => {
-    const upiId = config?.merchantUpiId || 'smartbazar@upi';
+    const upiId = config?.merchantUpiId || 'allkart@upi';
     navigator.clipboard.writeText(upiId).then(() => {
       setCopiedUpi(true);
       addToast('UPI ID copied! 📋', 'success');
@@ -857,7 +857,7 @@ export default function CheckoutPage() {
                     <div className="bg-white p-3.5 rounded-2xl shadow-md border border-primary/20 flex justify-center items-center animate-fadeIn relative group transition-transform duration-300 hover:scale-[1.02]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`upi://pay?pa=${config?.merchantUpiId || 'smartbazar@upi'}&pn=${encodeURIComponent(config?.businessName || 'Smart Bazar')}&am=${total}&cu=INR`)}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`upi://pay?pa=${config?.merchantUpiId || 'allkart@upi'}&pn=${encodeURIComponent(config?.businessName || 'Allkart')}&am=${total}&cu=INR`)}`}
                         alt="UPI QR"
                         className="w-40 h-40"
                       />
@@ -866,7 +866,7 @@ export default function CheckoutPage() {
 
                   {/* Direct Launch Button */}
                   <a
-                    href={`upi://pay?pa=${config?.merchantUpiId || 'smartbazar@upi'}&pn=${encodeURIComponent(config?.businessName || 'Smart Bazar')}&am=${total}&cu=INR`}
+                    href={`upi://pay?pa=${config?.merchantUpiId || 'allkart@upi'}&pn=${encodeURIComponent(config?.businessName || 'Allkart')}&am=${total}&cu=INR`}
                     className="w-full max-w-[280px] mt-4 py-2.5 px-4 bg-gradient-primary text-white rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 hover:opacity-95 active:scale-98 transition-all shadow-md press-effect"
                   >
                     <span>📱</span> Pay via UPI App (GPay/PhonePe...)
@@ -878,7 +878,7 @@ export default function CheckoutPage() {
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">UPI ID</p>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs text-foreground font-bold select-all">{config?.merchantUpiId || 'smartbazar@upi'}</span>
+                        <span className="font-mono text-xs text-foreground font-bold select-all">{config?.merchantUpiId || 'allkart@upi'}</span>
                         <button
                           type="button"
                           onClick={handleCopyUpi}

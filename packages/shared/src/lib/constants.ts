@@ -53,6 +53,7 @@ export const ADMIN_NAV = [
   { label: 'Pre-Orders',    href: '/dashboard/admin/preorders',      icon: '⭐' },
   { label: 'Users',         href: '/dashboard/admin/users',          icon: '👥' },
   { label: 'Stores',        href: '/dashboard/admin/categories',     icon: '🏪' },
+  { label: 'Sub-Categories', href: '/dashboard/admin/subcategories', icon: '📂' },
   { label: 'Banners',       href: '/dashboard/admin/banners',        icon: '🎨' },
   { label: 'Applications',  href: '/dashboard/admin/applications',   icon: '📝' },
   { label: 'Inventory',     href: '/dashboard/admin/inventory',      icon: '📦' },

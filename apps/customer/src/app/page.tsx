@@ -23,7 +23,7 @@ const LANGS: { code: Lang; label: string }[] = [
 
 export default function CustomerAuthPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-900 flex items-center justify-center"><div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-900 flex items-center justify-center"><div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div></div>}>
       <AuthContent />
     </Suspense>
   );
@@ -222,9 +222,9 @@ function AuthContent() {
     <div className="min-h-screen min-h-dvh flex flex-col bg-gradient-hero-soft overflow-hidden" style={bnFont}>
       {/* Decorative blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-        <div className="absolute -top-32 -right-32 w-80 h-80 bg-emerald-400/12 rounded-full blur-3xl" />
+        <div className="absolute -top-32 -right-32 w-80 h-80 bg-teal-400/12 rounded-full blur-3xl" />
         <div className="absolute top-1/3 -left-20 w-60 h-60 bg-teal-300/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 right-10 w-64 h-64 bg-emerald-300/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 right-10 w-64 h-64 bg-teal-300/10 rounded-full blur-3xl" />
       </div>
 
       {/* Top brand section */}
@@ -240,7 +240,7 @@ function AuthContent() {
                 fontWeight: 700,
                 fontFamily: code === 'bn' ? 'var(--font-hind-siliguri), sans-serif' : 'inherit',
                 background: lang === code ? '#fff' : 'transparent',
-                color: lang === code ? '#059669' : 'rgba(255,255,255,0.75)',
+                color: lang === code ? '#14b8a6' : 'rgba(255,255,255,0.75)',
                 boxShadow: lang === code ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
                 transition: 'all 0.2s',
               }}>
@@ -251,12 +251,12 @@ function AuthContent() {
 
         <div
           className="w-20 h-20 rounded-3xl bg-gradient-primary flex items-center justify-center mb-5 animate-scaleInBounce"
-          style={{ boxShadow: '0 12px 32px rgba(5, 150, 105, 0.35)' }}
+          style={{ boxShadow: '0 12px 32px rgba(20, 184, 166, 0.35)' }}
         >
           <span className="text-4xl">🛒</span>
         </div>
         <h1 className="text-3xl font-extrabold text-foreground tracking-tight animate-fadeInUp" style={{ animationDelay: '80ms' }}>
-          Smart Bazar
+          Allkart
         </h1>
         <p className="text-muted-foreground text-sm mt-1.5 animate-fadeInUp" style={{ animationDelay: '140ms', ...bnFont }}>
           {t('auth.appTagline')}
@@ -268,7 +268,7 @@ function AuthContent() {
             <span
               key={badge}
               className="text-xs font-medium px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(5,150,105,0.1)', color: '#047857', ...bnFont }}
+              style={{ background: 'rgba(20,184,166,0.1)', color: '#0d9488', ...bnFont }}
             >
               {badge}
             </span>
@@ -384,7 +384,7 @@ function AuthContent() {
                 type="submit"
                 disabled={loading}
                 className="w-full py-3.5 rounded-xl font-semibold text-white transition-all duration-200 press-effect disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg, #059669, #10b981)', boxShadow: '0 6px 20px rgba(5,150,105,0.3)', ...bnFont }}
+                style={{ background: 'linear-gradient(135deg, #0d9488, #14b8a6)', boxShadow: '0 6px 20px rgba(20, 184, 166, 0.3)', ...bnFont }}
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -489,7 +489,7 @@ function AuthContent() {
                 type="submit"
                 disabled={loading}
                 className="w-full py-3.5 rounded-xl font-semibold text-white transition-all duration-200 press-effect disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg, #059669, #10b981)', boxShadow: '0 6px 20px rgba(5,150,105,0.3)', ...bnFont }}
+                style={{ background: 'linear-gradient(135deg, #0d9488, #14b8a6)', boxShadow: '0 6px 20px rgba(20, 184, 166, 0.3)', ...bnFont }}
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -535,7 +535,7 @@ function AuthContent() {
                 type="submit"
                 disabled={loading}
                 className="w-full py-3.5 rounded-xl font-semibold text-white transition-all press-effect disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg, #059669, #10b981)', boxShadow: '0 6px 20px rgba(5,150,105,0.3)', ...bnFont }}
+                style={{ background: 'linear-gradient(135deg, #0d9488, #14b8a6)', boxShadow: '0 6px 20px rgba(20, 184, 166, 0.3)', ...bnFont }}
               >
                 {loading ? t('auth.forgot.submitting') : t('auth.forgot.submit')}
               </button>

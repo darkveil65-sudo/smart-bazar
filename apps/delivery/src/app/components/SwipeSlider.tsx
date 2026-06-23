@@ -18,10 +18,23 @@ export const SwipeSlider: React.FC<SwipeSliderProps> = ({
   const [isSwiped, setIsSwiped] = useState(false);
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [maxDrag, setMaxDrag] = useState(0);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef(0);
+
+  // Measure max drag distance on mount and resize
+  useEffect(() => {
+    const updateMaxDrag = () => {
+      if (containerRef.current && handleRef.current) {
+        setMaxDrag(containerRef.current.clientWidth - handleRef.current.clientWidth - 8);
+      }
+    };
+    updateMaxDrag();
+    window.addEventListener('resize', updateMaxDrag);
+    return () => window.removeEventListener('resize', updateMaxDrag);
+  }, []);
 
   // Automatically reset swipe status when loading turns off and it is no longer pending
   useEffect(() => {
@@ -34,13 +47,6 @@ export const SwipeSlider: React.FC<SwipeSliderProps> = ({
     }
   }, [isLoading, isSwiped]);
 
-  const getMaxDrag = () => {
-    if (containerRef.current && handleRef.current) {
-      return containerRef.current.clientWidth - handleRef.current.clientWidth - 8; // 8px buffer for padding/margins
-    }
-    return 0;
-  };
-
   const handleStart = (clientX: number) => {
     if (isSwiped || isLoading) return;
     setIsDragging(true);
@@ -49,8 +55,7 @@ export const SwipeSlider: React.FC<SwipeSliderProps> = ({
 
   const handleMove = (clientX: number) => {
     if (!isDragging || isSwiped || isLoading) return;
-    const max = getMaxDrag();
-    const newX = Math.max(0, Math.min(clientX - startXRef.current, max));
+    const newX = Math.max(0, Math.min(clientX - startXRef.current, maxDrag));
     setDragX(newX);
   };
 
@@ -58,10 +63,9 @@ export const SwipeSlider: React.FC<SwipeSliderProps> = ({
     if (!isDragging) return;
     setIsDragging(false);
     
-    const max = getMaxDrag();
-    if (max > 0 && dragX >= max * 0.85) {
+    if (maxDrag > 0 && dragX >= maxDrag * 0.85) {
       // Success! Snap to end
-      setDragX(max);
+      setDragX(maxDrag);
       setIsSwiped(true);
       onComplete();
     } else {
@@ -107,9 +111,9 @@ export const SwipeSlider: React.FC<SwipeSliderProps> = ({
       window.removeEventListener('mouseup', handleGlobalMouseUp);
       window.removeEventListener('mousemove', handleGlobalMouseMove);
     };
-  }, [isDragging, dragX]);
+  }, [isDragging, dragX, maxDrag]);
 
-  const max = getMaxDrag() || 1;
+  const max = maxDrag || 1;
   const opacity = isDragging ? Math.max(0, 1 - (dragX / max) * 1.5) : 1;
 
   return (

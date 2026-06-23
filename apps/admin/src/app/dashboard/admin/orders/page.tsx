@@ -403,11 +403,11 @@ export default function AdminOrdersPage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
           { label: 'Total', value: stats.total, color: '#94a3b8' },
-          { label: 'Pending', value: stats.pending, color: '#f59e0b' },
+          { label: 'Pending', value: stats.pending, color: '#f97316' },
           { label: 'Active', value: stats.active, color: '#06b6d4' },
-          { label: 'Completed', value: stats.completed, color: '#10b981' },
+          { label: 'Completed', value: stats.completed, color: '#14b8a6' },
           { label: 'Cancelled', value: stats.cancelled, color: '#ef4444' },
-          { label: 'Revenue', value: `₹${stats.revenue.toLocaleString('en-IN')}`, color: '#10b981' },
+          { label: 'Revenue', value: `₹${stats.revenue.toLocaleString('en-IN')}`, color: '#14b8a6' },
         ].map((kpi) => (
           <div key={kpi.label} className="card-admin p-4 text-center">
             <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">

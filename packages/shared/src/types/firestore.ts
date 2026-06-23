@@ -32,6 +32,7 @@ export interface Category {
   name: string;
   createdAt?: string;
   imageUrl?: string;
+  emoji?: string;
 }
 
 export interface SubCategory {
@@ -219,7 +220,7 @@ export interface AppConfig {
 
 // Default config (used if Firestore document doesn't exist yet)
 export const DEFAULT_APP_CONFIG: AppConfig = {
-  businessName:       'Smart Bazar',
+  businessName:       'Allkart',
   supportPhone:       '',
   supportEmail:       '',
   minOrderValue:      199,

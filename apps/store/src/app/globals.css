@@ -1,29 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --primary: #d97706;
-  --primary-light: #f59e0b;
-  --primary-dark: #b45309;
+  --background: #04060f; /* Sleek Obsidian dark background */
+  --foreground: #f8fafc;
+  --primary: #14b8a6; /* Vibrant Teal */
+  --primary-light: #2dd4bf;
+  --primary-dark: #0d9488;
   --primary-foreground: #ffffff;
-  --secondary: #3b82f6;
-  --secondary-foreground: #ffffff;
-  --accent: #f59e0b;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
+  --secondary: #f97316; /* Electric Orange */
+  --accent: #f97316;
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  --card: rgba(11, 14, 24, 0.45);
+  --card-foreground: #f8fafc;
   --destructive: #ef4444;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --info: #3b82f6;
+  --success: #14b8a6;
+  --warning: #f97316;
+  --info: #06b6d4;
   --radius: 0.75rem;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 8px 24px 0 rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 16px 40px 0 rgba(0, 0, 0, 0.8);
 }
 
 @theme inline {
@@ -39,7 +38,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
-  --color-card: var(--color-card);
+  --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
@@ -47,6 +46,30 @@
   --color-info: var(--info);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+
+  /* Map emerald classes to Teal theme variables */
+  --color-emerald-50: #f0fdfa;
+  --color-emerald-100: #ccfbf1;
+  --color-emerald-200: #99f6e4;
+  --color-emerald-300: #5eead4;
+  --color-emerald-400: #2dd4bf;
+  --color-emerald-500: var(--primary);
+  --color-emerald-600: var(--primary-dark);
+  --color-emerald-700: #0f766e;
+  --color-emerald-800: #115e59;
+  --color-emerald-900: #134e4a;
+
+  /* Map amber classes to Orange theme variables */
+  --color-amber-50: #fff7ed;
+  --color-amber-100: #ffedd5;
+  --color-amber-200: #fed7aa;
+  --color-amber-300: #fdbb2f;
+  --color-amber-400: #fb923c;
+  --color-amber-500: var(--accent);
+  --color-amber-600: #ea580c;
+  --color-amber-700: #c2410c;
+  --color-amber-800: #9a3412;
+  --color-amber-900: #7c2d12;
 }
 
 * {
@@ -147,13 +170,13 @@ body {
 
 /* Gradient backgrounds */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #d97706, #f59e0b);
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
 }
 .bg-gradient-hero {
-  background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%);
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #2dd4bf 100%);
 }
 .bg-gradient-card {
-  background: linear-gradient(135deg, #fef3c7, #fffbeb);
+  background: linear-gradient(135deg, #0f172a, #0b0f19);
 }
 
 /* Focus ring utility */
@@ -176,14 +199,14 @@ body {
 
 @keyframes flash-red-warning {
   0%, 100% {
-    background-color: rgba(254, 226, 226, 0.4);
+    background-color: rgba(239, 68, 68, 0.15);
     border-color: rgba(239, 68, 68, 0.3);
-    box-shadow: 0 0 4px rgba(239, 68, 68, 0.1);
+    box-shadow: 0 0 4px rgba(239, 68, 68, 0.15);
   }
   50% {
-    background-color: rgba(254, 226, 226, 0.85);
-    border-color: rgba(220, 38, 38, 0.85);
-    box-shadow: 0 0 12px rgba(220, 38, 38, 0.35);
+    background-color: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.7);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
   }
 }
 

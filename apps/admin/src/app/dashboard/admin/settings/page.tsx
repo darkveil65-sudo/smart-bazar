@@ -494,7 +494,7 @@ export default function SettingsPage() {
             {slots.length === 0 && (
               <div className="py-12 text-center text-muted-foreground">
                 <p className="text-3xl mb-2">🕐</p>
-                <p className="text-sm font-medium">No delivery slots defined. Click "+ Add Slot" to add one.</p>
+                <p className="text-sm font-medium">No delivery slots defined. Click &quot;+ Add Slot&quot; to add one.</p>
               </div>
             )}
           </div>
@@ -863,9 +863,9 @@ export default function SettingsPage() {
 
           <div className="p-6 space-y-5 max-w-lg">
             {[
-              { key: 'businessName' as const, label: 'Business Name', placeholder: 'Smart Bazar', type: 'text', icon: '🏪' },
+              { key: 'businessName' as const, label: 'Business Name', placeholder: 'Allkart', type: 'text', icon: '🏪' },
               { key: 'supportPhone' as const, label: 'Support Phone', placeholder: '+91 98765 43210', type: 'tel', icon: '📞' },
-              { key: 'supportEmail' as const, label: 'Support Email', placeholder: 'support@smartbazar.in', type: 'email', icon: '📧' },
+              { key: 'supportEmail' as const, label: 'Support Email', placeholder: 'support@allkart.in', type: 'email', icon: '📧' },
             ].map(field => (
               <div key={field.key}>
                 <label className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">

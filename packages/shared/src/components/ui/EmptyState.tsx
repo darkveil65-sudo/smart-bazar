@@ -16,13 +16,13 @@ const CartIllustration = () => (
     <circle cx="90" cy="90" r="72" stroke="url(#cart-bg-grad)" strokeWidth="2" strokeDasharray="6 6" strokeOpacity="0.3" />
     
     {/* Floating elements */}
-    <circle cx="45" cy="60" r="4" fill="#10b981" opacity="0.6" className="animate-pulse" />
-    <circle cx="135" cy="75" r="6" fill="#059669" opacity="0.4" />
-    <path d="M130 125l4-4-4-4-4 4z" fill="#f59e0b" opacity="0.6" />
+    <circle cx="45" cy="60" r="4" fill="#14b8a6" opacity="0.6" className="animate-pulse" />
+    <circle cx="135" cy="75" r="6" fill="#0d9488" opacity="0.4" />
+    <path d="M130 125l4-4-4-4-4 4z" fill="#f97316" opacity="0.6" />
     <path d="M50 120l3-3-3-3-3 3z" fill="#3b82f6" opacity="0.5" />
 
     {/* Sparkles */}
-    <path d="M105 45l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#fbbf24" className="animate-bounce-subtle" />
+    <path d="M105 45l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#f97316" className="animate-bounce-subtle" />
 
     {/* Cart path */}
     <g transform="translate(15, 10)">
@@ -46,12 +46,12 @@ const CartIllustration = () => (
 
     <defs>
       <linearGradient id="cart-bg-grad" x1="18" y1="18" x2="162" y2="162" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#10B981" />
-        <stop offset="1" stopColor="#059669" />
+        <stop stopColor="#14B8A6" />
+        <stop offset="1" stopColor="#0D9488" />
       </linearGradient>
       <linearGradient id="cart-main-grad" x1="35" y1="45" x2="122" y2="95" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#10B981" />
-        <stop offset="1" stopColor="#059669" />
+        <stop stopColor="#14B8A6" />
+        <stop offset="1" stopColor="#0D9488" />
       </linearGradient>
       <linearGradient id="cart-accent-grad" x1="55" y1="105" x2="115" y2="125" gradientUnits="userSpaceOnUse">
         <stop stopColor="#111827" />
@@ -69,7 +69,7 @@ const SearchIllustration = () => (
     {/* Floating elements */}
     <circle cx="50" cy="55" r="5" fill="#3b82f6" opacity="0.5" />
     <circle cx="130" cy="120" r="4" fill="#6366f1" opacity="0.6" />
-    <path d="M125 50l3 3-3 3-3-3z" fill="#10b981" opacity="0.5" />
+    <path d="M125 50l3 3-3 3-3-3z" fill="#14b8a6" opacity="0.5" />
 
     {/* Magnifying Glass */}
     <g transform="translate(10, 10)">
@@ -120,7 +120,7 @@ const OrdersIllustration = () => (
     <circle cx="90" cy="90" r="72" stroke="url(#orders-bg-grad)" strokeWidth="2" strokeDasharray="6 6" strokeOpacity="0.3" />
 
     {/* Floating stars */}
-    <path d="M40 70l2 5 5-2-5-2-2-5-2 5-5 2z" fill="#f59e0b" opacity="0.6" />
+    <path d="M40 70l2 5 5-2-5-2-2-5-2 5-5 2z" fill="#f97316" opacity="0.6" />
     <circle cx="135" cy="60" r="5" fill="#f97316" opacity="0.4" />
     <circle cx="55" cy="125" r="3" fill="#ef4444" opacity="0.5" />
 
@@ -159,29 +159,29 @@ const OrdersIllustration = () => (
         strokeLinejoin="round"
       />
       {/* Tape sealing */}
-      <path d="M80 85v35" stroke="#f59e0b" strokeWidth="4" strokeLinecap="round" />
+      <path d="M80 85v35" stroke="#f97316" strokeWidth="4" strokeLinecap="round" />
     </g>
 
     <defs>
       <linearGradient id="orders-bg-grad" x1="18" y1="18" x2="162" y2="162" gradientUnits="userSpaceOnUse">
         <stop stopColor="#F97316" />
-        <stop offset="1" stopColor="#F59E0B" />
+        <stop offset="1" stopColor="#ea580c" />
       </linearGradient>
       <linearGradient id="orders-main-grad" x1="45" y1="30" x2="115" y2="120" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#D97706" />
-        <stop offset="1" stopColor="#B45309" />
+        <stop stopColor="#ea580c" />
+        <stop offset="1" stopColor="#9a3412" />
       </linearGradient>
       <linearGradient id="orders-flap-grad" x1="45" y1="30" x2="115" y2="65" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#FDE68A" />
-        <stop offset="1" stopColor="#F59E0B" />
+        <stop stopColor="#ffedd5" />
+        <stop offset="1" stopColor="#f97316" />
       </linearGradient>
       <linearGradient id="orders-side-grad-1" x1="45" y1="65" x2="80" y2="120" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#F59E0B" />
-        <stop offset="1" stopColor="#D97706" />
+        <stop stopColor="#f97316" />
+        <stop offset="1" stopColor="#ea580c" />
       </linearGradient>
       <linearGradient id="orders-side-grad-2" x1="80" y1="65" x2="115" y2="120" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#FBBF24" />
-        <stop offset="1" stopColor="#F59E0B" />
+        <stop stopColor="#fed7aa" />
+        <stop offset="1" stopColor="#f97316" />
       </linearGradient>
     </defs>
   </svg>
@@ -212,7 +212,7 @@ const EmptyState: FC<EmptyStateProps> = ({ type = 'default', icon, title, descri
           size="md"
           onClick={action.onClick}
           className="px-6 py-3 rounded-xl font-semibold press-effect"
-          style={{ background: 'linear-gradient(135deg, #059669, #10b981)', boxShadow: '0 4px 12px rgba(5,150,105,0.2)' }}
+          style={{ background: 'linear-gradient(135deg, #0d9488, #14b8a6)', boxShadow: '0 4px 12px rgba(13,148,136,0.25)' }}
         >
           {action.label}
         </Button>

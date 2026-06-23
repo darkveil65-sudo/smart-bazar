@@ -22,10 +22,10 @@ export default function AnalyticsPage() {
     .reduce((sum, o) => sum + o.totalAmount, 0);
 
   const stats = [
-    { label: 'Life-time Revenue', value: `₹${totalRevenue.toLocaleString()}`, color: '#10b981', icon: '💰' },
+    { label: 'Life-time Revenue', value: `₹${totalRevenue.toLocaleString()}`, color: '#14b8a6', icon: '💰' },
     { label: 'Success Rate', value: `${orders.length ? Math.round((orders.filter(o => o.status === 'completed').length / orders.length) * 100) : 0}%`, color: '#06b6d4', icon: '📈' },
-    { label: 'Active Customers', value: users.filter(u => u.role === 'customer').length, color: '#10b981', icon: '👥' },
-    { label: 'Avg Order Value', value: `₹${orders.length ? Math.round(totalRevenue / (orders.filter(o => o.status === 'completed').length || 1)) : 0}`, color: '#f59e0b', icon: '🛍️' },
+    { label: 'Active Customers', value: users.filter(u => u.role === 'customer').length, color: '#14b8a6', icon: '👥' },
+    { label: 'Avg Order Value', value: `₹${orders.length ? Math.round(totalRevenue / (orders.filter(o => o.status === 'completed').length || 1)) : 0}`, color: '#f97316', icon: '🛍️' },
   ];
 
   return (

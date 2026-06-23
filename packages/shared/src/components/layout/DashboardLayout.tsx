@@ -87,8 +87,8 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({
   // Prevent flashing unauthenticated or unauthorized content
   if (!mounted || !initialized || (loading && !userData) || (userData && !isAuthorized)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
-        <div className="w-8 h-8 border-4 border-slate-700 border-t-blue-500 rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#04060f]">
+        <div className="w-8 h-8 border-4 border-slate-800 border-t-teal-500 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -116,7 +116,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({
             🛒
           </div>
           <div>
-            <h1 className="text-white font-extrabold text-sm leading-none tracking-wide">Smart Bazar</h1>
+            <h1 className="text-white font-extrabold text-sm leading-none tracking-wide">Allkart</h1>
             <p className="text-slate-400 text-[10px] mt-0.5 font-medium opacity-80">{title}</p>
           </div>
         </div>
@@ -126,8 +126,8 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({
       <div className="px-5 py-4 border-b border-white/[0.06] shrink-0">
         <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.05] shadow-inner transition-all duration-300 hover:bg-white/[0.04]">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-extrabold text-xs shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-            style={{ background: `linear-gradient(135deg, #10b981, #059669)` }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-extrabold text-xs shrink-0 shadow-[0_0_10px_rgba(20,184,166,0.3)]"
+            style={{ background: `linear-gradient(135deg, #14b8a6, #0d9488)` }}
           >
             {initial}
           </div>
@@ -152,18 +152,18 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ease-out relative group hover:scale-[1.02] hover:translate-x-0.5 active:scale-[0.98] cursor-pointer"
               style={
                 active
-                  ? { background: 'rgba(16, 185, 129, 0.08)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.15)' }
+                  ? { background: 'rgba(20, 184, 166, 0.08)', color: '#2dd4bf', border: '1px solid rgba(20, 184, 166, 0.15)' }
                   : { color: '#94a3b8', border: '1px solid transparent' }
               }
             >
               {active && (
                 <span
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"
-                  style={{ background: '#10b981' }}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full shadow-[0_0_8px_rgba(20,184,166,0.8)]"
+                  style={{ background: '#14b8a6' }}
                 />
               )}
-              <span className={`text-base transition-transform duration-200 ${active ? 'text-[#34d399]' : 'text-slate-400 group-hover:text-slate-200 group-hover:scale-110'}`}>{item.icon}</span>
-              <span className={`flex-1 text-left ${active ? 'font-semibold text-[#34d399]' : 'text-slate-400 group-hover:text-slate-200'} transition-colors`}>
+              <span className={`text-base transition-transform duration-200 ${active ? 'text-[#2dd4bf]' : 'text-slate-400 group-hover:text-slate-200 group-hover:scale-110'}`}>{item.icon}</span>
+              <span className={`flex-1 text-left ${active ? 'font-semibold text-[#2dd4bf]' : 'text-slate-400 group-hover:text-slate-200'} transition-colors`}>
                 {item.label}
               </span>
               {item.badge !== undefined && item.badge > 0 && (
@@ -199,7 +199,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({
         style={{
           width: 240,
           borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-          background: 'rgba(15, 23, 42, 0.55)',
+          background: 'rgba(11, 14, 24, 0.55)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           position: 'sticky',
@@ -224,7 +224,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({
             className="fixed inset-y-0 left-0 z-50 flex flex-col lg:hidden"
             style={{
               width: 240,
-              background: 'rgba(15, 23, 42, 0.75)',
+              background: 'rgba(11, 14, 24, 0.75)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               borderRight: '1px solid rgba(255, 255, 255, 0.08)'

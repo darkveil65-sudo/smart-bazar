@@ -77,7 +77,7 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/60 shadow-sm flex flex-col gap-3 hover:shadow-md transition-all duration-200 overflow-hidden group">
+    <div className="relative bg-card rounded-2xl p-5 border border-border shadow-md flex flex-col gap-3 hover:shadow-lg transition-all duration-200 overflow-hidden group">
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
         style={{ background: `radial-gradient(ellipse at top right, ${color}08 0%, transparent 70%)` }} />
       <div className="flex items-center justify-between relative z-10">
@@ -95,11 +95,11 @@ function StatCard({
         </span>
       </div>
       <div className="relative z-10">
-        <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-1">{label}</p>
-        <h3 className="text-3xl font-black text-slate-900 leading-none tabular-nums">{value}</h3>
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">{label}</p>
+        <h3 className="text-3xl font-black text-foreground leading-none tabular-nums">{value}</h3>
       </div>
-      <p className="text-[11px] text-slate-400 flex items-center gap-1.5 relative z-10">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+      <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 relative z-10">
+        <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse inline-block" />
         {sub}
       </p>
     </div>
@@ -134,18 +134,18 @@ function OrderQueueCard({
     (order.items.length > 2 ? ` +${order.items.length - 2} more` : '');
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-200 p-4 flex flex-col gap-3 group">
+    <div className="bg-card rounded-2xl border border-border shadow-md hover:shadow-lg transition-all duration-200 p-4 flex flex-col gap-3 group">
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-sm flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-muted flex items-center justify-center text-sm flex-shrink-0">
             🛍️
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-black text-slate-900 font-mono">
+            <p className="text-xs font-black text-foreground font-mono">
               #{order.id.slice(-8).toUpperCase()}
             </p>
-            <p className="text-[10px] text-slate-400 mt-0.5">{timeSince(order.createdAt)}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{timeSince(order.createdAt)}</p>
           </div>
         </div>
         <OrderStatusPill status={order.status} />
@@ -153,23 +153,23 @@ function OrderQueueCard({
 
       {/* Customer + Items */}
       <div className="space-y-1">
-        <p className="text-xs font-semibold text-slate-800 truncate">
+        <p className="text-xs font-semibold text-foreground truncate">
           👤 {order.customerName || 'Unknown Customer'}
         </p>
-        <p className="text-[11px] text-slate-500 truncate">📦 {itemSummary}</p>
+        <p className="text-[11px] text-muted-foreground truncate">📦 {itemSummary}</p>
         {order.deliverySlot && (
-          <p className="text-[10px] font-bold text-emerald-600">⏱ Slot: {order.deliverySlot}</p>
+          <p className="text-[10px] font-bold text-teal-400">⏱ Slot: {order.deliverySlot}</p>
         )}
       </div>
 
       {/* Footer: Amount + Action */}
-      <div className="flex items-center justify-between pt-1 border-t border-slate-50">
-        <span className="text-sm font-black text-slate-900">₹{order.totalAmount.toLocaleString('en-IN')}</span>
+      <div className="flex items-center justify-between pt-1 border-t border-border">
+        <span className="text-sm font-black text-foreground">₹{order.totalAmount.toLocaleString('en-IN')}</span>
         {order.status === 'packed' && (
           <button
             onClick={() => onAssignDelivery(order)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-white transition-all hover:opacity-90 active:scale-95 press-effect"
-            style={{ background: 'linear-gradient(135deg, #059669, #0891b2)' }}
+            style={{ background: 'linear-gradient(135deg, #0d9488, #14b8a6)' }}
           >
             🛵 Assign Delivery
           </button>
@@ -233,48 +233,48 @@ function AssignDeliveryModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl animate-scaleIn">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-card rounded-3xl p-6 w-full max-w-md shadow-2xl animate-scaleIn border border-border">
         {/* Header */}
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="text-base font-black text-slate-900">Assign Delivery Partner</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <h2 className="text-base font-black text-foreground">Assign Delivery Partner</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
               Order <span className="font-mono font-bold">#{order.id.slice(-8).toUpperCase()}</span>
               &nbsp;·&nbsp;₹{order.totalAmount.toLocaleString('en-IN')}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-xs"
+            className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-muted/80 transition-colors text-xs"
           >
             ✕
           </button>
         </div>
 
         {/* Order summary */}
-        <div className="bg-slate-50 rounded-xl p-3 mb-4 border border-slate-100">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Items</p>
-          <p className="text-xs text-slate-700">
+        <div className="bg-background rounded-xl p-3 mb-4 border border-border">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Items</p>
+          <p className="text-xs text-foreground font-semibold">
             {order.items.map(i => `${i.name} ×${i.quantity}`).join(', ')}
           </p>
           {order.deliveryAddress && (
-            <p className="text-[10px] text-slate-500 mt-1">
+            <p className="text-[10px] text-muted-foreground mt-1">
               📍 {[order.deliveryAddress.street, order.deliveryAddress.city].filter(Boolean).join(', ')}
             </p>
           )}
         </div>
 
         {/* Delivery boys list */}
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
           Available Partners ({availableBoys.length})
         </p>
         <div className="space-y-2 max-h-52 overflow-y-auto mb-5 pr-1">
           {availableBoys.length === 0 ? (
             <div className="py-8 text-center">
               <p className="text-2xl mb-2">😴</p>
-              <p className="text-sm font-semibold text-slate-500">No online delivery partners</p>
-              <p className="text-xs text-slate-400 mt-1">Ask your team to come online</p>
+              <p className="text-sm font-semibold text-muted-foreground">No online delivery partners</p>
+              <p className="text-xs text-muted-foreground mt-1">Ask your team to come online</p>
             </div>
           ) : (
             availableBoys.map(boy => (
@@ -283,20 +283,20 @@ function AssignDeliveryModal({
                 onClick={() => setSelectedId(boy.id)}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl border-2 transition-all text-left ${
                   selectedId === boy.id
-                    ? 'border-cyan-500 bg-cyan-50/60 shadow-sm'
-                    : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
+                    ? 'border-teal-500 bg-teal-500/10 shadow-sm'
+                    : 'border-border hover:border-border/80 hover:bg-muted'
                 }`}
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center text-sm font-black text-cyan-700 flex-shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-teal-500/20 flex items-center justify-center text-sm font-black text-teal-400 flex-shrink-0">
                   {boy.name[0]?.toUpperCase() ?? '?'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-slate-900 truncate">{boy.name}</p>
-                  <p className="text-[10px] text-slate-400 truncate">{boy.phone || boy.email}</p>
+                  <p className="text-xs font-bold text-foreground truncate">{boy.name}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{boy.phone || boy.email}</p>
                 </div>
                 <DeliveryStatusBadge status={boy.status} />
                 {selectedId === boy.id && (
-                  <span className="text-cyan-600 text-sm font-black flex-shrink-0">✓</span>
+                  <span className="text-teal-400 text-sm font-black flex-shrink-0">✓</span>
                 )}
               </button>
             ))
@@ -307,7 +307,7 @@ function AssignDeliveryModal({
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-3 rounded-2xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+            className="flex-1 py-3 rounded-2xl border border-border text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors"
           >
             Cancel
           </button>
@@ -315,7 +315,7 @@ function AssignDeliveryModal({
             onClick={handleAssign}
             disabled={!selectedId || assigning || availableBoys.length === 0}
             className="flex-1 py-3 rounded-2xl text-white text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:opacity-90 active:scale-95 press-effect"
-            style={{ background: 'linear-gradient(135deg, #059669, #0891b2)' }}
+            style={{ background: 'linear-gradient(135deg, #0d9488, #14b8a6)' }}
           >
             {assigning ? 'Assigning…' : '🛵 Assign Delivery'}
           </button>
@@ -464,12 +464,12 @@ export default function ManagerDashboard() {
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <span className="text-xl">👋</span>
-            <p className="text-sm text-slate-500 font-medium">{getGreeting()},</p>
+            <p className="text-sm text-muted-foreground font-medium">{getGreeting()},</p>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-black text-foreground tracking-tight">
             {userData?.name?.split(' ')[0] || 'Manager'}
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Here&apos;s what&apos;s happening with your operations right now.
           </p>
         </div>
@@ -477,19 +477,19 @@ export default function ManagerDashboard() {
           <Link
             href="/dashboard/manager/orders"
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 press-effect shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
+            style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
           >
             📋 Manage Orders
           </Link>
           <Link
             href="/dashboard/manager/team/delivery"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-muted hover:bg-muted/80 text-foreground transition-all active:scale-95"
           >
             🛵 Delivery Team
           </Link>
           <Link
             href="/dashboard/manager/applications"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-card border border-border hover:bg-muted text-foreground transition-all active:scale-95"
           >
             📥 Applications
           </Link>
@@ -501,8 +501,8 @@ export default function ManagerDashboard() {
       ══════════════════════════════════════════════ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 stagger">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={`stat-sk-${i}`} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col gap-3">
+          [1, 2, 3, 4].map(i => (
+            <div key={`stat-sk-${i}`} className="bg-card rounded-2xl p-5 border border-border shadow-sm flex flex-col gap-3">
               <div className="flex justify-between items-start">
                 <Skeleton width="40px" height="40px" className="rounded-xl" />
                 <Skeleton width="40px" height="16px" className="rounded-full" />
@@ -557,7 +557,7 @@ export default function ManagerDashboard() {
         <div className="lg:col-span-2 flex flex-col gap-4">
 
           {/* Queue header + filter tabs */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border shadow-md overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-50">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center text-sm">📡</div>
@@ -661,7 +661,7 @@ export default function ManagerDashboard() {
         <div className="flex flex-col gap-4">
 
           {/* Delivery Assignment Widget */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border shadow-md overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-50 flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center text-sm">📦</div>
               <div>
@@ -710,7 +710,7 @@ export default function ManagerDashboard() {
                               onClick={() => setAssignModalOrder(order)}
                               disabled={onlineBoys.length === 0}
                               className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-[11px] font-bold text-white transition-all hover:opacity-90 active:scale-95 press-effect disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                              style={{ background: 'linear-gradient(135deg, #059669, #0891b2)' }}
+                              style={{ background: 'linear-gradient(135deg, #0d9488, #14b8a6)' }}
                               title={onlineBoys.length === 0 ? 'No online delivery partners' : 'Assign to delivery'}
                             >
                               🛵 Assign
@@ -787,7 +787,7 @@ export default function ManagerDashboard() {
           </div>
 
           {/* Quick Nav */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+          <div className="bg-card rounded-2xl border border-border shadow-md p-4">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Quick Access</p>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -818,7 +818,7 @@ export default function ManagerDashboard() {
       {/* ══════════════════════════════════════════════
           TEAM STATUS TABLE
       ══════════════════════════════════════════════ */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border shadow-md overflow-hidden">
         {/* Table header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-50">
           <div className="flex items-center gap-3">
