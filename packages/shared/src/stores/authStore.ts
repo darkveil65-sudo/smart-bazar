@@ -40,7 +40,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
   initialized: initialInitialized,
   authReady: false, // ← starts false; becomes true only after onAuthStateChanged fires
 
-  setUserData: (userData) => set({ userData }),
+  setUserData: (userData) => {
+    if (typeof window !== 'undefined') {
+      if (userData) {
+        localStorage.setItem('sb_userData', JSON.stringify(userData));
+      } else {
+        localStorage.removeItem('sb_userData');
+      }
+    }
+    set({ userData });
+  },
 
   init: () => {
     // Attempt to load cached session synchronously to avoid layout shift and Fast Refresh drops

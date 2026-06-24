@@ -12,7 +12,7 @@ import { type Address } from '@smart-bazar/shared/types/firestore';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { userData, logout } = useAuthStore();
+  const { userData, logout, setUserData } = useAuthStore();
   const { addToast } = useToast();
   const { t } = useLanguage();
   const { config } = useAppConfig();
@@ -42,6 +42,22 @@ export default function ProfilePage() {
 
   const [name, setName] = useState(userData?.name || '');
   const [addresses, setAddresses] = useState<Address[]>(userData?.addresses || []);
+
+  useEffect(() => {
+    if (userData) {
+      setName(userData.name || '');
+      setAddresses(userData.addresses || []);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    if (!userData?.id) return;
+    userService.getUser(userData.id).then(fresh => {
+      if (fresh) {
+        setUserData(fresh);
+      }
+    }).catch(e => console.error("Error loading fresh user data:", e));
+  }, [userData?.id]);
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [newAddress, setNewAddress] = useState<Address>({
     customerName: '', mobile: '', area: '', para: '', street: '', city: '', state: '', pincode: '',
@@ -53,6 +69,7 @@ export default function ProfilePage() {
     setLoading(true);
     try {
       await userService.updateUser(userData.id, { name: name.trim() });
+      setUserData({ ...userData, name: name.trim() });
       addToast('Name updated ✓', 'success');
       setEditingName(false);
     } catch (error) {
@@ -74,6 +91,7 @@ export default function ProfilePage() {
     try {
       const updatedAddresses = [...addresses, newAddress];
       await userService.updateUser(userData!.id, { addresses: updatedAddresses });
+      setUserData({ ...userData!, addresses: updatedAddresses });
       setAddresses(updatedAddresses);
       setNewAddress({ customerName: '', mobile: '', area: '', para: '', street: '', city: '', state: '', pincode: '' });
       setShowAddAddress(false);
@@ -89,6 +107,7 @@ export default function ProfilePage() {
     try {
       const updated = addresses.filter((_, i) => i !== index);
       await userService.updateUser(userData!.id, { addresses: updated });
+      setUserData({ ...userData!, addresses: updated });
       setAddresses(updated);
       addToast('Address removed', 'info');
     } catch (error) {

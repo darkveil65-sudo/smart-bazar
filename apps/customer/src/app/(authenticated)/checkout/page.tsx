@@ -77,7 +77,7 @@ export default function CheckoutPage() {
   const { addToast } = useToast();
   const { config, getDeliverySlot: getLiveSlot } = useAppConfig();
   const { items, getSubtotal, getDeliveryCharge, clearCart } = useCartStore();
-  const { user, userData } = useAuthStore();
+  const { user, userData, setUserData } = useAuthStore();
   const subtotal = getSubtotal();
 
   const freeMin   = config.freeDeliveryMin;
@@ -482,7 +482,14 @@ export default function CheckoutPage() {
           })),
           addressToSave
         ];
-        await userService.updateUser(user.uid, { addresses: updatedAddresses as any }).catch(e => console.error("Error saving address to profile:", e));
+        try {
+          await userService.updateUser(user.uid, { addresses: updatedAddresses as any });
+          if (userData) {
+            setUserData({ ...userData, addresses: updatedAddresses as any });
+          }
+        } catch (e) {
+          console.error("Error saving address to profile:", e);
+        }
       }
 
       // Mark coupon as used

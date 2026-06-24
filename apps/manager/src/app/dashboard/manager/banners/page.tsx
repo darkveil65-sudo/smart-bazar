@@ -98,6 +98,22 @@ export default function ManagerHeroBannerPage() {
 
   return (
     <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
+      <style>{`
+        .banner-modal-input {
+          color: #0a1628 !important;
+          background-color: #ffffff !important;
+          border: 1.5px solid #cbd5e1 !important;
+        }
+        .banner-modal-input::placeholder {
+          color: #64748b !important;
+          opacity: 0.75 !important;
+        }
+        .banner-modal-input option {
+          color: #0a1628 !important;
+          background-color: #ffffff !important;
+        }
+      `}</style>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0a1628', margin: 0 }}>🎨 Hero Banners</h1>
@@ -217,26 +233,26 @@ export default function ManagerHeroBannerPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Headline *</label>
-                <input value={form.headline} onChange={e => setForm(f => ({ ...f, headline: e.target.value }))} placeholder="e.g. Fresh Groceries" maxLength={40}
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <input className="banner-modal-input" value={form.headline} onChange={e => setForm(f => ({ ...f, headline: e.target.value }))} placeholder="e.g. Fresh Groceries" maxLength={40}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
               </div>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Sub-title *</label>
-                <input value={form.sub} onChange={e => setForm(f => ({ ...f, sub: e.target.value }))} placeholder="e.g. Delivered to your door" maxLength={60}
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <input className="banner-modal-input" value={form.sub} onChange={e => setForm(f => ({ ...f, sub: e.target.value }))} placeholder="e.g. Delivered to your door" maxLength={60}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Badge</label>
-                  <select value={form.badge} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}>
+                  <select className="banner-modal-input" value={form.badge} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: 10, fontSize: 13, outline: 'none', boxSizing: 'border-box' }}>
                     {BADGE_PRESETS.map(b => <option key={b} value={b}>{b}</option>)}
                   </select>
                 </div>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>CTA Button</label>
-                  <input value={form.cta} onChange={e => setForm(f => ({ ...f, cta: e.target.value }))} placeholder="Shop Now" maxLength={20}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                  <input className="banner-modal-input" value={form.cta} onChange={e => setForm(f => ({ ...f, cta: e.target.value }))} placeholder="Shop Now" maxLength={20}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: 10, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
                 </div>
               </div>
               <div>
@@ -266,8 +282,8 @@ export default function ManagerHeroBannerPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 4 }}>Display Order</label>
-                  <input type="number" value={form.order} min={0} onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                  <input className="banner-modal-input" type="number" value={form.order} min={0} onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: 10, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 2 }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
