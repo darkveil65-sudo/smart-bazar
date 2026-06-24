@@ -16,11 +16,11 @@ export const getAppUrl = (app: string) => {
   
   // Production URLs based on deployment script output
   const prodUrls: Record<string, string> = {
-    customer: 'https://smart-bazar-customer-five.vercel.app',
-    admin: 'https://smart-bazar-admin-three.vercel.app',
-    manager: 'https://smart-bazar-manager-nine.vercel.app',
-    store: 'https://smart-bazar-store.vercel.app',
-    delivery: 'https://smart-bazar-delivery-rose.vercel.app',
+    customer: 'https://smart-bazar-customer-phi.vercel.app',
+    admin: 'https://smart-bazar-admin-six.vercel.app',
+    manager: 'https://smart-bazar-manager-sand.vercel.app',
+    store: 'https://smart-bazar-store-eight.vercel.app',
+    delivery: 'https://smart-bazar-delivery-nu.vercel.app',
   };
   
   return prodUrls[app] || `https://smart-bazar-${app}.vercel.app`;
